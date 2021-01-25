@@ -1,0 +1,70 @@
+{
+  "name": "@voiceflow/runtime-client-sdk",
+  "version": "0.1.0",
+  "description": "Runtime SDK for executing Voiceflow projects",
+  "main": "index.js",
+  "scripts": {
+    "test": "NODE_ENV=test nyc ts-mocha --paths --opts ./config/tests/mocha.opts 'tests/**/*.{unit,it}.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/voiceflow/runtime-client-sdk.git"
+  },
+  "author": "Voiceflow",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/voiceflow/runtime-client-sdk/issues"
+  },
+  "homepage": "https://github.com/voiceflow/runtime-client-sdk#readme",
+  "devDependencies": {
+    "@commitlint/cli": "^11.0.0",
+    "@commitlint/config-conventional": "^11.0.0",
+    "@istanbuljs/nyc-config-typescript": "^1.0.1",
+    "@types/bluebird": "^3.5.29",
+    "@types/chai": "^4.2.11",
+    "@types/chai-as-promised": "^7.1.2",
+    "@types/express": "^4.17.2",
+    "@types/lodash": "^4.14.149",
+    "@types/mathjs": "^6.0.4",
+    "@types/mocha": "^5.2.7",
+    "@types/sinon": "^7.5.2",
+    "@types/workerpool": "^5.0.1",
+    "@typescript-eslint/eslint-plugin": "^2.17.0",
+    "@typescript-eslint/parser": "^2.17.0",
+    "@voiceflow/commitlint-config": "^1.0.1",
+    "@voiceflow/eslint-config": "^2.0.4",
+    "@voiceflow/git-branch-check": "^1.0.6",
+    "@voiceflow/prettier-config": "^1.0.4",
+    "@zerollup/ts-transform-paths": "^1.7.9",
+    "babel-eslint": "^10.0.3",
+    "chai": "^4.2.0",
+    "chai-as-promised": "^7.1.1",
+    "codacy-coverage": "^3.2.0",
+    "commitizen": "^4.0.3",
+    "cz-conventional-changelog": "^3.0.2",
+    "eslint": "^5.16.0",
+    "eslint-plugin-mocha": "^6.2.2",
+    "eslint-plugin-simple-import-sort": "^5.0.0",
+    "fixpack": "^4.0.0",
+    "husky": "^3.1.0",
+    "lint-staged": "^9.5.0",
+    "mocha": "^6.2.2",
+    "nyc": "^15.0.0",
+    "prettier": "^1.19.1",
+    "prettier-eslint-cli": "^5.0.0",
+    "rimraf": "^3.0.0",
+    "semantic-release": "^17.3.7",
+    "sinon": "^7.5.0",
+    "source-map-support": "^0.5.16",
+    "supertest": "^4.0.2",
+    "ts-mocha": "^6.0.0",
+    "ts-node": "^8.5.4",
+    "tsconfig-paths": "^3.9.0",
+    "ttypescript": "^1.5.8",
+    "typedoc": "^0.20.12",
+    "typescript": "^3.9"
+  },
+  "dependencies": {
+    "axios": "^0.21.1"
+  }
+}
