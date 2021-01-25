@@ -1,0 +1,24 @@
+.DS_Store
+src/.DS_Store
+/components/.DS_Store
+.idea
+node_modules
+.vscode
+dump.rdb
+
+coverage
+*_coverage
+restart.sh
+log/
+newrelic_agent.log
+
+.nyc_output
+
+# Test scripts
+/test.js
+tests/output
+
+package-lock.json
+
+# build folder
+build
