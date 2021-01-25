@@ -2,10 +2,7 @@
   "name": "@voiceflow/runtime-client-js",
   "version": "0.1.0",
   "description": "JavaScript runtime SDK for executing Voiceflow projects",
-  "main": "index.js",
-  "scripts": {
-    "test": "NODE_ENV=test nyc ts-mocha --paths --opts ./config/tests/mocha.opts 'tests/**/*.{unit,it}.ts"
-  },
+  "main": "build/index.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/voiceflow/runtime-client-js.git"
@@ -59,5 +56,10 @@
   },
   "dependencies": {
     "axios": "^0.21.1"
+  },
+  "scripts": {
+    "build": "npm run clean && ttsc --project ./tsconfig.build.json",
+    "clean": "rimraf build",
+    "test": "NODE_ENV=test nyc ts-mocha --paths --opts ./config/tests/mocha.opts 'tests/**/*.{unit,it}.ts"
   }
 }
