@@ -1,1 +1,1 @@
-# runtime-client-sdk
+# runtime-client-js
