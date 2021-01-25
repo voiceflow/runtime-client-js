@@ -5,8 +5,6 @@ src/.DS_Store
 node_modules
 .vscode
 dump.rdb
-routes/tmp/*
-!routes/tmp/.gitkeep
 
 coverage
 *_coverage
@@ -21,7 +19,6 @@ newrelic_agent.log
 tests/output
 
 package-lock.json
-scratch.*
 
 # build folder
 build

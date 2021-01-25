@@ -1,12 +1,4 @@
 coverage
 .idea
 .nyc_output
-scratch.js
-/scripts
-/.ebextensions/
-/log/
-/routes/multimodal/apl_authoring_tool
-/database
 /node_modules
-/routes
-/docs
