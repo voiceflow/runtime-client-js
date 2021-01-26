@@ -37,9 +37,9 @@ class App {
         this.appState = _.cloneDeep(this.cachedInitAppState);
     }
 
-    private updateState(newState: AppState) {
-        this.appState = newState;
-        return this.appState;
+    private updateState({ state, trace }: AppState) {
+        this.appState = { state, trace: this.filterTraces(trace) };
+        return this.appendEndAttribute(this.appState);
     }
 
     private makeRequestBody(text?: string) {
@@ -53,6 +53,17 @@ class App {
     private makeRequest(payload?: string) {
         if (!payload) return null;
         return { type: 'text', payload };
+    }
+
+    private filterTraces(trace: any[]) {
+        return trace.filter(({ type }) => (
+            type !== 'flow' && type !== 'block'
+        ));
+    }
+
+    private appendEndAttribute(newState: AppState) {
+        const { trace } = newState;
+        return { ...newState, end: trace.length !== 0 && trace[trace.length - 1].type === 'end' }
     }
 }
 
