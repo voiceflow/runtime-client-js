@@ -1,13 +1,13 @@
 import Client from "@/lib/Client";
-import { AppConfig } from "./types";
-import { State } from '@voiceflow/runtime';
+import { AppConfig, AppState } from "./types";
 import _ from "lodash"
+import { State } from "@voiceflow/runtime";
 
 class App {
     private versionID: string;                      // version ID of the VF project that the SDK communicates with
     private client: Client;
-    private cachedInitialState: State | null = null;
-    // private state: State | null = null;
+    private cachedInitAppState: AppState | null = null;
+    private appState: AppState | null = null;
 
     constructor({ versionID }: AppConfig) {
         this.versionID = versionID;
@@ -17,14 +17,42 @@ class App {
     }
 
     async start() {
-        await this.initializeDiagramID();
+        await this.initialAppState();
+        return this.updateState(
+            await this.client.interact(this.makeRequestBody(), this.versionID)
+        );
     }
 
-    private async initializeDiagramID() {
-        if (this.cachedInitialState === null) {
-            this.cachedInitialState = await this.client.getAppInitialState(this.versionID);
+    async sendText(userResponse: string) {
+        return this.updateState(
+            await this.client.interact(this.makeRequestBody(userResponse), this.versionID)
+        );
+    }
+
+    private async initialAppState() {
+        if (this.cachedInitAppState !== null) return;
+
+        const initialState: State = await this.client.getAppInitialState(this.versionID);
+        this.cachedInitAppState = { state: initialState, trace: [] };
+        this.appState = _.cloneDeep(this.cachedInitAppState);
+    }
+
+    private updateState(newState: AppState) {
+        this.appState = newState;
+        return this.appState;
+    }
+
+    private makeRequestBody(text?: string) {
+        if (this.appState === null) throw new Error("this.state in VFClient.App was not set");
+        return {
+            state: this.appState.state,
+            request: this.makeRequest(text)
         };
-        // this.state = _.cloneDeep(this.cachedInitialState);
+    }
+
+    private makeRequest(payload?: string) {
+        if (!payload) return null;
+        return { type: 'text', payload };
     }
 }
 
