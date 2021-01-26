@@ -3,7 +3,7 @@ import { AppConfig, AppState, InternalAppState } from "./types";
 import _ from "lodash"
 import { State } from "@voiceflow/runtime";
 import { TraceType, GeneralTrace, GeneralRequest, RequestType } from "@voiceflow/general-types";
-import { InteractRequestBody } from "../Client/type";
+import { InteractRequestBody } from "@/lib/Client/type";
 
 class App {
     private versionID: string;                      // version ID of the VF project that the SDK communicates with

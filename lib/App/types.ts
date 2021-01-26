@@ -1,6 +1,6 @@
 import { State } from "@voiceflow/runtime";
 import { GeneralTrace } from "@voiceflow/general-types";
-import { DeepReadonly } from "../Typings";
+import { DeepReadonly } from "@/lib/Typings";
 
 export type AppConfig = {
     versionID: string;
