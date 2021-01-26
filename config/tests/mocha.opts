@@ -1,0 +1,6 @@
+--require source-map-support/register
+--timeout 4000
+--use_strict
+--exit
+--recursive
+tests/setup.ts
