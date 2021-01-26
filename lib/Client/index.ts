@@ -11,8 +11,7 @@ class Client {
 
   async getAppInitialState(versionID: string): Promise<State> {
     return axios.get(`${this.GENERAL_RUNTIME_ENDPOINT_URL}/interact/${versionID}/state`)
-      .then(response => response.data)
-      .catch(err => err);
+      .then(response => response.data);
   }
 
   async interact(body: { state: State, request: any }, versionID: string) {
