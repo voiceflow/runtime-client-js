@@ -831,6 +831,20 @@
     regenerator-runtime "^0.13.5"
     superstruct "^0.10.12"
 
+"@voiceflow/api-sdk@1.22.0":
+  version "1.22.0"
+  resolved "https://registry.yarnpkg.com/@voiceflow/api-sdk/-/api-sdk-1.22.0.tgz#363396a2bd37ee541a498fb065d3fd5ffdc3fa85"
+  integrity sha512-1UxcX01Gp3T03EpBNHRnDKRKyziBZQnr6hK7YyKQKJ7TuWLukKeT2j4dWgKave7fcjQdm70CNG7RAOz83Ax/gA==
+  dependencies:
+    "@types/atob" "^2.1.2"
+    "@voiceflow/logger" "^1.1.10"
+    atob "^2.1.2"
+    axios "^0.19.2"
+    core-js "^3.6.5"
+    io-ts "^2.2.8"
+    regenerator-runtime "^0.13.5"
+    superstruct "^0.10.12"
+
 "@voiceflow/commitlint-config@^1.0.1":
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/@voiceflow/commitlint-config/-/commitlint-config-1.0.1.tgz#e9513aa348d5e88ff064022e2dae8d0d7e227f6a"
@@ -867,6 +881,13 @@
   integrity sha512-g80szhpoozHn1rttq7R8hN5xcjF7SiaPnq6KiioBzaAXuMPxUuXM+YLHc/PYstllbgqYXox+uwJN6RoYcFTL4A==
   dependencies:
     "@voiceflow/api-sdk" "1.21.0"
+
+"@voiceflow/general-types@^1.19.0":
+  version "1.19.0"
+  resolved "https://registry.yarnpkg.com/@voiceflow/general-types/-/general-types-1.19.0.tgz#75034f0cd5646d45bacf2afc71ceb5fa298e4c47"
+  integrity sha512-gDxA7l27PGxNGq98BHGzWsC9WIv8ynemRk+FsbTXepMKdNhQNIfLVvPc38T9mDY/IUocowpVG2G1FuBrGB8WcA==
+  dependencies:
+    "@voiceflow/api-sdk" "1.22.0"
 
 "@voiceflow/git-branch-check@^1.0.6":
   version "1.1.3"
