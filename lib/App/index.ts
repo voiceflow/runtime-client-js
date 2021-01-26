@@ -30,20 +30,23 @@ class App {
     }
 
     private async initialAppState() {
-        if (this.cachedInitAppState !== null) return;
-
-        const initialState: State = await this.client.getAppInitialState(this.versionID);
-        this.cachedInitAppState = { state: initialState, trace: [] };
+        if (this.cachedInitAppState === null) {
+            const initialState: State = await this.client.getAppInitialState(this.versionID);
+            this.cachedInitAppState = { state: initialState, trace: [] }; 
+        };
         this.appState = _.cloneDeep(this.cachedInitAppState);
     }
 
     private updateState({ state, trace }: AppState) {
         this.appState = { state, trace: this.filterTraces(trace) };
-        return this.appendEndAttribute(this.appState);
+        return { ...this.appState, end: this.isConversationEnding(trace) }
     }
 
     private makeRequestBody(text?: string) {
-        if (this.appState === null) throw new Error("this.state in VFClient.App was not set");
+        if (this.appState === null) {
+            throw new Error("this.state in VFClient.App was not set");
+        }
+
         return {
             state: this.appState.state,
             request: this.makeRequest(text)
@@ -57,13 +60,12 @@ class App {
 
     private filterTraces(trace: any[]) {
         return trace.filter(({ type }) => (
-            type !== 'flow' && type !== 'block'
+            type !== 'flow' && type !== 'block' && type !== 'end'
         ));
     }
 
-    private appendEndAttribute(newState: AppState) {
-        const { trace } = newState;
-        return { ...newState, end: trace.length !== 0 && trace[trace.length - 1].type === 'end' }
+    private isConversationEnding(trace: any[]) {
+        return trace.length !== 0 && trace[trace.length - 1].type === 'end';
     }
 }
 
