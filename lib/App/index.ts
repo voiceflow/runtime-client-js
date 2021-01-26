@@ -2,6 +2,7 @@ import Client from "@/lib/Client";
 import { AppConfig, AppState } from "./types";
 import _ from "lodash"
 import { State } from "@voiceflow/runtime";
+import { GeneralTrace, GeneralRequest, RequestType } from "@voiceflow/general-types";
 
 class App {
     private versionID: string;                      // version ID of the VF project that the SDK communicates with
@@ -49,22 +50,22 @@ class App {
 
         return {
             state: this.appState.state,
-            request: this.makeRequest(text)
+            request: this.makeGeneralRequest(text)
         };
     }
 
-    private makeRequest(payload?: string) {
+    private makeGeneralRequest(payload?: string): GeneralRequest {
         if (!payload) return null;
-        return { type: 'text', payload };
+        return { type: RequestType.TEXT, payload };
     }
 
-    private filterTraces(trace: any[]) {
+    private filterTraces(trace: GeneralTrace[]) {
         return trace.filter(({ type }) => (
             type !== 'flow' && type !== 'block' && type !== 'end'
         ));
     }
 
-    private isConversationEnding(trace: any[]) {
+    private isConversationEnding(trace: GeneralTrace[]) {
         return trace.length !== 0 && trace[trace.length - 1].type === 'end';
     }
 }
