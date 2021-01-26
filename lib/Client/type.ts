@@ -10,3 +10,8 @@ export type InteractResponse = {
     request: GeneralRequest;
     trace: GeneralTrace[];
 };
+
+export type InteractRequestBody = { 
+    state: State;
+    request: GeneralRequest 
+};

@@ -1,14 +1,15 @@
 import Client from "@/lib/Client";
-import { AppConfig, AppState } from "./types";
+import { AppConfig, AppState, InternalAppState } from "./types";
 import _ from "lodash"
 import { State } from "@voiceflow/runtime";
 import { GeneralTrace, GeneralRequest, RequestType } from "@voiceflow/general-types";
+import { InteractRequestBody } from "../Client/type";
 
 class App {
     private versionID: string;                      // version ID of the VF project that the SDK communicates with
     private client: Client;
-    private cachedInitAppState: AppState | null = null;
-    private appState: AppState | null = null;
+    private cachedInitAppState: InternalAppState | null = null;
+    private appState: InternalAppState | null = null;
 
     constructor({ versionID }: AppConfig) {
         this.versionID = versionID;
@@ -17,14 +18,14 @@ class App {
         });
     }
 
-    async start() {
+    async start(): Promise<AppState> {
         await this.initialAppState();
         return this.updateState(
             await this.client.interact(this.makeRequestBody(), this.versionID)
         );
     }
 
-    async sendText(userResponse: string) {
+    async sendText(userResponse: string): Promise<AppState> {
         return this.updateState(
             await this.client.interact(this.makeRequestBody(userResponse), this.versionID)
         );
@@ -38,12 +39,12 @@ class App {
         this.appState = _.cloneDeep(this.cachedInitAppState);
     }
 
-    private updateState({ state, trace }: AppState) {
+    private updateState({ state, trace }: InternalAppState): AppState {
         this.appState = { state, trace: this.filterTraces(trace) };
         return { ...this.appState, end: this.isConversationEnding(trace) }
     }
 
-    private makeRequestBody(text?: string) {
+    private makeRequestBody(text?: string): InteractRequestBody {
         if (this.appState === null) {
             throw new Error("this.state in VFClient.App was not set");
         }
@@ -59,13 +60,13 @@ class App {
         return { type: RequestType.TEXT, payload };
     }
 
-    private filterTraces(trace: GeneralTrace[]) {
+    private filterTraces(trace: GeneralTrace[]): GeneralTrace[] {
         return trace.filter(({ type }) => (
             type !== 'flow' && type !== 'block' && type !== 'end'
         ));
     }
 
-    private isConversationEnding(trace: GeneralTrace[]) {
+    private isConversationEnding(trace: GeneralTrace[]): boolean {
         return trace.length !== 0 && trace[trace.length - 1].type === 'end';
     }
 }

@@ -1,7 +1,6 @@
 import axios from "axios";
-import { ClientConfig, InteractResponse } from "./type";
+import { ClientConfig, InteractResponse, InteractRequestBody } from "./type";
 import { State } from '@voiceflow/runtime';
-import { GeneralRequest } from "@voiceflow/general-types";
 
 class Client {
   private GENERAL_RUNTIME_ENDPOINT_URL: string = '';
@@ -15,7 +14,7 @@ class Client {
       .then(response => response.data);
   }
 
-  async interact(body: { state: State, request: GeneralRequest }, versionID: string): Promise<InteractResponse> {
+  async interact(body: InteractRequestBody, versionID: string): Promise<InteractResponse> {
     return axios.post(
       `${this.GENERAL_RUNTIME_ENDPOINT_URL}/interact/${versionID}`,
       body,

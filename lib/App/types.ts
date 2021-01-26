@@ -5,7 +5,11 @@ export type AppConfig = {
     versionID: string;
 };
 
-export type AppState = {
+export type InternalAppState = {
     state: State;
     trace: GeneralTrace[];
+};
+
+export type AppState = InternalAppState & {
+    end: boolean;
 };
