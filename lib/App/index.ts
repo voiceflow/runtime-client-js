@@ -2,7 +2,7 @@ import Client from "@/lib/Client";
 import { AppConfig, AppState, InternalAppState } from "./types";
 import _ from "lodash"
 import { State } from "@voiceflow/runtime";
-import { GeneralTrace, GeneralRequest, RequestType } from "@voiceflow/general-types";
+import { TraceType, GeneralTrace, GeneralRequest, RequestType } from "@voiceflow/general-types";
 import { InteractRequestBody } from "../Client/type";
 
 class App {
@@ -46,7 +46,7 @@ class App {
 
     private makeRequestBody(text?: string): InteractRequestBody {
         if (this.appState === null) {
-            throw new Error("this.state in VFClient.App was not set");
+            throw new Error("the appState in VFClient.App was not initialized");
         }
 
         return {
@@ -62,12 +62,12 @@ class App {
 
     private filterTraces(trace: GeneralTrace[]): GeneralTrace[] {
         return trace.filter(({ type }) => (
-            type !== 'flow' && type !== 'block' && type !== 'end'
+            type !== TraceType.FLOW && type !== TraceType.BLOCK && type !== TraceType.END
         ));
     }
 
     private isConversationEnding(trace: GeneralTrace[]): boolean {
-        return trace.length !== 0 && trace[trace.length - 1].type === 'end';
+        return trace.length !== 0 && trace[trace.length - 1].type === TraceType.END;
     }
 }
 
