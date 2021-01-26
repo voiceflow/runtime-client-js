@@ -19,7 +19,7 @@ class App {
     }
 
     async start(): Promise<AppState> {
-        await this.initialAppState();
+        await this.getAppInitialState();
         return this.updateState(
             await this.client.interact(this.makeRequestBody(), this.versionID)
         );
@@ -31,8 +31,8 @@ class App {
         );
     }
 
-    private async initialAppState() {
-        if (this.cachedInitAppState === null) {
+    private async getAppInitialState(forcePull = false) {
+        if (forcePull || this.cachedInitAppState === null) {
             const initialState: State = await this.client.getAppInitialState(this.versionID);
             this.cachedInitAppState = { state: initialState, trace: [] }; 
         };
