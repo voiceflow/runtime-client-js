@@ -4,6 +4,7 @@ import _ from "lodash"
 import { State } from "@voiceflow/runtime";
 import { TraceType, GeneralTrace, GeneralRequest, RequestType } from "@voiceflow/general-types";
 import { InteractRequestBody } from "@/lib/Client/type";
+import { SSML_TAG_REGEX } from "./constants";
 
 class App {
     private versionID: string;                      // version ID of the VF project that the SDK communicates with
@@ -40,7 +41,7 @@ class App {
     }
 
     private updateState({ state, trace }: InternalAppState): AppState {
-        this.appState = { state, trace: this.filterTraces(trace) };
+        this.appState = { state, trace: trace.filter(this.filterTraces).map(this.stripSSML) };
         return { ...this.appState, end: this.isConversationEnding(trace) }
     }
 
@@ -60,8 +61,20 @@ class App {
         return { type: RequestType.TEXT, payload };
     }
 
-    private filterTraces(trace: GeneralTrace[]): GeneralTrace[] {
-        return trace.filter(({ type }) => type === TraceType.SPEAK);
+    private filterTraces({ type }: GeneralTrace): boolean {
+        return type === TraceType.SPEAK;
+    }
+
+    private stripSSML(trace: GeneralTrace): GeneralTrace {
+        return trace.type !== TraceType.SPEAK 
+            ? trace 
+            : {
+                ...trace,
+                payload: {
+                    ...trace.payload,
+                    message: trace.payload.message.replace(SSML_TAG_REGEX, ''),
+                }
+            }
     }
 
     private isConversationEnding(trace: GeneralTrace[]): boolean {
