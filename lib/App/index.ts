@@ -2,9 +2,10 @@ import Client from "@/lib/Client";
 import { AppConfig, AppState, InternalAppState } from "./types";
 import _ from "lodash"
 import { State } from "@voiceflow/runtime";
-import { TraceType, GeneralTrace, GeneralRequest, RequestType } from "@voiceflow/general-types";
+import { TraceType, GeneralTrace, GeneralRequest, RequestType, SpeakTrace } from "@voiceflow/general-types";
 import { InteractRequestBody } from "@/lib/Client/type";
 import { SSML_TAG_REGEX } from "./constants";
+import axios from "axios";
 
 class App {
     private versionID: string;                      // version ID of the VF project that the SDK communicates with
@@ -14,9 +15,9 @@ class App {
 
     constructor({ versionID }: AppConfig) {
         this.versionID = versionID;
-        this.client = new Client({
-            GENERAL_RUNTIME_ENDPOINT_URL: 'https://localhost:4000'  // $TODO - Add a config system appropriate for production
-        });
+
+        const axiosInstance = axios.create({ baseURL: 'https://localhost:4000' });
+        this.client = new Client(axiosInstance);
     }
 
     async start(): Promise<AppState> {
@@ -32,16 +33,14 @@ class App {
         );
     }
 
-    private async getAppInitialState(forcePull = false) {
-        if (forcePull || this.cachedInitAppState === null) {
-            const initialState: State = await this.client.getAppInitialState(this.versionID);
-            this.cachedInitAppState = { state: initialState, trace: [] }; 
-        };
+    private async getAppInitialState() {
+        const initialState: State = await this.client.getAppInitialState(this.versionID);
+        this.cachedInitAppState = { state: initialState, trace: [] }; 
         this.appState = _.cloneDeep(this.cachedInitAppState);
     }
 
     private updateState({ state, trace }: InternalAppState): AppState {
-        this.appState = { state, trace: trace.filter(this.filterTraces).map(this.stripSSML) };
+        this.appState = { state, trace: this.filterTraces(trace).map(this.stripSSMLFromSpeak) };
         return { ...this.appState, end: this.isConversationEnding(trace) }
     }
 
@@ -61,20 +60,18 @@ class App {
         return { type: RequestType.TEXT, payload };
     }
 
-    private filterTraces({ type }: GeneralTrace): boolean {
-        return type === TraceType.SPEAK;
+    private filterTraces(traces: GeneralTrace[]) {
+        return traces.filter(({ type }) => type === TraceType.SPEAK) as SpeakTrace[];
     }
 
-    private stripSSML(trace: GeneralTrace): GeneralTrace {
-        return trace.type !== TraceType.SPEAK 
-            ? trace 
-            : {
-                ...trace,
-                payload: {
-                    ...trace.payload,
-                    message: trace.payload.message.replace(SSML_TAG_REGEX, ''),
-                }
+    private stripSSMLFromSpeak(trace: SpeakTrace): GeneralTrace {
+        return {
+            ...trace,
+            payload: {
+                ...trace.payload,
+                message: trace.payload.message.replace(SSML_TAG_REGEX, ''),
             }
+        };
     }
 
     private isConversationEnding(trace: GeneralTrace[]): boolean {
