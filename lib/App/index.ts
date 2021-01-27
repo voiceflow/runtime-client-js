@@ -61,9 +61,7 @@ class App {
     }
 
     private filterTraces(trace: GeneralTrace[]): GeneralTrace[] {
-        return trace.filter(({ type }) => (
-            type !== TraceType.FLOW && type !== TraceType.BLOCK && type !== TraceType.END
-        ));
+        return trace.filter(({ type }) => type === TraceType.SPEAK);
     }
 
     private isConversationEnding(trace: GeneralTrace[]): boolean {
