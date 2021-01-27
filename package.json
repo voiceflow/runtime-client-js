@@ -64,9 +64,6 @@
   "scripts": {
     "build": "npm run clean && ttsc --project ./tsconfig.build.json",
     "clean": "rimraf build",
-    "test": "NODE_ENV=test nyc ts-mocha --paths --opts ./config/tests/mocha.opts 'tests/**/*.{unit,it}.ts'",
-    "test:integration": "NODE_ENV=test nyc ts-mocha --paths --opts ./config/tests/mocha.opts 'tests/**/*.it.ts'",
-    "test:single": "NODE_ENV=test ts-mocha --paths --opts ./config/tests/mocha.opts",
-    "test:unit": "NODE_ENV=test nyc ts-mocha --paths --opts ./config/tests/mocha.opts 'tests/**/*.unit.ts'"
+    "test": "NODE_ENV=test nyc ts-mocha --paths"
   }
 }

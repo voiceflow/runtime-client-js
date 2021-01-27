@@ -1,0 +1,10 @@
+{
+    "diff": true,
+    "extension": ["ts"],
+    "timeout": 4000,
+    "require": ["source-map-support/register"],
+    "exit": true,
+    "use-strict": true,
+    "recursive": ["./tests/**/*.unit.ts"]
+  }
+  
