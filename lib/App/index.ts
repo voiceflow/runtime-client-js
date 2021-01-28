@@ -34,8 +34,10 @@ class App {
     }
 
     private async getAppInitialState() {
-        const initialState: State = await this.client.getAppInitialState(this.versionID);
-        this.cachedInitAppState = { state: initialState, trace: [] }; 
+        if (this.cachedInitAppState === null) {
+            const initialState: State = await this.client.getAppInitialState(this.versionID);
+            this.cachedInitAppState = { state: initialState, trace: [] }; 
+        }
         this.appState = _.cloneDeep(this.cachedInitAppState);
     }
 
