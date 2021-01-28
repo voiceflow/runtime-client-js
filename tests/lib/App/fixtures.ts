@@ -12,7 +12,8 @@ export const GENERAL_RUNTIME_ENDPOINT_URL: string = 'https://localhost:4000';
 export const SPEAK_TRACE: SpeakTrace = {
     type: TraceType.SPEAK,
     payload: {
-        message: "Books ought to have to have good endings."
+        message: "Books ought to have to have good endings.",
+        src: "data:audio/mpeg;base64,SUQzBAAAAAAA"
     }
 };
 export const BLOCK_TRACE: BlockTrace = {
@@ -172,6 +173,22 @@ export const SEND_TEXT_RESPONSE_BODY: InteractResponse = {
     request: null,
     trace: [
         SPEAK_TRACE,
+        CHOICE_TRACE,
+        END_TRACE
+    ]
+};
+
+export const SEND_TEXT_RESPONSE_BODY_WITH_SSML_AND_TTS: InteractResponse = {
+    ...SEND_TEXT_RESPONSE_BODY,
+    trace: [
+        {
+            type: TraceType.SPEAK,
+            payload: {
+            message: "<voice>Books ought to have to have good endings.</voice>",
+            src: "data:audio/mpeg;base64,SUQzBAAAAAAA"
+            },
+        },
+        CHOICE_TRACE,
         END_TRACE
     ]
 };

@@ -5,23 +5,25 @@ import baseAxios from 'axios';
 import App from '@/lib/App';
 import _ from 'lodash';
 import { 
-    EXPOSED_VF_APP_NEXT_STATE_1, 
-    EXPOSED_VF_APP_NEXT_STATE_2, 
-    GENERAL_RUNTIME_ENDPOINT_URL, 
-    SEND_TEXT_REQUEST_BODY, 
-    SEND_TEXT_RESPONSE_BODY, 
-    START_REQUEST_BODY, 
-    START_RESPONSE_BODY, 
-    USER_RESPONSE, 
-    VERSION_ID, 
-    VF_APP_INITIAL_STATE 
+    EXPOSED_VF_APP_NEXT_STATE_1,
+    EXPOSED_VF_APP_NEXT_STATE_2,
+    GENERAL_RUNTIME_ENDPOINT_URL,
+    SEND_TEXT_REQUEST_BODY,
+    SEND_TEXT_RESPONSE_BODY,
+    SEND_TEXT_RESPONSE_BODY_WITH_SSML_AND_TTS,
+    START_REQUEST_BODY,
+    START_RESPONSE_BODY,
+    USER_RESPONSE,
+    VERSION_ID,
+    VF_APP_INITIAL_STATE
 } from "./fixtures"
+import { DataConfig } from '@/lib/App/types';
 
 chai.use(chaiAsPromise);
 
 const asHttpResponse = (data: object) => ({ data });
 
-const createVFApp = () => {
+const createVFApp = (dataConfig: DataConfig = {}) => {
   const axiosInstance = {
     get: sinon.stub(),
     post: sinon.stub(),
@@ -33,7 +35,7 @@ const createVFApp = () => {
 
   const axiosCreate = sinon.stub(baseAxios, 'create').returns(axiosInstance as any);
 
-  const VFApp = new App({ versionID: VERSION_ID });
+  const VFApp = new App({ versionID: VERSION_ID, dataConfig: dataConfig });
 
   return { VFApp, axiosCreate, axiosInstance };
 };
@@ -147,5 +149,36 @@ describe('App', () => {
         return expect(VFApp.sendText("call sendText after conversation had ended"))
             .to.be.eventually.be.rejectedWith('VFClient.sendText() was called but the conversation has ended')
             .and.be.an.instanceOf(Error);
+    });
+        
+    it('advanced config', async () => {
+        const { VFApp, axiosInstance } = createVFApp({
+            hasTTS: false,
+            showSSML: true,
+            includeTypes: ['debug', 'choice'],
+        });
+
+        axiosInstance.get.resolves(asHttpResponse(VF_APP_INITIAL_STATE));
+        axiosInstance.post.resolves(asHttpResponse(START_RESPONSE_BODY));
+
+        await VFApp.start();
+
+        axiosInstance.post.resolves(asHttpResponse(SEND_TEXT_RESPONSE_BODY_WITH_SSML_AND_TTS));
+
+        const data = await VFApp.sendText(USER_RESPONSE);
+
+        expect(axiosInstance.post.callCount).to.eql(2);
+        expect(axiosInstance.post.args[1]).to.eql([
+            `/interact/${VERSION_ID}`,
+            SEND_TEXT_REQUEST_BODY
+        ]);
+        
+        expect((data.trace[0] as any).payload.message).to.eql('<voice>Books ought to have to have good endings.</voice>');
+        expect((data.trace[0] as any).payload.src).to.eql(undefined);
+        expect(data.trace.length).to.eql(2);
+    });
+
+    it('advanced config includeTypes error', async () => {
+        expect(() => createVFApp({includeTypes: ['fake']})).to.throw();
     });
 });
