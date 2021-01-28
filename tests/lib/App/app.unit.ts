@@ -278,11 +278,28 @@ describe('App', () => {
         expect(data).to.eql(EXPOSED_VF_APP_NEXT_STATE_2);
     });
 
-    it('makeRequestBody, uninitialized app state error', async () => {
+    it('sendText, start was not previously called', async () => {
         const { VFApp } = createVFApp();
 
         return expect(VFApp.sendText("call sendText without calling .start() first"))
             .to.be.eventually.be.rejectedWith('the appState in VFClient.App was not initialized')
+            .and.be.an.instanceOf(Error);
+    });
+
+    it('sendText, called when conversation has ended', async () => {
+        const { VFApp, axiosInstance } = createVFApp();
+
+        axiosInstance.get.resolves(asHttpResponse(VF_APP_INITIAL_STATE));
+        axiosInstance.post.resolves(asHttpResponse(START_RESPONSE_BODY));
+
+        await VFApp.start();
+
+        axiosInstance.post.resolves(asHttpResponse(SEND_TEXT_RESPONSE_BODY));
+
+        await VFApp.sendText(USER_RESPONSE);
+
+        return expect(VFApp.sendText("call sendText after conversation had ended"))
+            .to.be.eventually.be.rejectedWith('VFClient.sendText() was called but the conversation has ended')
             .and.be.an.instanceOf(Error);
     });
 });

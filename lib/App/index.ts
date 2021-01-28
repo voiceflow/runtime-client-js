@@ -22,14 +22,23 @@ class App {
 
     async start(): Promise<AppState> {
         await this.getAppInitialState();
+
+        const { state } = this.appState!;
         return this.updateState(
-            await this.client.interact(this.makeRequestBody(), this.versionID)
+            await this.client.interact(this.makeRequestBody(state), this.versionID)
         );
     }
 
     async sendText(userResponse: string): Promise<AppState> {
+        if (this.appState === null) {
+            throw new Error("the appState in VFClient.App was not initialized");
+        } else if (this.isConversationEnding(this.appState.trace)) {
+            throw new Error("VFClient.sendText() was called but the conversation has ended");
+        }
+
+        const { state } = this.appState;
         return this.updateState(
-            await this.client.interact(this.makeRequestBody(userResponse), this.versionID)
+            await this.client.interact(this.makeRequestBody(state, userResponse), this.versionID)
         );
     }
 
@@ -42,17 +51,17 @@ class App {
     }
 
     private updateState({ state, trace }: InternalAppState): AppState {
-        this.appState = { state, trace: this.filterTraces(trace).map(this.stripSSMLFromSpeak) };
-        return { ...this.appState, end: this.isConversationEnding(trace) }
+        this.appState = { state, trace };
+        return { 
+            state, 
+            trace: this.filterTraces(trace).map(this.stripSSMLFromSpeak), 
+            end: this.isConversationEnding(trace) 
+        }
     }
 
-    private makeRequestBody(text?: string): InteractRequestBody {
-        if (this.appState === null) {
-            throw new Error("the appState in VFClient.App was not initialized");
-        }
-
+    private makeRequestBody(state: State, text?: string): InteractRequestBody {
         return {
-            state: this.appState.state,
+            state,
             request: this.makeGeneralRequest(text)
         };
     }
