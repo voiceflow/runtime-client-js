@@ -1,0 +1,16 @@
+{
+  "extends": "@istanbuljs/nyc-config-typescript",
+  "include": [
+    "lib/**"
+  ],
+  "all" : true,
+  "reporter": [
+    "html",
+    "text",
+    "text-summary",
+    "lcov"
+  ],
+  "extension": [
+    ".ts"
+  ]
+}
