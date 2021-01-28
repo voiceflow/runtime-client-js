@@ -883,9 +883,9 @@
     "@voiceflow/api-sdk" "1.21.0"
 
 "@voiceflow/general-types@^1.19.0":
-  version "1.19.0"
-  resolved "https://registry.yarnpkg.com/@voiceflow/general-types/-/general-types-1.19.0.tgz#75034f0cd5646d45bacf2afc71ceb5fa298e4c47"
-  integrity sha512-gDxA7l27PGxNGq98BHGzWsC9WIv8ynemRk+FsbTXepMKdNhQNIfLVvPc38T9mDY/IUocowpVG2G1FuBrGB8WcA==
+  version "1.20.0"
+  resolved "https://registry.yarnpkg.com/@voiceflow/general-types/-/general-types-1.20.0.tgz#096ea68fdfb9e662eb8d525185886a1823522e11"
+  integrity sha512-hTRr4rdVRMySy6LhyC51RR2gskx0g3nrA4uWBBcnadC2JV0uwBEolYS0vS3apOtsK150AwWoU8nBuBX1OMmJ0A==
   dependencies:
     "@voiceflow/api-sdk" "1.22.0"
 
