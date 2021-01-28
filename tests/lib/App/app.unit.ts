@@ -4,18 +4,7 @@ import sinon from 'sinon';
 import baseAxios from 'axios';
 import App from '@/lib/App';
 import _ from 'lodash';
-import { 
-    EXPOSED_VF_APP_NEXT_STATE_1, 
-    EXPOSED_VF_APP_NEXT_STATE_2, 
-    GENERAL_RUNTIME_ENDPOINT_URL, 
-    SEND_TEXT_REQUEST_BODY, 
-    SEND_TEXT_RESPONSE_BODY, 
-    START_REQUEST_BODY, 
-    START_RESPONSE_BODY, 
-    USER_RESPONSE, 
-    VERSION_ID, 
-    VF_APP_INITIAL_STATE 
-} from "./fixtures"
+import { CHOICES_1, CHOICES_2, CHOICES_3, CHOICE_TRACE, EXPOSED_VF_APP_NEXT_STATE_1, EXPOSED_VF_APP_NEXT_STATE_2, GENERAL_RUNTIME_ENDPOINT_URL, SEND_TEXT_REQUEST_BODY, SEND_TEXT_RESPONSE_BODY, START_REQUEST_BODY, START_RESPONSE_BODY, START_RESPONSE_BODY_WITH_MULTIPLE_CHOICES, START_RESPONSE_BODY_WITH_NO_CHOICES, USER_RESPONSE, VERSION_ID, VF_APP_INITIAL_STATE } from './fixtures';
 
 chai.use(chaiAsPromise);
 
@@ -147,5 +136,73 @@ describe('App', () => {
         return expect(VFApp.sendText("call sendText after conversation had ended"))
             .to.be.eventually.be.rejectedWith('VFClient.sendText() was called but the conversation has ended')
             .and.be.an.instanceOf(Error);
+    });
+
+    it('get chips', async () => {
+        const { VFApp, axiosInstance } = createVFApp();
+
+        axiosInstance.get.resolves(asHttpResponse(VF_APP_INITIAL_STATE));
+        axiosInstance.post.resolves(asHttpResponse(START_RESPONSE_BODY));
+
+        await VFApp.start();
+
+        const chips = VFApp.chips;
+
+        expect(chips).to.eql(CHOICE_TRACE.payload.choices);
+    });
+
+    it('get chips, returns empty arr if app not initialized', async () => {
+        const { VFApp } = createVFApp();
+
+        const chips = VFApp.chips;
+
+        expect(chips).to.eql([]);
+    });
+
+    it('get chips, returns empty arr if trace doesn\'t end with ChoiceTrace', async () => {
+        const { VFApp, axiosInstance } = createVFApp();
+
+        axiosInstance.get.resolves(asHttpResponse(VF_APP_INITIAL_STATE));
+        axiosInstance.post.resolves(asHttpResponse(START_RESPONSE_BODY));
+
+        await VFApp.start();
+
+        axiosInstance.post.resolves(asHttpResponse(SEND_TEXT_RESPONSE_BODY));
+
+        await VFApp.sendText(USER_RESPONSE);
+
+        const chips = VFApp.chips;
+
+        expect(chips).to.eql([]);
+    });
+
+    it('get chips, return empty arr if choice trace has no choices', async () => {
+        const { VFApp, axiosInstance } = createVFApp();
+
+        axiosInstance.get.resolves(asHttpResponse(VF_APP_INITIAL_STATE));
+        axiosInstance.post.resolves(asHttpResponse(START_RESPONSE_BODY_WITH_NO_CHOICES));
+
+        await VFApp.start();
+
+        const chips = VFApp.chips;
+
+        expect(chips).to.eql([]);
+    });
+
+    it('get chips, handles data with multiple choice blocks', async () => {
+        const { VFApp, axiosInstance } = createVFApp();
+
+        axiosInstance.get.resolves(asHttpResponse(VF_APP_INITIAL_STATE));
+        axiosInstance.post.resolves(asHttpResponse(START_RESPONSE_BODY_WITH_MULTIPLE_CHOICES));
+
+        await VFApp.start();
+
+        const chips = VFApp.chips;
+
+        expect(chips).to.eql([
+            ...CHOICES_1,
+            ...CHOICES_2,
+            ...CHOICES_3
+        ]);
     });
 });

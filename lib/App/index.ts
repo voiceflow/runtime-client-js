@@ -1,11 +1,12 @@
 import Client from "@/lib/Client";
-import { AppConfig, AppState, InternalAppState } from "./types";
+import { AppConfig, AppState, InternalAppState, Choice } from "./types";
 import _ from "lodash"
 import { State } from "@voiceflow/runtime";
 import { TraceType, GeneralTrace, GeneralRequest, RequestType, SpeakTrace } from "@voiceflow/general-types";
 import { InteractRequestBody } from "@/lib/Client/type";
 import { SSML_TAG_REGEX } from "./constants";
 import axios from "axios";
+import { DeepReadonly } from "../Typings";
 
 class App {
     private versionID: string;                      // version ID of the VF project that the SDK communicates with
@@ -18,6 +19,17 @@ class App {
 
         const axiosInstance = axios.create({ baseURL: 'https://localhost:4000' });
         this.client = new Client(axiosInstance);
+    }
+
+    get chips(): DeepReadonly<Choice[]> {
+        if (this.appState === null) {
+            return [];
+        }
+        return this.appState.trace.reduce<Choice[]>((acc, trace) => (
+            trace.type !== TraceType.CHOICE
+            ? acc 
+            : [...acc, ...trace.payload.choices]
+        ), []);
     }
 
     async start(): Promise<AppState> {

@@ -181,3 +181,50 @@ export const EXPOSED_VF_APP_NEXT_STATE_2: AppState = {
     trace: [ SPEAK_TRACE ],
     end: true,
 };
+
+export const CHOICES_1 = [            
+    { name: 'Do you have small available?' },
+    { name: "I'd like to order a large please" },
+    { name: "I'd like the small  thank you very much" }
+];
+
+export const CHOICES_2 = [            
+    { name: 'Do you have large available?' },
+    { name: "Is there any options for vegans?" },
+    { name: "Is there any options for halal?" }
+];
+
+export const CHOICES_3 = [            
+    { name: 'Do you have handicapped parking?' },
+];
+
+export const START_RESPONSE_BODY_WITH_MULTIPLE_CHOICES: InteractResponse = {
+    state: VF_APP_NEXT_STATE_1,
+    request: null,
+    trace: [
+        FLOW_TRACE,
+        {
+            type: TraceType.CHOICE,
+            payload: {
+                choices: CHOICES_1
+            }
+        }, 
+        STREAM_TRACE,
+        DEBUG_TRACE,
+        {
+            type: TraceType.CHOICE,
+            payload: {
+                choices: CHOICES_2,
+            }
+        }, 
+        SPEAK_TRACE,
+        BLOCK_TRACE,
+        {
+            type: TraceType.CHOICE,
+            payload: {
+                choices: CHOICES_3
+            }
+        },
+        END_TRACE
+    ]
+};
