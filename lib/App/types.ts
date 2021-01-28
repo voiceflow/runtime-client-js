@@ -1,5 +1,5 @@
 import { State } from "@voiceflow/runtime";
-import { GeneralTrace } from "@voiceflow/general-types";
+import { ChoiceTrace, GeneralTrace } from "@voiceflow/general-types";
 import { DeepReadonly } from "@/lib/Typings";
 
 export type AppConfig = {
@@ -14,3 +14,5 @@ export type InternalAppState = {
 export type AppState = DeepReadonly<InternalAppState & {
     end: boolean;
 }>;
+
+export type Choice = ChoiceTrace['payload']['choices'][number];

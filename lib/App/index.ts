@@ -1,11 +1,12 @@
 import Client from "@/lib/Client";
-import { AppConfig, AppState, InternalAppState } from "./types";
+import { AppConfig, AppState, InternalAppState, Choice } from "./types";
 import _ from "lodash"
 import { State } from "@voiceflow/runtime";
-import { TraceType, GeneralTrace, GeneralRequest, RequestType, SpeakTrace, ChoiceTrace } from "@voiceflow/general-types";
+import { TraceType, GeneralTrace, GeneralRequest, RequestType, SpeakTrace } from "@voiceflow/general-types";
 import { InteractRequestBody } from "@/lib/Client/type";
 import { SSML_TAG_REGEX } from "./constants";
 import axios from "axios";
+import { DeepReadonly } from "../Typings";
 
 class App {
     private versionID: string;                      // version ID of the VF project that the SDK communicates with
@@ -20,19 +21,15 @@ class App {
         this.client = new Client(axiosInstance);
     }
 
-    get chips() {
-        if (this.appState === null || this.appState.trace.length === 0) {
+    get chips(): DeepReadonly<Choice[]> {
+        if (this.appState === null) {
             return [];
         }
-
-        const { trace } = this.appState;
-        const lastTrace = trace[trace.length - 1];
-
-        if (!this.isChoiceTrace(lastTrace)) {
-            return [];
-        }
-
-        return lastTrace.payload.choices;
+        return this.appState.trace.reduce<Choice[]>((acc, trace) => (
+            trace.type !== TraceType.CHOICE
+            ? acc 
+            : [...acc, ...trace.payload.choices]
+        ), []);
     }
 
     async start(): Promise<AppState> {
@@ -102,10 +99,6 @@ class App {
 
     private isConversationEnding(trace: GeneralTrace[]): boolean {
         return trace.length !== 0 && trace[trace.length - 1].type === TraceType.END;
-    }
-
-    private isChoiceTrace(trace: GeneralTrace): trace is ChoiceTrace {
-        return trace.type === TraceType.CHOICE;
     }
 }
 
