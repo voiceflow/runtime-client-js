@@ -5,7 +5,6 @@ import baseAxios from 'axios';
 import App from '@/lib/App';
 import _ from 'lodash';
 import { 
-    CHOICE_TRACE, 
     EXPOSED_VF_APP_NEXT_STATE_1, 
     EXPOSED_VF_APP_NEXT_STATE_2, 
     GENERAL_RUNTIME_ENDPOINT_URL, 
@@ -13,7 +12,6 @@ import {
     SEND_TEXT_RESPONSE_BODY, 
     START_REQUEST_BODY, 
     START_RESPONSE_BODY, 
-    START_RESPONSE_BODY_WITH_NO_CHOICES,
     USER_RESPONSE, 
     VERSION_ID, 
     VF_APP_INITIAL_STATE 
