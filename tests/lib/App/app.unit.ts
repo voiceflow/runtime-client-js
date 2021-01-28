@@ -15,6 +15,7 @@ import {
   EXPOSED_VF_APP_NEXT_STATE_2,
   SEND_TEXT_REQUEST_BODY,
   SEND_TEXT_RESPONSE_BODY,
+  SEND_TEXT_RESPONSE_BODY_WITH_SSML_AND_TTS,
   START_REQUEST_BODY,
   START_RESPONSE_BODY,
   START_RESPONSE_BODY_WITH_MULTIPLE_CHOICES,
@@ -28,7 +29,7 @@ chai.use(chaiAsPromise);
 
 const asHttpResponse = (data: object) => ({ data });
 
-const createVFApp = (options?: AppConfig) => {
+const createVFApp = (appConfig?: AppConfig) => {
   const axiosInstance = {
     get: sinon.stub(),
     post: sinon.stub(),
@@ -40,7 +41,7 @@ const createVFApp = (options?: AppConfig) => {
 
   const axiosCreate = sinon.stub(baseAxios, 'create').returns(axiosInstance as any);
 
-  const VFApp = new App({ versionID: VERSION_ID, ...options });
+  const VFApp = new App({ versionID: VERSION_ID, ...appConfig });
 
   return { VFApp, axiosCreate, axiosInstance };
 };
@@ -221,5 +222,39 @@ describe('App', () => {
     const { chips } = VFApp;
 
     expect(chips).to.eql([...CHOICES_1, ...CHOICES_2, ...CHOICES_3]);
+  });
+                
+  it('advanced config', async () => {
+    const { VFApp, axiosInstance } = createVFApp({
+      versionID: VERSION_ID,
+      dataConfig: {
+        hasTTS: false,
+        showSSML: true,
+        includeTypes: ['debug', 'choice'],
+      }
+    });
+
+    axiosInstance.get.resolves(asHttpResponse(VF_APP_INITIAL_STATE));
+    axiosInstance.post.resolves(asHttpResponse(START_RESPONSE_BODY));
+
+    await VFApp.start();
+    
+    axiosInstance.post.resolves(asHttpResponse(SEND_TEXT_RESPONSE_BODY_WITH_SSML_AND_TTS));
+
+    const data = await VFApp.sendText(USER_RESPONSE);
+
+    expect(axiosInstance.post.callCount).to.eql(2);
+    expect(axiosInstance.post.args[1]).to.eql([
+      `/interact/${VERSION_ID}`,
+      SEND_TEXT_REQUEST_BODY
+    ]);
+    
+    expect((data.trace[0] as any).payload.message).to.eql('<voice>Books ought to have to have good endings.</voice>');
+    expect((data.trace[0] as any).payload.src).to.eql(undefined);
+    expect(data.trace.length).to.eql(2);
+  });
+
+  it('advanced config includeTypes error', async () => {
+      expect(() => createVFApp({versionID: VERSION_ID, dataConfig: {includeTypes: ['fake']}})).to.throw();
   });
 });
