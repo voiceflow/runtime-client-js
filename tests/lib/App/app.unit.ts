@@ -228,6 +228,35 @@ describe('App', () => {
         expect(data).to.eql(EXPOSED_VF_APP_NEXT_STATE_1);
     });
 
+    it('start, pulls the cached initial state', async () => {
+        const { VFApp, axiosInstance } = createVFApp();
+
+        axiosInstance.get.resolves(asHttpResponse(VF_APP_INITIAL_STATE));
+        axiosInstance.post.resolves(asHttpResponse(START_RESPONSE_BODY));
+
+        const data1 = await VFApp.start();
+
+        axiosInstance.post.resolves(asHttpResponse(START_RESPONSE_BODY));
+
+        const data2 = await VFApp.start();
+
+        expect(axiosInstance.get.callCount).to.eql(1);
+        expect(axiosInstance.get.args[0]).to.eql([`/interact/${VERSION_ID}/state`]);
+
+        expect(axiosInstance.post.callCount).to.eql(2);
+        expect(axiosInstance.post.args[0]).to.eql([
+            `/interact/${VERSION_ID}`,
+            START_REQUEST_BODY
+        ]);
+        expect(axiosInstance.post.args[1]).to.eql([
+            `/interact/${VERSION_ID}`,
+            START_REQUEST_BODY
+        ]);
+
+        expect(data1).to.eql(EXPOSED_VF_APP_NEXT_STATE_1);
+        expect(data2).to.eql(EXPOSED_VF_APP_NEXT_STATE_1);
+    });
+
     it('sendText', async () => {
         const { VFApp, axiosInstance } = createVFApp();
 
