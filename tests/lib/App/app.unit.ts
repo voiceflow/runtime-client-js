@@ -8,6 +8,7 @@ import { InteractResponse, InteractRequestBody } from '@/lib/Client/type';
 import { GeneralTrace, RequestType, TraceType } from '@voiceflow/general-types';
 import { TraceStreamAction } from '@voiceflow/general-types/build/nodes/stream';
 import { AppState } from '@/lib/App/types';
+import _ from 'lodash';
 
 chai.use(chaiAsPromise);
 
@@ -36,6 +37,13 @@ const CHOICE_TRACE: GeneralTrace = {
             { name: "I'd like to order a large please" },
             { name: "I'd like the small  thank you very much" }
         ]
+    }
+};
+
+const CHOICE_TRACE_WITH_NO_CHOICES: GeneralTrace = {
+    type: TraceType.CHOICE,
+    payload: {
+        choices: []
     }
 };
 
@@ -108,7 +116,7 @@ const VF_APP_NEXT_STATE_1: State = {
     }
 };
 
-const START_RESPONSE_BODY: InteractResponse = {
+const START_RESPONSE_BODY = {
     state: VF_APP_NEXT_STATE_1,
     request: null,
     trace: [
@@ -118,6 +126,14 @@ const START_RESPONSE_BODY: InteractResponse = {
         STREAM_TRACE,
         DEBUG_TRACE,
         CHOICE_TRACE,
+    ]
+};
+
+const START_RESPONSE_BODY_WITH_NO_CHOICES = {
+    ...START_RESPONSE_BODY,
+    trace: [
+        ...(_.initial(START_RESPONSE_BODY.trace)),
+        CHOICE_TRACE_WITH_NO_CHOICES
     ]
 };
 
@@ -301,5 +317,56 @@ describe('App', () => {
         return expect(VFApp.sendText("call sendText after conversation had ended"))
             .to.be.eventually.be.rejectedWith('VFClient.sendText() was called but the conversation has ended')
             .and.be.an.instanceOf(Error);
+    });
+
+    it('get chips', async () => {
+        const { VFApp, axiosInstance } = createVFApp();
+
+        axiosInstance.get.resolves(asHttpResponse(VF_APP_INITIAL_STATE));
+        axiosInstance.post.resolves(asHttpResponse(START_RESPONSE_BODY));
+
+        await VFApp.start();
+
+        const chips = VFApp.chips;
+
+        expect(chips).to.eql(CHOICE_TRACE.payload.choices);
+    });
+
+    it('get chips, returns empty arr if app not initialized', async () => {
+        const { VFApp } = createVFApp();
+
+        const chips = VFApp.chips;
+
+        expect(chips).to.eql([]);
+    });
+
+    it('get chips, returns empty arr if trace doesn\'t end with ChoiceTrace', async () => {
+        const { VFApp, axiosInstance } = createVFApp();
+
+        axiosInstance.get.resolves(asHttpResponse(VF_APP_INITIAL_STATE));
+        axiosInstance.post.resolves(asHttpResponse(START_RESPONSE_BODY));
+
+        await VFApp.start();
+
+        axiosInstance.post.resolves(asHttpResponse(SEND_TEXT_RESPONSE_BODY));
+
+        await VFApp.sendText(USER_RESPONSE);
+
+        const chips = VFApp.chips;
+
+        expect(chips).to.eql([]);
+    });
+
+    it('get chips, return empty arr if choice trace has no choices', async () => {
+        const { VFApp, axiosInstance } = createVFApp();
+
+        axiosInstance.get.resolves(asHttpResponse(VF_APP_INITIAL_STATE));
+        axiosInstance.post.resolves(asHttpResponse(START_RESPONSE_BODY_WITH_NO_CHOICES));
+
+        await VFApp.start();
+
+        const chips = VFApp.chips;
+
+        expect(chips).to.eql([]);
     });
 });

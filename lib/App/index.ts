@@ -2,7 +2,7 @@ import Client from "@/lib/Client";
 import { AppConfig, AppState, InternalAppState } from "./types";
 import _ from "lodash"
 import { State } from "@voiceflow/runtime";
-import { TraceType, GeneralTrace, GeneralRequest, RequestType, SpeakTrace } from "@voiceflow/general-types";
+import { TraceType, GeneralTrace, GeneralRequest, RequestType, SpeakTrace, ChoiceTrace } from "@voiceflow/general-types";
 import { InteractRequestBody } from "@/lib/Client/type";
 import { SSML_TAG_REGEX } from "./constants";
 import axios from "axios";
@@ -18,6 +18,21 @@ class App {
 
         const axiosInstance = axios.create({ baseURL: 'https://localhost:4000' });
         this.client = new Client(axiosInstance);
+    }
+
+    get chips() {
+        if (this.appState === null || this.appState.trace.length === 0) {
+            return [];
+        }
+
+        const { trace } = this.appState;
+        const lastTrace = trace[trace.length - 1];
+
+        if (!this.isChoiceTrace(lastTrace)) {
+            return [];
+        }
+
+        return lastTrace.payload.choices;
     }
 
     async start(): Promise<AppState> {
@@ -87,6 +102,10 @@ class App {
 
     private isConversationEnding(trace: GeneralTrace[]): boolean {
         return trace.length !== 0 && trace[trace.length - 1].type === TraceType.END;
+    }
+
+    private isChoiceTrace(trace: GeneralTrace): trace is ChoiceTrace {
+        return trace.type === TraceType.CHOICE;
     }
 }
 
