@@ -1,20 +1,30 @@
 import Client from "@/lib/Client";
-import { AppConfig, AppState, InternalAppState } from "./types";
+import { AppConfig, AppState, DataConfig, InternalAppState } from "./types";
 import _ from "lodash"
 import { State } from "@voiceflow/runtime";
-import { TraceType, GeneralTrace, GeneralRequest, RequestType, SpeakTrace } from "@voiceflow/general-types";
+import { TraceType, GeneralTrace, GeneralRequest, RequestType } from "@voiceflow/general-types";
 import { InteractRequestBody } from "@/lib/Client/type";
 import { SSML_TAG_REGEX } from "./constants";
 import axios from "axios";
+import DataFilterer from '@/lib/DataFilterer'
 
 class App {
     private versionID: string;                      // version ID of the VF project that the SDK communicates with
+    private dataConfig: DataConfig;
     private client: Client;
     private cachedInitAppState: InternalAppState | null = null;
     private appState: InternalAppState | null = null;
+    private dataFilterer: DataFilterer;
 
-    constructor({ versionID }: AppConfig) {
+    constructor({ versionID, dataConfig }: AppConfig) {
         this.versionID = versionID;
+        this.dataConfig = {
+            hasTTS: true,
+            showSSML: false,
+        };
+        this.dataConfig = Object.assign(this.dataConfig, dataConfig);
+        
+        this.dataFilterer = new DataFilterer(this.dataConfig.includeTypes ? this.dataConfig.includeTypes : []);
 
         const axiosInstance = axios.create({ baseURL: 'https://localhost:4000' });
         this.client = new Client(axiosInstance);
@@ -51,14 +61,18 @@ class App {
     }
 
     private updateState({ state, trace }: InternalAppState): AppState {
-        this.appState = { state, trace };
-        return { 
-            state, 
-            trace: this.filterTraces(trace).map(this.stripSSMLFromSpeak), 
-            end: this.isConversationEnding(trace) 
+        this.appState = { state, trace: this.filterTraces(trace) };
+        if (!this.dataConfig.showSSML) {
+            this.appState.trace = this.appState.trace.map(this.stripSSMLFromSpeak);
         }
-    }
 
+        if (!this.dataConfig.hasTTS) {
+            this.appState.trace = this.appState.trace.map(this.stripTTSFromSpeak);
+        }
+
+        return { ...this.appState, end: this.isConversationEnding(trace) }
+    }
+    
     private makeRequestBody(state: State, text?: string): InteractRequestBody {
         return {
             state,
@@ -72,17 +86,33 @@ class App {
     }
 
     private filterTraces(traces: GeneralTrace[]) {
-        return traces.filter(({ type }) => type === TraceType.SPEAK) as SpeakTrace[];
+        return this.dataFilterer.filter(traces);
     }
 
-    private stripSSMLFromSpeak(trace: SpeakTrace): GeneralTrace {
-        return {
+    private stripSSMLFromSpeak(trace: GeneralTrace): GeneralTrace {
+        return trace.type !== TraceType.SPEAK
+            ? trace
+            : {
             ...trace,
             payload: {
                 ...trace.payload,
                 message: trace.payload.message.replace(SSML_TAG_REGEX, ''),
             }
         };
+    }
+
+    private stripTTSFromSpeak(trace: GeneralTrace): GeneralTrace {
+        if (trace.type !== TraceType.SPEAK) {
+            return trace;
+        }
+        const strippedTrace = {
+            ...trace,
+            payload: {
+                ...trace.payload
+            }
+        }
+        delete strippedTrace.payload.src;
+        return strippedTrace;
     }
 
     private isConversationEnding(trace: GeneralTrace[]): boolean {
