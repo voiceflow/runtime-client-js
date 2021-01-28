@@ -1,4 +1,4 @@
-import { GeneralRequest, GeneralTrace, RequestType, SpeakTrace, TraceType } from '@voiceflow/general-types';
+import { GeneralRequest, GeneralTrace, RequestType, TraceType } from '@voiceflow/general-types';
 import { State } from '@voiceflow/runtime';
 import axios from 'axios';
 import _ from 'lodash';
@@ -76,16 +76,22 @@ class App {
   }
 
   private updateState({ state, trace }: InternalAppState): AppState {
-    this.appState = { state, trace: this.filterTraces(trace) };
+    this.appState = { state, trace };
+    let filteredTrace = this.filterTraces(trace);
+
     if (!this.dataConfig.showSSML) {
-        this.appState.trace = this.appState.trace.map(this.stripSSMLFromSpeak);
+        filteredTrace = filteredTrace.map(this.stripSSMLFromSpeak);
     }
 
     if (!this.dataConfig.hasTTS) {
-        this.appState.trace = this.appState.trace.map(this.stripTTSFromSpeak);
+        filteredTrace = filteredTrace.map(this.stripTTSFromSpeak);
     }
 
-    return { ...this.appState, end: this.isConversationEnding(trace) }
+    return {
+        state,
+        trace: filteredTrace,
+        end: this.isConversationEnding(trace)
+    }
   }
 
   private makeRequestBody(state: State, text?: string): InteractRequestBody {
