@@ -41,7 +41,6 @@ workflows:
       - build-and-test:
           context: dev-test
       - vfcommon/release:
-          context: dev-test
           requires:
             - build-and-test
           filters:
