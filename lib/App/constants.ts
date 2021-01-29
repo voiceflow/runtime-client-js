@@ -1,2 +1,2 @@
 const SSML_TAG_REGEX = /<\/?[^>]+(>|$)/g;
-export { SSML_TAG_REGEX as default };
+export default SSML_TAG_REGEX;

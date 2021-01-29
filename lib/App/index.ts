@@ -7,7 +7,7 @@ import Client from '@/lib/Client';
 import { InteractRequestBody } from '@/lib/Client/type';
 
 import { DeepReadonly } from '../Typings';
-import { SSML_TAG_REGEX } from './constants';
+import SSML_TAG_REGEX from './constants';
 import { AppConfig, AppState, Choice, InternalAppState } from './types';
 
 class App {
