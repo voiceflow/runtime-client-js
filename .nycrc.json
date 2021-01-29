@@ -10,6 +10,7 @@
     "text-summary",
     "lcov"
   ],
+  "report-dir": "nyc_coverage",
   "extension": [
     ".ts"
   ]

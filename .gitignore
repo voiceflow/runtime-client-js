@@ -22,3 +22,6 @@ package-lock.json
 
 # build folder
 build
+
+# Sonar
+sonar/
