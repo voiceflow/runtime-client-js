@@ -13,6 +13,7 @@ jobs:
       - checkout
       - vfcommon/install_node_modules
       - vfcommon/lint_source
+      - vfcommon/lint_report
       - vfcommon/build
       - vfcommon/unit_tests
       - codecov/upload:
