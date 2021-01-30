@@ -7,8 +7,11 @@ import Client from '@/lib/Client';
 import { InteractRequestBody } from '@/lib/Client/type';
 
 import { DeepReadonly } from '../Typings';
-import SSML_TAG_REGEX from './constants';
+import { DEFAULT_ENDPOINT, SSML_TAG_REGEX } from './constants';
 import { AppConfig, AppState, Choice, InternalAppState } from './types';
+
+export * from './types';
+export * from './constants';
 
 class App {
   private versionID: string; // version ID of the VF project that the SDK communicates with
@@ -19,10 +22,10 @@ class App {
 
   private appState: InternalAppState | null = null;
 
-  constructor({ versionID }: AppConfig) {
+  constructor({ versionID, endpoint = DEFAULT_ENDPOINT }: AppConfig) {
     this.versionID = versionID;
 
-    const axiosInstance = axios.create({ baseURL: 'https://localhost:4000' });
+    const axiosInstance = axios.create({ baseURL: endpoint });
     this.client = new Client(axiosInstance);
   }
 
@@ -96,6 +99,10 @@ class App {
 
   private isConversationEnding(trace: GeneralTrace[]): boolean {
     return trace.length !== 0 && trace[trace.length - 1].type === TraceType.END;
+  }
+
+  getVersion() {
+    return this.versionID;
   }
 }
 

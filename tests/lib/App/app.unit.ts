@@ -1,16 +1,34 @@
+import baseAxios from 'axios';
 import chai, { expect } from 'chai';
 import chaiAsPromise from 'chai-as-promised';
-import sinon from 'sinon';
-import baseAxios from 'axios';
-import App from '@/lib/App';
 import _ from 'lodash';
-import { CHOICES_1, CHOICES_2, CHOICES_3, CHOICE_TRACE, EXPOSED_VF_APP_NEXT_STATE_1, EXPOSED_VF_APP_NEXT_STATE_2, GENERAL_RUNTIME_ENDPOINT_URL, SEND_TEXT_REQUEST_BODY, SEND_TEXT_RESPONSE_BODY, START_REQUEST_BODY, START_RESPONSE_BODY, START_RESPONSE_BODY_WITH_MULTIPLE_CHOICES, START_RESPONSE_BODY_WITH_NO_CHOICES, USER_RESPONSE, VERSION_ID, VF_APP_INITIAL_STATE } from './fixtures';
+import sinon from 'sinon';
+
+import App, { AppConfig, DEFAULT_ENDPOINT } from '@/lib/App';
+
+import {
+  CHOICE_TRACE,
+  CHOICES_1,
+  CHOICES_2,
+  CHOICES_3,
+  EXPOSED_VF_APP_NEXT_STATE_1,
+  EXPOSED_VF_APP_NEXT_STATE_2,
+  SEND_TEXT_REQUEST_BODY,
+  SEND_TEXT_RESPONSE_BODY,
+  START_REQUEST_BODY,
+  START_RESPONSE_BODY,
+  START_RESPONSE_BODY_WITH_MULTIPLE_CHOICES,
+  START_RESPONSE_BODY_WITH_NO_CHOICES,
+  USER_RESPONSE,
+  VERSION_ID,
+  VF_APP_INITIAL_STATE,
+} from './fixtures';
 
 chai.use(chaiAsPromise);
 
 const asHttpResponse = (data: object) => ({ data });
 
-const createVFApp = () => {
+const createVFApp = (options?: AppConfig) => {
   const axiosInstance = {
     get: sinon.stub(),
     post: sinon.stub(),
@@ -22,187 +40,186 @@ const createVFApp = () => {
 
   const axiosCreate = sinon.stub(baseAxios, 'create').returns(axiosInstance as any);
 
-  const VFApp = new App({ versionID: VERSION_ID });
+  const VFApp = new App({ versionID: VERSION_ID, ...options });
 
   return { VFApp, axiosCreate, axiosInstance };
 };
 
 describe('App', () => {
-    afterEach(() => {
-        sinon.restore();
-    });
+  afterEach(() => {
+    sinon.restore();
+  });
 
-    it('constructor', () => {
-        const { axiosCreate } = createVFApp();
+  it('constructor', () => {
+    const { axiosCreate } = createVFApp();
 
-        expect(axiosCreate.callCount).to.eql(1);
-        expect(axiosCreate.args[0]).to.eql([
-            {
-                baseURL: GENERAL_RUNTIME_ENDPOINT_URL,
-            }
-        ]);
-    });
+    expect(axiosCreate.callCount).to.eql(1);
+    expect(axiosCreate.args[0]).to.eql([
+      {
+        baseURL: DEFAULT_ENDPOINT,
+      },
+    ]);
+  });
 
-    it('start', async () => {
-        const { VFApp, axiosInstance } = createVFApp();
+  it('options', () => {
+    const versionID = 'customVersionID';
+    const endpoint = 'customEndpoint';
+    const { axiosCreate, VFApp } = createVFApp({ versionID, endpoint });
 
-        axiosInstance.get.resolves(asHttpResponse(VF_APP_INITIAL_STATE));
-        axiosInstance.post.resolves(asHttpResponse(START_RESPONSE_BODY));
+    expect(axiosCreate.callCount).to.eql(1);
+    expect(axiosCreate.args[0]).to.eql([
+      {
+        baseURL: endpoint,
+      },
+    ]);
 
-        const data = await VFApp.start();
+    expect(VFApp.getVersion()).to.eql(versionID);
+  });
 
-        expect(axiosInstance.get.callCount).to.eql(1);
-        expect(axiosInstance.get.args[0]).to.eql([`/interact/${VERSION_ID}/state`]);
+  it('start', async () => {
+    const { VFApp, axiosInstance } = createVFApp();
 
-        expect(axiosInstance.post.callCount).to.eql(1);
-        expect(axiosInstance.post.args[0]).to.eql([
-            `/interact/${VERSION_ID}`,
-            START_REQUEST_BODY
-        ]);
+    axiosInstance.get.resolves(asHttpResponse(VF_APP_INITIAL_STATE));
+    axiosInstance.post.resolves(asHttpResponse(START_RESPONSE_BODY));
 
-        expect(data).to.eql(EXPOSED_VF_APP_NEXT_STATE_1);
-    });
+    const data = await VFApp.start();
 
-    it('start, pulls the cached initial state', async () => {
-        const { VFApp, axiosInstance } = createVFApp();
+    expect(axiosInstance.get.callCount).to.eql(1);
+    expect(axiosInstance.get.args[0]).to.eql([`/interact/${VERSION_ID}/state`]);
 
-        axiosInstance.get.resolves(asHttpResponse(VF_APP_INITIAL_STATE));
-        axiosInstance.post.resolves(asHttpResponse(START_RESPONSE_BODY));
+    expect(axiosInstance.post.callCount).to.eql(1);
+    expect(axiosInstance.post.args[0]).to.eql([`/interact/${VERSION_ID}`, START_REQUEST_BODY]);
 
-        const data1 = await VFApp.start();
+    expect(data).to.eql(EXPOSED_VF_APP_NEXT_STATE_1);
+  });
 
-        axiosInstance.post.resolves(asHttpResponse(START_RESPONSE_BODY));
+  it('start, pulls the cached initial state', async () => {
+    const { VFApp, axiosInstance } = createVFApp();
 
-        const data2 = await VFApp.start();
+    axiosInstance.get.resolves(asHttpResponse(VF_APP_INITIAL_STATE));
+    axiosInstance.post.resolves(asHttpResponse(START_RESPONSE_BODY));
 
-        expect(axiosInstance.get.callCount).to.eql(1);
-        expect(axiosInstance.get.args[0]).to.eql([`/interact/${VERSION_ID}/state`]);
+    const data1 = await VFApp.start();
 
-        expect(axiosInstance.post.callCount).to.eql(2);
-        expect(axiosInstance.post.args[0]).to.eql([
-            `/interact/${VERSION_ID}`,
-            START_REQUEST_BODY
-        ]);
-        expect(axiosInstance.post.args[1]).to.eql([
-            `/interact/${VERSION_ID}`,
-            START_REQUEST_BODY
-        ]);
+    axiosInstance.post.resolves(asHttpResponse(START_RESPONSE_BODY));
 
-        expect(data1).to.eql(EXPOSED_VF_APP_NEXT_STATE_1);
-        expect(data2).to.eql(EXPOSED_VF_APP_NEXT_STATE_1);
-    });
+    const data2 = await VFApp.start();
 
-    it('sendText', async () => {
-        const { VFApp, axiosInstance } = createVFApp();
+    expect(axiosInstance.get.callCount).to.eql(1);
+    expect(axiosInstance.get.args[0]).to.eql([`/interact/${VERSION_ID}/state`]);
 
-        axiosInstance.get.resolves(asHttpResponse(VF_APP_INITIAL_STATE));
-        axiosInstance.post.resolves(asHttpResponse(START_RESPONSE_BODY));
+    expect(axiosInstance.post.callCount).to.eql(2);
+    expect(axiosInstance.post.args[0]).to.eql([`/interact/${VERSION_ID}`, START_REQUEST_BODY]);
+    expect(axiosInstance.post.args[1]).to.eql([`/interact/${VERSION_ID}`, START_REQUEST_BODY]);
 
-        await VFApp.start();
+    expect(data1).to.eql(EXPOSED_VF_APP_NEXT_STATE_1);
+    expect(data2).to.eql(EXPOSED_VF_APP_NEXT_STATE_1);
+  });
 
-        axiosInstance.post.resolves(asHttpResponse(SEND_TEXT_RESPONSE_BODY));
+  it('sendText', async () => {
+    const { VFApp, axiosInstance } = createVFApp();
 
-        const data = await VFApp.sendText(USER_RESPONSE);
+    axiosInstance.get.resolves(asHttpResponse(VF_APP_INITIAL_STATE));
+    axiosInstance.post.resolves(asHttpResponse(START_RESPONSE_BODY));
 
-        expect(axiosInstance.post.callCount).to.eql(2);
-        expect(axiosInstance.post.args[1]).to.eql([
-            `/interact/${VERSION_ID}`,
-            SEND_TEXT_REQUEST_BODY
-        ]);
+    await VFApp.start();
 
-        expect(data).to.eql(EXPOSED_VF_APP_NEXT_STATE_2);
-    });
+    axiosInstance.post.resolves(asHttpResponse(SEND_TEXT_RESPONSE_BODY));
 
-    it('sendText, start was not previously called', async () => {
-        const { VFApp } = createVFApp();
+    const data = await VFApp.sendText(USER_RESPONSE);
 
-        return expect(VFApp.sendText("call sendText without calling .start() first"))
-            .to.be.eventually.be.rejectedWith('the appState in VFClient.App was not initialized')
-            .and.be.an.instanceOf(Error);
-    });
+    expect(axiosInstance.post.callCount).to.eql(2);
+    expect(axiosInstance.post.args[1]).to.eql([`/interact/${VERSION_ID}`, SEND_TEXT_REQUEST_BODY]);
 
-    it('sendText, called when conversation has ended', async () => {
-        const { VFApp, axiosInstance } = createVFApp();
+    expect(data).to.eql(EXPOSED_VF_APP_NEXT_STATE_2);
+  });
 
-        axiosInstance.get.resolves(asHttpResponse(VF_APP_INITIAL_STATE));
-        axiosInstance.post.resolves(asHttpResponse(START_RESPONSE_BODY));
+  it('sendText, start was not previously called', async () => {
+    const { VFApp } = createVFApp();
 
-        await VFApp.start();
+    return expect(VFApp.sendText('call sendText without calling .start() first'))
+      .to.be.eventually.be.rejectedWith('the appState in VFClient.App was not initialized')
+      .and.be.an.instanceOf(Error);
+  });
 
-        axiosInstance.post.resolves(asHttpResponse(SEND_TEXT_RESPONSE_BODY));
+  it('sendText, called when conversation has ended', async () => {
+    const { VFApp, axiosInstance } = createVFApp();
 
-        await VFApp.sendText(USER_RESPONSE);
+    axiosInstance.get.resolves(asHttpResponse(VF_APP_INITIAL_STATE));
+    axiosInstance.post.resolves(asHttpResponse(START_RESPONSE_BODY));
 
-        return expect(VFApp.sendText("call sendText after conversation had ended"))
-            .to.be.eventually.be.rejectedWith('VFClient.sendText() was called but the conversation has ended')
-            .and.be.an.instanceOf(Error);
-    });
+    await VFApp.start();
 
-    it('get chips', async () => {
-        const { VFApp, axiosInstance } = createVFApp();
+    axiosInstance.post.resolves(asHttpResponse(SEND_TEXT_RESPONSE_BODY));
 
-        axiosInstance.get.resolves(asHttpResponse(VF_APP_INITIAL_STATE));
-        axiosInstance.post.resolves(asHttpResponse(START_RESPONSE_BODY));
+    await VFApp.sendText(USER_RESPONSE);
 
-        await VFApp.start();
+    return expect(VFApp.sendText('call sendText after conversation had ended'))
+      .to.be.eventually.be.rejectedWith('VFClient.sendText() was called but the conversation has ended')
+      .and.be.an.instanceOf(Error);
+  });
 
-        const chips = VFApp.chips;
+  it('get chips', async () => {
+    const { VFApp, axiosInstance } = createVFApp();
 
-        expect(chips).to.eql(CHOICE_TRACE.payload.choices);
-    });
+    axiosInstance.get.resolves(asHttpResponse(VF_APP_INITIAL_STATE));
+    axiosInstance.post.resolves(asHttpResponse(START_RESPONSE_BODY));
 
-    it('get chips, returns empty arr if app not initialized', async () => {
-        const { VFApp } = createVFApp();
+    await VFApp.start();
 
-        const chips = VFApp.chips;
+    const { chips } = VFApp;
 
-        expect(chips).to.eql([]);
-    });
+    expect(chips).to.eql(CHOICE_TRACE.payload.choices);
+  });
 
-    it('get chips, returns empty arr if trace doesn\'t end with ChoiceTrace', async () => {
-        const { VFApp, axiosInstance } = createVFApp();
+  it('get chips, returns empty arr if app not initialized', async () => {
+    const { VFApp } = createVFApp();
 
-        axiosInstance.get.resolves(asHttpResponse(VF_APP_INITIAL_STATE));
-        axiosInstance.post.resolves(asHttpResponse(START_RESPONSE_BODY));
+    const { chips } = VFApp;
 
-        await VFApp.start();
+    expect(chips).to.eql([]);
+  });
 
-        axiosInstance.post.resolves(asHttpResponse(SEND_TEXT_RESPONSE_BODY));
+  it("get chips, returns empty arr if trace doesn't end with ChoiceTrace", async () => {
+    const { VFApp, axiosInstance } = createVFApp();
 
-        await VFApp.sendText(USER_RESPONSE);
+    axiosInstance.get.resolves(asHttpResponse(VF_APP_INITIAL_STATE));
+    axiosInstance.post.resolves(asHttpResponse(START_RESPONSE_BODY));
 
-        const chips = VFApp.chips;
+    await VFApp.start();
 
-        expect(chips).to.eql([]);
-    });
+    axiosInstance.post.resolves(asHttpResponse(SEND_TEXT_RESPONSE_BODY));
 
-    it('get chips, return empty arr if choice trace has no choices', async () => {
-        const { VFApp, axiosInstance } = createVFApp();
+    await VFApp.sendText(USER_RESPONSE);
 
-        axiosInstance.get.resolves(asHttpResponse(VF_APP_INITIAL_STATE));
-        axiosInstance.post.resolves(asHttpResponse(START_RESPONSE_BODY_WITH_NO_CHOICES));
+    const { chips } = VFApp;
 
-        await VFApp.start();
+    expect(chips).to.eql([]);
+  });
 
-        const chips = VFApp.chips;
+  it('get chips, return empty arr if choice trace has no choices', async () => {
+    const { VFApp, axiosInstance } = createVFApp();
 
-        expect(chips).to.eql([]);
-    });
+    axiosInstance.get.resolves(asHttpResponse(VF_APP_INITIAL_STATE));
+    axiosInstance.post.resolves(asHttpResponse(START_RESPONSE_BODY_WITH_NO_CHOICES));
 
-    it('get chips, handles data with multiple choice blocks', async () => {
-        const { VFApp, axiosInstance } = createVFApp();
+    await VFApp.start();
 
-        axiosInstance.get.resolves(asHttpResponse(VF_APP_INITIAL_STATE));
-        axiosInstance.post.resolves(asHttpResponse(START_RESPONSE_BODY_WITH_MULTIPLE_CHOICES));
+    const { chips } = VFApp;
 
-        await VFApp.start();
+    expect(chips).to.eql([]);
+  });
 
-        const chips = VFApp.chips;
+  it('get chips, handles data with multiple choice blocks', async () => {
+    const { VFApp, axiosInstance } = createVFApp();
 
-        expect(chips).to.eql([
-            ...CHOICES_1,
-            ...CHOICES_2,
-            ...CHOICES_3
-        ]);
-    });
+    axiosInstance.get.resolves(asHttpResponse(VF_APP_INITIAL_STATE));
+    axiosInstance.post.resolves(asHttpResponse(START_RESPONSE_BODY_WITH_MULTIPLE_CHOICES));
+
+    await VFApp.start();
+
+    const { chips } = VFApp;
+
+    expect(chips).to.eql([...CHOICES_1, ...CHOICES_2, ...CHOICES_3]);
+  });
 });
