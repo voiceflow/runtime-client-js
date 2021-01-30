@@ -5,6 +5,7 @@ import { DeepReadonly } from '@/lib/Typings';
 
 export type AppConfig = {
   versionID: string;
+  endpoint?: string;
 };
 
 export type InternalAppState = {
