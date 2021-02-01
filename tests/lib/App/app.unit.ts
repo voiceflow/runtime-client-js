@@ -4,7 +4,8 @@ import chaiAsPromise from 'chai-as-promised';
 import _ from 'lodash';
 import sinon from 'sinon';
 
-import App, { AppConfig, DEFAULT_ENDPOINT } from '@/lib/App';
+import App, { AppConfig } from '@/lib/App';
+import { DEFAULT_ENDPOINT } from '@/lib/App/constants';
 
 import {
   CHOICE_TRACE,
@@ -228,8 +229,8 @@ describe('App', () => {
     const { VFApp, axiosInstance } = createVFApp({
       versionID: VERSION_ID,
       dataConfig: {
-        hasTTS: false,
-        showSSML: true,
+        tts: false,
+        ssml: false,
         includeTypes: ['debug', 'choice'],
       }
     });
@@ -249,7 +250,7 @@ describe('App', () => {
       SEND_TEXT_REQUEST_BODY
     ]);
     
-    expect((data.trace[0] as any).payload.message).to.eql('<voice>Books ought to have to have good endings.</voice>');
+    expect((data.trace[0] as any).payload.message).to.eql('Books ought to have to have good endings.');
     expect((data.trace[0] as any).payload.src).to.eql(undefined);
     expect(data.trace.length).to.eql(2);
   });

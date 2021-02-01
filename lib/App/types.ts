@@ -10,8 +10,8 @@ export type AppConfig = {
 };
 
 export type DataConfig = {
-    hasTTS?: boolean;
-    showSSML?: boolean;
+    tts?: boolean;
+    ssml?: boolean;
     includeTypes?: string[];
 };
 

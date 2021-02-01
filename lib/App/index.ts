@@ -8,11 +8,10 @@ import DataFilterer from '@/lib/DataFilterer'
 import { InteractRequestBody } from '@/lib/Client/type';
 
 import { DeepReadonly } from '../Typings';
-import { DEFAULT_ENDPOINT, SSML_TAG_REGEX } from './constants';
+import { DEFAULT_ENDPOINT } from './constants';
 import { AppConfig, AppState, Choice, DataConfig, InternalAppState } from './types';
 
 export * from './types';
-export * from './constants';
 
 class App {
   private versionID: string; // version ID of the VF project that the SDK communicates with
@@ -34,12 +33,13 @@ class App {
     this.client = new Client(axiosInstance);
 
     this.dataConfig = {
-        hasTTS: true,
-        showSSML: false,
+      tts: false,
+      ssml: false,
+      includeTypes: [],
     };
     this.dataConfig = Object.assign(this.dataConfig, dataConfig);
     
-    this.dataFilterer = new DataFilterer(this.dataConfig.includeTypes ? this.dataConfig.includeTypes : []);
+    this.dataFilterer = new DataFilterer(this.dataConfig);
   }
 
   get chips(): DeepReadonly<Choice[]> {
@@ -77,19 +77,10 @@ class App {
 
   private updateState({ state, trace }: InternalAppState): AppState {
     this.appState = { state, trace };
-    let filteredTrace = this.filterTraces(trace);
-
-    if (!this.dataConfig.showSSML) {
-        filteredTrace = filteredTrace.map(this.stripSSMLFromSpeak);
-    }
-
-    if (!this.dataConfig.hasTTS) {
-        filteredTrace = filteredTrace.map(this.stripTTSFromSpeak);
-    }
 
     return {
         state,
-        trace: filteredTrace,
+        trace: this.dataFilterer.filter(trace),
         end: this.isConversationEnding(trace)
     }
   }
@@ -104,36 +95,6 @@ class App {
   private makeGeneralRequest(payload?: string): GeneralRequest {
     if (!payload) return null;
     return { type: RequestType.TEXT, payload };
-  }
-
-  private filterTraces(traces: GeneralTrace[]) {
-    return this.dataFilterer.filter(traces);
-}
-
-  private stripSSMLFromSpeak(trace: GeneralTrace): GeneralTrace {
-    return trace.type !== TraceType.SPEAK
-        ? trace
-        : {
-        ...trace,
-        payload: {
-            ...trace.payload,
-            message: trace.payload.message.replace(SSML_TAG_REGEX, ''),
-        }
-    };
-  }
-
-  private stripTTSFromSpeak(trace: GeneralTrace): GeneralTrace {
-    if (trace.type !== TraceType.SPEAK) {
-        return trace;
-    }
-    const strippedTrace = {
-        ...trace,
-        payload: {
-            ...trace.payload
-        }
-    }
-    delete strippedTrace.payload.src;
-    return strippedTrace;
   }
 
   private isConversationEnding(trace: GeneralTrace[]): boolean {
