@@ -10,6 +10,7 @@ import DataFilterer from '@/lib/DataFilterer';
 import { DeepReadonly } from '../Typings';
 import { DEFAULT_ENDPOINT } from './constants';
 import { AppConfig, AppState, Choice, DataConfig, InternalAppState } from './types';
+import VariableManager from '../VariableManager';
 
 export * from './types';
 
@@ -24,9 +25,9 @@ class App {
 
   private appState: InternalAppState | null = null;
 
-  private dataFilterer: DataFilterer;
+  public variables = new VariableManager(this);
 
-  constructor({ versionID, endpoint = DEFAULT_ENDPOINT, dataConfig }: AppConfig) {
+  constructor({ versionID, endpoint = DEFAULT_ENDPOINT }: AppConfig) {
     this.versionID = versionID;
 
     const axiosInstance = axios.create({ baseURL: endpoint });
@@ -58,9 +59,9 @@ class App {
 
   async sendText(userResponse: string): Promise<AppState> {
     if (this.appState === null) {
-      throw new Error('the appState in VFClient.App was not initialized');
+      throw new Error('VFError: the appState in VFClient.App was not initialized');
     } else if (this.isConversationEnding(this.appState.trace)) {
-      throw new Error('VFClient.sendText() was called but the conversation has ended');
+      throw new Error('VFError: VFClient.sendText() was called but the conversation has ended');
     }
 
     const { state } = this.appState;
@@ -104,6 +105,10 @@ class App {
   getVersion() {
     return this.versionID;
   }
+
+  public __internal__ = {
+    getState: (): InternalAppState | null => this.appState,
+  };
 }
 
 export default App;
