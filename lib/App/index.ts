@@ -87,8 +87,9 @@ class App {
 
   private makeRequestBody(state: State, text?: string): InteractRequestBody {
     return {
-        state,
-        request: this.makeGeneralRequest(text)
+      state,
+      request: this.makeGeneralRequest(text),
+      config: { tts: this.dataConfig.tts }
     };
   }
 
