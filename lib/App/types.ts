@@ -10,9 +10,9 @@ export type AppConfig = {
 };
 
 export type DataConfig = {
-    tts?: boolean;
-    ssml?: boolean;
-    includeTypes?: string[];
+  tts?: boolean;
+  ssml?: boolean;
+  includeTypes?: string[];
 };
 
 export type InternalAppState = {

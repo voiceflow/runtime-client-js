@@ -15,6 +15,7 @@ import {
   EXPOSED_VF_APP_NEXT_STATE_1,
   EXPOSED_VF_APP_NEXT_STATE_2,
   SEND_TEXT_REQUEST_BODY,
+  SEND_TEXT_REQUEST_BODY_TTS_ON,
   SEND_TEXT_RESPONSE_BODY,
   SEND_TEXT_RESPONSE_BODY_WITH_SSML_AND_TTS,
   START_REQUEST_BODY,
@@ -225,12 +226,12 @@ describe('App', () => {
     expect(chips).to.eql([...CHOICES_1, ...CHOICES_2, ...CHOICES_3]);
   });
                 
-  it('advanced config', async () => {
+  it('advanced config, SSML set to true', async () => {
     const { VFApp, axiosInstance } = createVFApp({
       versionID: VERSION_ID,
       dataConfig: {
-        tts: false,
-        ssml: false,
+        tts: true,
+        ssml: true,
         includeTypes: ['debug', 'choice'],
       }
     });
@@ -247,15 +248,45 @@ describe('App', () => {
     expect(axiosInstance.post.callCount).to.eql(2);
     expect(axiosInstance.post.args[1]).to.eql([
       `/interact/${VERSION_ID}`,
-      SEND_TEXT_REQUEST_BODY
+      SEND_TEXT_REQUEST_BODY_TTS_ON
     ]);
     
-    expect((data.trace[0] as any).payload.message).to.eql('Books ought to have to have good endings.');
-    expect((data.trace[0] as any).payload.src).to.eql(undefined);
+    expect((data.trace[0] as any).payload.message).to.eql('<voice>Books ought to have to have good endings.</voice>');
+    expect((data.trace[0] as any).payload.src).to.eql('data:audio/mpeg;base64,SUQzBAAAAAAA');
     expect(data.trace.length).to.eql(2);
   });
 
-  it('advanced config includeTypes error', async () => {
+  it('advanced config, SSML set to false', async () => {
+    const { VFApp, axiosInstance } = createVFApp({
+      versionID: VERSION_ID,
+      dataConfig: {
+        tts: true,
+        ssml: false,
+        includeTypes: ['speak', 'debug', 'choice'],
+      }
+    });
+
+    axiosInstance.get.resolves(asHttpResponse(VF_APP_INITIAL_STATE));
+    axiosInstance.post.resolves(asHttpResponse(START_RESPONSE_BODY));
+
+    await VFApp.start();
+    
+    axiosInstance.post.resolves(asHttpResponse(SEND_TEXT_RESPONSE_BODY_WITH_SSML_AND_TTS));
+
+    const data = await VFApp.sendText(USER_RESPONSE);
+
+    expect(axiosInstance.post.callCount).to.eql(2);
+    expect(axiosInstance.post.args[1]).to.eql([
+      `/interact/${VERSION_ID}`,
+      SEND_TEXT_REQUEST_BODY_TTS_ON
+    ]);
+    
+    expect((data.trace[0] as any).payload.message).to.eql('Books ought to have to have good endings.');
+    expect((data.trace[0] as any).payload.src).to.eql('data:audio/mpeg;base64,SUQzBAAAAAAA');
+    expect(data.trace.length).to.eql(2);
+  });
+
+  it('advanced config, includeTypes error', async () => {
       expect(() => createVFApp({versionID: VERSION_ID, dataConfig: {includeTypes: ['fake']}})).to.throw();
   });
 });

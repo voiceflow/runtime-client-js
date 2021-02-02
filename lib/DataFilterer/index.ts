@@ -27,37 +27,19 @@ class DataFilterer {
       traces = traces.map(this.stripSSMLFromSpeak);
     }
 
-    if (!this.dataConfig.tts) {
-      traces = traces.map(this.stripTTSFromSpeak);
-    }
-
     return traces;
-  };
+  }
 
   private stripSSMLFromSpeak(trace: GeneralTrace): GeneralTrace {
     return trace.type !== TraceType.SPEAK
-        ? trace
-        : {
-        ...trace,
-        payload: {
-            ...trace.payload,
-            message: trace.payload.message.replace(SSML_TAG_REGEX, ''),
-        }
+      ? trace
+      : {
+      ...trace,
+      payload: {
+        ...trace.payload,
+        message: trace.payload.message.replace(SSML_TAG_REGEX, ''),
+      }
     };
-  }
-  
-  private stripTTSFromSpeak(trace: GeneralTrace): GeneralTrace {
-    if (trace.type !== TraceType.SPEAK) {
-        return trace;
-    }
-    const strippedTrace = {
-        ...trace,
-        payload: {
-            ...trace.payload
-        }
-    }
-    delete strippedTrace.payload.src;
-    return strippedTrace;
   }
 };
 

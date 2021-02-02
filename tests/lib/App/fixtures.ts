@@ -12,7 +12,6 @@ export const SPEAK_TRACE: SpeakTrace = {
     type: TraceType.SPEAK,
     payload: {
       message: 'Books ought to have to have good endings.',
-      src: 'data:audio/mpeg;base64,SUQzBAAAAAAA'
     }
 };
 export const BLOCK_TRACE: BlockTrace = {
@@ -86,6 +85,9 @@ export const VF_APP_INITIAL_STATE: State = {
 export const START_REQUEST_BODY: InteractRequestBody = {
   state: VF_APP_INITIAL_STATE,
   request: null,
+  config: {
+    tts: false,
+  }
 };
 
 export const VF_APP_NEXT_STATE_1: State = {
@@ -134,6 +136,20 @@ export const SEND_TEXT_REQUEST_BODY: InteractRequestBody = {
     type: RequestType.TEXT,
     payload: USER_RESPONSE,
   },
+  config: {
+    tts: false,
+  }
+};
+
+export const SEND_TEXT_REQUEST_BODY_TTS_ON: InteractRequestBody = {
+  state: VF_APP_NEXT_STATE_1,
+  request: {
+    type: RequestType.TEXT,
+    payload: USER_RESPONSE,
+  },
+  config: {
+    tts: true,
+  }
 };
 
 export const VF_APP_NEXT_STATE_2: State = {
@@ -164,18 +180,18 @@ export const SEND_TEXT_RESPONSE_BODY: InteractResponse = {
 };
 
 export const SEND_TEXT_RESPONSE_BODY_WITH_SSML_AND_TTS: InteractResponse = {
-    ...SEND_TEXT_RESPONSE_BODY,
-    trace: [
-        {
-            type: TraceType.SPEAK,
-            payload: {
-            message: "<voice>Books ought to have to have good endings.</voice>",
-            src: "data:audio/mpeg;base64,SUQzBAAAAAAA"
-            },
-        },
-        CHOICE_TRACE,
-        END_TRACE
-    ]
+  ...SEND_TEXT_RESPONSE_BODY,
+  trace: [
+    {
+      ...SPEAK_TRACE,
+      payload: {
+        message: "<voice>Books ought to have to have good endings.</voice>",
+        src: "data:audio/mpeg;base64,SUQzBAAAAAAA"
+      },
+    },
+    CHOICE_TRACE,
+    END_TRACE
+  ]
 };
 
 export const EXPOSED_VF_APP_NEXT_STATE_2: AppState = {
