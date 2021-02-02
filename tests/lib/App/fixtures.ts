@@ -9,10 +9,10 @@ import { InteractRequestBody, InteractResponse } from '@/lib/Client/type';
 export const VERSION_ID = 'dummy-version-id';
 
 export const SPEAK_TRACE: SpeakTrace = {
-    type: TraceType.SPEAK,
-    payload: {
-      message: 'Books ought to have to have good endings.',
-    }
+  type: TraceType.SPEAK,
+  payload: {
+    message: 'Books ought to have to have good endings.',
+  },
 };
 export const BLOCK_TRACE: BlockTrace = {
   type: TraceType.BLOCK,
@@ -87,7 +87,7 @@ export const START_REQUEST_BODY: InteractRequestBody = {
   request: null,
   config: {
     tts: false,
-  }
+  },
 };
 
 export const VF_APP_NEXT_STATE_1: State = {
@@ -138,7 +138,7 @@ export const SEND_TEXT_REQUEST_BODY: InteractRequestBody = {
   },
   config: {
     tts: false,
-  }
+  },
 };
 
 export const SEND_TEXT_REQUEST_BODY_TTS_ON: InteractRequestBody = {
@@ -149,7 +149,7 @@ export const SEND_TEXT_REQUEST_BODY_TTS_ON: InteractRequestBody = {
   },
   config: {
     tts: true,
-  }
+  },
 };
 
 export const VF_APP_NEXT_STATE_2: State = {
@@ -190,8 +190,8 @@ export const SEND_TEXT_RESPONSE_BODY_WITH_SSML_AND_TTS: InteractResponse = {
       },
     },
     CHOICE_TRACE,
-    END_TRACE
-  ]
+    END_TRACE,
+  ],
 };
 
 export const EXPOSED_VF_APP_NEXT_STATE_2: AppState = {

@@ -77,12 +77,11 @@ class App {
 
   private updateState({ state, trace }: InternalAppState): AppState {
     this.appState = { state, trace };
-
     return {
-        state,
-        trace: this.dataFilterer.filter(trace),
-        end: this.isConversationEnding(trace)
-    }
+      state,
+      trace: this.dataFilterer.filter(trace),
+      end: this.isConversationEnding(trace),
+    };
   }
 
   private makeRequestBody(state: State, text?: string): InteractRequestBody {
