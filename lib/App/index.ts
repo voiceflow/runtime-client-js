@@ -82,15 +82,15 @@ class App<S extends State['variables']> {
   private async getAppInitialState() {
     if (this.cachedInitAppState === null) {
       const { variables, ...restState }: State = await this.client.getAppInitialState(this.versionID);
-      this.cachedInitAppState = { 
-        state: { 
-          ...restState, 
+      this.cachedInitAppState = {
+        state: {
+          ...restState,
           variables: {
             ...variables,
-            ...this.initVariables
-          }
-        }, 
-        trace: [] 
+            ...this.initVariables,
+          },
+        },
+        trace: [],
       };
     }
     this.appState = _.cloneDeep(this.cachedInitAppState);
@@ -123,7 +123,7 @@ class App<S extends State['variables']> {
   }
 
   private getState() {
-    return this.appState
+    return this.appState;
   }
 }
 
