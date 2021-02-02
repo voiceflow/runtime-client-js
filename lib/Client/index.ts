@@ -1,7 +1,7 @@
 import { State } from '@voiceflow/runtime';
 import { AxiosInstance } from 'axios';
 
-import { InteractRequestBody, InteractResponse } from './type';
+import { InteractRequestBody, InteractResponse } from './types';
 
 class Client {
   private axios: AxiosInstance;

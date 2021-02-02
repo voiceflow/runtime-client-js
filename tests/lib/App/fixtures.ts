@@ -4,7 +4,7 @@ import { State } from '@voiceflow/runtime';
 import _ from 'lodash';
 
 import { AppState } from '@/lib/App/types';
-import { InteractRequestBody, InteractResponse } from '@/lib/Client/type';
+import { InteractRequestBody, InteractResponse } from '@/lib/Client/types';
 
 export const VERSION_ID = 'dummy-version-id';
 

@@ -4,7 +4,7 @@ import axios from 'axios';
 import _ from 'lodash';
 
 import Client from '@/lib/Client';
-import { InteractRequestBody } from '@/lib/Client/type';
+import { InteractRequestBody } from '@/lib/Client/types';
 import DataFilterer from '@/lib/DataFilterer';
 
 import { DeepReadonly } from '../Typings';
@@ -27,7 +27,7 @@ class App<S extends State['variables']> {
 
   private initVariables: Partial<S> | undefined;
 
-  public variables = new VariableManager<S>(this);
+  public variables = new VariableManager<S>(this.getState.bind(this));
 
   constructor({ versionID, endpoint = DEFAULT_ENDPOINT, variables }: AppConfig<S>) {
     this.versionID = versionID;
@@ -122,9 +122,9 @@ class App<S extends State['variables']> {
     return trace.length !== 0 && trace[trace.length - 1].type === TraceType.END;
   }
 
-  __internal__ = {
-    getState: (): InternalAppState | null => this.appState,
-  };
+  private getState() {
+    return this.appState
+  }
 }
 
 export default App;
