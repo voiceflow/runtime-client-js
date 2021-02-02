@@ -66,6 +66,17 @@ export const END_TRACE: ExitTrace = {
   type: TraceType.END,
 };
 
+export type VFAppVariablesSchema = {
+  age: number | 0;
+  name: string | 0;
+  gender: 'M' | 'F' | 'Other' | 0;
+};
+
+export const VF_APP_CUSTOM_INITIAL_VARIABLES: Partial<VFAppVariablesSchema> = {
+  age: 337,
+  name: 'Gandalf the White'
+}
+
 export const VF_APP_INITIAL_STATE: State = {
   stack: [
     {
@@ -77,8 +88,8 @@ export const VF_APP_INITIAL_STATE: State = {
   storage: {},
   variables: {
     age: 0,
-    name: '',
-    gender: '',
+    name: 0,
+    gender: 0,
   },
 };
 
@@ -89,6 +100,17 @@ export const START_REQUEST_BODY: InteractRequestBody = {
     tts: false,
   },
 };
+
+export const STATE_REQUEST_BODY_WITH_CUSTOM_VARIABLES: InteractRequestBody = {
+  state: {
+    ...VF_APP_INITIAL_STATE,
+    variables: {
+      ...VF_APP_INITIAL_STATE.variables,
+      ...VF_APP_CUSTOM_INITIAL_VARIABLES
+    }
+  },
+  request: null,
+}
 
 export const VF_APP_NEXT_STATE_1: State = {
   stack: [
@@ -107,7 +129,7 @@ export const VF_APP_NEXT_STATE_1: State = {
   variables: {
     age: 17,
     name: 'Samwise Gamgee',
-    gender: 'Male',
+    gender: 'M',
   },
 };
 
@@ -244,3 +266,7 @@ export const START_RESPONSE_BODY_WITH_MULTIPLE_CHOICES: InteractResponse = {
     END_TRACE,
   ],
 };
+
+export const INTERACT_ENDPOINT = (versionID: string) => `/interact/${versionID}`;
+
+export const STATE_ENDPOINT = (versionID: string) => `/interact/${versionID}/state`;
