@@ -3,10 +3,11 @@ import { State } from '@voiceflow/runtime';
 
 import { DeepReadonly } from '@/lib/Typings';
 
-export type AppConfig = {
+export type AppConfig<S> = {
   versionID: string;
   endpoint?: string;
   dataConfig?: DataConfig;
+  variables?: Partial<S>;
 };
 
 export type DataConfig = {

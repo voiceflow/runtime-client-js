@@ -14,7 +14,7 @@ import VariableManager from '../VariableManager';
 
 export * from './types';
 
-class App {
+class App<S extends State['variables']> {
   private versionID: string; // version ID of the VF project that the SDK communicates with
 
   private client: Client;
@@ -25,10 +25,17 @@ class App {
 
   private appState: InternalAppState | null = null;
 
-  public variables = new VariableManager(this);
+  private initVariables: Partial<S> | undefined;
 
-  constructor({ versionID, endpoint = DEFAULT_ENDPOINT }: AppConfig) {
+  public variables = new VariableManager<S>(this);
+
+  constructor({ versionID, endpoint = DEFAULT_ENDPOINT, variables }: AppConfig<S>) {
     this.versionID = versionID;
+
+    if (variables) {
+      this.variables.validateInitialVars(variables);
+    }
+    this.initVariables = variables;
 
     const axiosInstance = axios.create({ baseURL: endpoint });
     this.client = new Client(axiosInstance);
@@ -74,8 +81,17 @@ class App {
 
   private async getAppInitialState() {
     if (this.cachedInitAppState === null) {
-      const initialState: State = await this.client.getAppInitialState(this.versionID);
-      this.cachedInitAppState = { state: initialState, trace: [] };
+      const { variables, ...restState }: State = await this.client.getAppInitialState(this.versionID);
+      this.cachedInitAppState = { 
+        state: { 
+          ...restState, 
+          variables: {
+            ...variables,
+            ...this.initVariables
+          }
+        }, 
+        trace: [] 
+      };
     }
     this.appState = _.cloneDeep(this.cachedInitAppState);
   }

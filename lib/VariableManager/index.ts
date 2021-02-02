@@ -1,58 +1,39 @@
 import App from "@/lib/App";
 import _ from 'lodash';
-import { DeepReadonly } from "@/lib/Typings";
+import { State } from "@voiceflow/runtime";
 
-class VariableManager {
-    constructor(private VFApp: App) {}
+class VariableManager<S extends State['variables']> {
+    constructor(private VFApp: App<S>) {}
 
-    get(key: string): DeepReadonly<any> {
-        const value = this.getVariables()[key];
+    get<K extends keyof S>(key: K): S[K] {
+        const value = (this.getVariables() as S)[key];
         if (_.isUndefined(value)) {
             throw new Error(`VFError: variable "${key}" is undefined`);
         }
         return value;
     }
 
-    getAll(): DeepReadonly<Record<string, any>> {
-        return this.getVariables();
+    getAll(): S {
+        return this.getVariables() as S;
     }
 
-    getAllKeys(): DeepReadonly<string[]> {
+    getAllKeys(): Array<keyof S> {
         return Object.keys(this.getVariables());
     }
 
-    set<T>(key: string, val: T) {
-        const variablesMap = this.getVariables();
-        this.checkAssignmentValidity(key, val);
-        variablesMap[key] = val;
-    }
-
-    setMany(newMapping: Record<string, any>) {
-        const variablesMap = this.getVariables();
-        const keys = Object.keys(newMapping);
-        keys.forEach((key) => {
-            this.checkAssignmentValidity(key, newMapping[key]);
-        });
-        keys.forEach((key) => {
-            variablesMap[key] = newMapping[key];
+    validateInitialVars(initVars: Partial<S>) {
+        Object.keys(initVars).forEach((key) => {
+            this.validateVarAssignment(key, initVars[key]);
         });
     }
 
-    private getVariables(): Record<string, any> {
-        const appState = this.VFApp.__internal__.getState();
-        if (appState === null) {
-            throw new Error("VFError: cannot access variables, appState was not initialized");
-        }
-        return appState.state.variables;
-    }
-
-    private checkAssignmentValidity(key: string, val: any) {
+    private validateVarAssignment(key: keyof S, val: unknown) {
         if (!this.isJSONSerializable(val)) {
-            throw new Error(`VError: new value for ${key} is not JSON serializable`);
+            throw new Error(`VError: assigned value for ${key} is not JSON serializable`);
         }
     }
 
-    private isJSONSerializable(data: any) {
+    private isJSONSerializable(data: unknown) {
         if (_.isUndefined(data) || _.isNumber(data) || _.isString(data) || _.isNull(data) || _.isBoolean(data)) {
             return true;
         } else if (!_.isPlainObject(data) || !_.isArray(data)) {
@@ -65,6 +46,14 @@ class VariableManager {
             }
         }
         return true;
+    }
+
+    private getVariables(): State['variables'] {
+        const appState = this.VFApp.__internal__.getState();
+        if (appState === null) {
+            throw new Error("VFError: cannot access variables, appState was not initialized");
+        }
+        return appState.state.variables;
     }
 }
 

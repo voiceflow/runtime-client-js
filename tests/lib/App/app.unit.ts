@@ -64,6 +64,14 @@ describe('App', () => {
     ]);
   });
 
+  it('constructor, accepts initial variables', () => {
+    expect(false).to.eql(true); // TODO
+  });
+
+  it('constructor, rejects non-JSON serializable variables', () => {
+    expect(false).to.eql(true); // TODO
+  });
+
   it('options', () => {
     const versionID = 'customVersionID';
     const endpoint = 'customEndpoint';
