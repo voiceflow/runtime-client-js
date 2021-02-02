@@ -37,7 +37,7 @@ chai.use(chaiAsPromise);
 
 const asHttpResponse = (data: object) => ({ data });
 
-const createVFApp = (appConfig?: Partial<AppConfig<VFAppVariablesSchema>>) => {
+const createVFApp = <T = any>(appConfig?: Partial<AppConfig<T>>) => {
   const axiosInstance = {
     get: sinon.stub(),
     post: sinon.stub(),
@@ -255,8 +255,8 @@ describe('App', () => {
   });
 
   describe('variable manager', () => {
-    it('can access variable manger through app', async () => {
-      const { VFApp, axiosInstance } = createVFApp();
+    it('can access variable manager through app', async () => {
+      const { VFApp, axiosInstance } = createVFApp<VFAppVariablesSchema>();
 
       axiosInstance.get.resolves(asHttpResponse(VF_APP_INITIAL_STATE));
       axiosInstance.post.resolves(asHttpResponse(START_RESPONSE_BODY_WITH_MULTIPLE_CHOICES));
