@@ -4,8 +4,8 @@ import axios from 'axios';
 import _ from 'lodash';
 
 import Client from '@/lib/Client';
-import DataFilterer from '@/lib/DataFilterer'
 import { InteractRequestBody } from '@/lib/Client/type';
+import DataFilterer from '@/lib/DataFilterer';
 
 import { DeepReadonly } from '../Typings';
 import { DEFAULT_ENDPOINT } from './constants';
@@ -38,7 +38,7 @@ class App {
       includeTypes: [],
     };
     this.dataConfig = Object.assign(this.dataConfig, dataConfig);
-    
+
     this.dataFilterer = new DataFilterer(this.dataConfig);
   }
 
@@ -88,7 +88,7 @@ class App {
     return {
       state,
       request: this.makeGeneralRequest(text),
-      config: { tts: this.dataConfig.tts }
+      config: { tts: this.dataConfig.tts },
     };
   }
 
