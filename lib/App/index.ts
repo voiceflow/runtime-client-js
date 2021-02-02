@@ -50,6 +50,10 @@ class App {
     return this.appState.trace.reduce<Choice[]>((acc, trace) => (trace.type !== TraceType.CHOICE ? acc : [...acc, ...trace.payload.choices]), []);
   }
 
+  get version(): string {
+    return this.versionID;
+  }
+
   async start(): Promise<AppState> {
     await this.getAppInitialState();
 
@@ -102,11 +106,7 @@ class App {
     return trace.length !== 0 && trace[trace.length - 1].type === TraceType.END;
   }
 
-  getVersion() {
-    return this.versionID;
-  }
-
-  public __internal__ = {
+  __internal__ = {
     getState: (): InternalAppState | null => this.appState,
   };
 }

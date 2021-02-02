@@ -21,9 +21,9 @@ class VariableManager {
         return Object.keys(this.getVariables());
     }
 
-    set(key: string, val: any) {
+    set<T>(key: string, val: T) {
         const variablesMap = this.getVariables();
-        this.checkAssignmentTypeSafety(variablesMap, key, val);
+        this.checkAssignmentValidity(key, val);
         variablesMap[key] = val;
     }
 
@@ -31,7 +31,7 @@ class VariableManager {
         const variablesMap = this.getVariables();
         const keys = Object.keys(newMapping);
         keys.forEach((key) => {
-            this.checkAssignmentTypeSafety(variablesMap, key, newMapping[key]);
+            this.checkAssignmentValidity(key, newMapping[key]);
         });
         keys.forEach((key) => {
             variablesMap[key] = newMapping[key];
@@ -46,10 +46,25 @@ class VariableManager {
         return appState.state.variables;
     }
 
-    private checkAssignmentTypeSafety(variablesMap: Record<string, any>, key: string, val: any) {
-        if (typeof val !== typeof variablesMap[key]) {
-            throw new Error(`VError: type of new value for ${key} mismatches expected type`);
+    private checkAssignmentValidity(key: string, val: any) {
+        if (!this.isJSONSerializable(val)) {
+            throw new Error(`VError: new value for ${key} is not JSON serializable`);
         }
+    }
+
+    private isJSONSerializable(data: any) {
+        if (_.isUndefined(data) || _.isNumber(data) || _.isString(data) || _.isNull(data) || _.isBoolean(data)) {
+            return true;
+        } else if (!_.isPlainObject(data) || !_.isArray(data)) {
+            return false;
+        }
+
+        for (const key in data) {
+            if (!this.isJSONSerializable(data[key])) {
+                return false;
+            }
+        }
+        return true;
     }
 }
 
