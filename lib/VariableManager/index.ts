@@ -29,7 +29,7 @@ class VariableManager<S extends State['variables']> {
 
     private validateVarAssignment(key: keyof S, val: unknown) {
         if (!this.isJSONSerializable(val)) {
-            throw new Error(`VError: assigned value for ${key} is not JSON serializable`);
+            throw new TypeError(`VError: assigned value for ${key} is not JSON serializable`);
         }
     }
 
