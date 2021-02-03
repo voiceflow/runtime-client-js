@@ -1,7 +1,7 @@
 import { State } from '@voiceflow/runtime';
 import { AxiosInstance } from 'axios';
 
-import { InteractRequestBody, InteractResponse } from './type';
+import { RequestContext, ResponseContext } from '@/lib/types';
 
 class Client {
   private axios: AxiosInstance;
@@ -14,7 +14,7 @@ class Client {
     return this.axios.get(`/interact/${versionID}/state`).then((response) => response.data);
   }
 
-  async interact(body: InteractRequestBody, versionID: string): Promise<InteractResponse> {
+  async interact(body: RequestContext, versionID: string): Promise<ResponseContext> {
     return this.axios.post(`/interact/${versionID}`, body).then((response) => response.data);
   }
 }

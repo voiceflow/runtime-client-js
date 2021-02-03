@@ -1,12 +1,12 @@
 import { TraceType } from '@voiceflow/general-types';
 
 import DataFilterer from '@/lib/DataFilterer';
-import { AppContext, Choice, DataConfig } from '@/lib/types';
+import { Choice, DataConfig, ResponseContext } from '@/lib/types';
 
 class Context {
-  dataFilterer: DataFilterer;
+  private dataFilterer: DataFilterer;
 
-  constructor(private context: AppContext, dataConfig?: DataConfig) {
+  constructor(private context: ResponseContext, dataConfig?: DataConfig) {
     this.dataFilterer = new DataFilterer(dataConfig);
   }
 

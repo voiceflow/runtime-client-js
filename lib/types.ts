@@ -1,11 +1,5 @@
-import { ChoiceTrace, GeneralRequest, GeneralTrace } from '@voiceflow/general-types';
+import { ChoiceTrace, Config, GeneralRequest, GeneralTrace } from '@voiceflow/general-types';
 import { State } from '@voiceflow/runtime';
-
-export type AppConfig = {
-  versionID: string;
-  endpoint?: string;
-  dataConfig?: DataConfig;
-};
 
 export type DataConfig = {
   tts?: boolean;
@@ -13,10 +7,16 @@ export type DataConfig = {
   includeTypes?: string[];
 };
 
-export type AppContext = {
-  request: GeneralRequest;
+export type ResponseContext = {
   state: State;
+  request: GeneralRequest;
   trace: GeneralTrace[];
+};
+
+export type RequestContext = {
+  state: State;
+  request: GeneralRequest;
+  config?: Config;
 };
 
 export type Choice = ChoiceTrace['payload']['choices'][number];

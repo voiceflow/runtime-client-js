@@ -5,10 +5,16 @@ import _ from 'lodash';
 
 import Client from '@/lib/Client';
 import Context from '@/lib/Context';
-import { AppConfig, AppContext, DataConfig } from '@/lib/types';
+import { DataConfig, ResponseContext } from '@/lib/types';
 
 import { DEFAULT_ENDPOINT } from './constants';
 import { makeRequestBody } from './utils';
+
+export type AppConfig = {
+  versionID: string;
+  endpoint?: string;
+  dataConfig?: DataConfig;
+};
 
 class App {
   private versionID: string; // version ID of the VF project that the SDK communicates with
@@ -63,7 +69,7 @@ class App {
     this.context = new Context({ request: null, state: this.cachedInitState, trace: [] }, this.dataConfig);
   }
 
-  setContext(contextJSON: AppContext): Context {
+  setContext(contextJSON: ResponseContext): Context {
     this.context = new Context(contextJSON, this.dataConfig);
 
     return this.context;

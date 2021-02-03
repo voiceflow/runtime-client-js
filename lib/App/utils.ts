@@ -1,7 +1,7 @@
 import { Config, GeneralRequest } from '@voiceflow/general-types';
 
-import { InteractRequestBody } from '@/lib/Client/type';
 import Context from '@/lib/Context';
+import { RequestContext } from '@/lib/types';
 
 import { DataConfig } from '../types';
 
@@ -9,9 +9,10 @@ export const configAdapter = ({ tts = false }: DataConfig): Config => ({
   tts,
 });
 
-export const makeRequestBody = (context: Context, request: GeneralRequest, dataConfig: DataConfig): InteractRequestBody => {
+export const makeRequestBody = (context: Context, request: GeneralRequest = null, dataConfig: DataConfig): RequestContext => {
+  const { state } = context.getJSON();
   return {
-    ...context.getJSON(),
+    state,
     request,
     config: configAdapter(dataConfig),
   };

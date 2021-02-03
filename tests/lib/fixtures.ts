@@ -3,8 +3,7 @@ import { TraceStreamAction } from '@voiceflow/general-types/build/nodes/stream';
 import { State } from '@voiceflow/runtime';
 import _ from 'lodash';
 
-import { AppState } from '@/lib/App/types';
-import { InteractRequestBody, InteractResponse } from '@/lib/Client/type';
+import { RequestContext, ResponseContext } from '@/lib/types';
 
 export const VERSION_ID = 'dummy-version-id';
 
@@ -82,7 +81,7 @@ export const VF_APP_INITIAL_STATE: State = {
   },
 };
 
-export const START_REQUEST_BODY: InteractRequestBody = {
+export const START_REQUEST_BODY: RequestContext = {
   state: VF_APP_INITIAL_STATE,
   request: null,
   config: {
@@ -122,15 +121,15 @@ export const START_RESPONSE_BODY_WITH_NO_CHOICES = {
   trace: [..._.initial(START_RESPONSE_BODY.trace), CHOICE_TRACE_WITH_NO_CHOICES],
 };
 
-export const EXPOSED_VF_APP_NEXT_STATE_1: AppState = {
+export const EXPOSED_VF_APP_NEXT_STATE_1: ResponseContext = {
   state: VF_APP_NEXT_STATE_1,
   trace: [SPEAK_TRACE],
-  end: false,
+  request: null,
 };
 
 export const USER_RESPONSE = 'This is what the user says in response to the voice assistant';
 
-export const SEND_TEXT_REQUEST_BODY: InteractRequestBody = {
+export const SEND_TEXT_REQUEST_BODY: RequestContext = {
   state: VF_APP_NEXT_STATE_1,
   request: {
     type: RequestType.TEXT,
@@ -141,7 +140,7 @@ export const SEND_TEXT_REQUEST_BODY: InteractRequestBody = {
   },
 };
 
-export const SEND_TEXT_REQUEST_BODY_TTS_ON: InteractRequestBody = {
+export const SEND_TEXT_REQUEST_BODY_TTS_ON: RequestContext = {
   state: VF_APP_NEXT_STATE_1,
   request: {
     type: RequestType.TEXT,
@@ -173,20 +172,20 @@ export const VF_APP_NEXT_STATE_2: State = {
   },
 };
 
-export const SEND_TEXT_RESPONSE_BODY: InteractResponse = {
+export const SEND_TEXT_RESPONSE_BODY: ResponseContext = {
   state: VF_APP_NEXT_STATE_2,
   request: null,
   trace: [SPEAK_TRACE, END_TRACE],
 };
 
-export const SEND_TEXT_RESPONSE_BODY_WITH_SSML_AND_TTS: InteractResponse = {
+export const SEND_TEXT_RESPONSE_BODY_WITH_SSML_AND_TTS: ResponseContext = {
   ...SEND_TEXT_RESPONSE_BODY,
   trace: [
     {
       ...SPEAK_TRACE,
       payload: {
-        message: "<voice>Books ought to have to have good endings.</voice>",
-        src: "data:audio/mpeg;base64,SUQzBAAAAAAA"
+        message: '<voice>Books ought to have to have good endings.</voice>',
+        src: 'data:audio/mpeg;base64,SUQzBAAAAAAA',
       },
     },
     CHOICE_TRACE,
@@ -194,10 +193,10 @@ export const SEND_TEXT_RESPONSE_BODY_WITH_SSML_AND_TTS: InteractResponse = {
   ],
 };
 
-export const EXPOSED_VF_APP_NEXT_STATE_2: AppState = {
+export const EXPOSED_VF_APP_NEXT_STATE_2: ResponseContext = {
   state: VF_APP_NEXT_STATE_2,
   trace: [SPEAK_TRACE],
-  end: true,
+  request: null,
 };
 
 export const CHOICES_1 = [
@@ -214,7 +213,7 @@ export const CHOICES_2 = [
 
 export const CHOICES_3 = [{ name: 'Do you have handicapped parking?' }];
 
-export const START_RESPONSE_BODY_WITH_MULTIPLE_CHOICES: InteractResponse = {
+export const START_RESPONSE_BODY_WITH_MULTIPLE_CHOICES: ResponseContext = {
   state: VF_APP_NEXT_STATE_1,
   request: null,
   trace: [
