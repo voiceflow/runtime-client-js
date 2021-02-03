@@ -13,6 +13,15 @@ describe('DataFilterer', () => {
     sinon.restore();
   });
 
+  it('invalid types', () => {
+    expect(
+      () =>
+        new DataFilterer({
+          includeTypes: ['foo'],
+        })
+    ).to.throw();
+  });
+
   it('keeps speak', () => {
     const dataFilterer = new DataFilterer({
       includeTypes: [],
