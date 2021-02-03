@@ -1,4 +1,4 @@
-import { GeneralTrace, SpeakTrace, TraceType } from '@voiceflow/general-types';
+import { GeneralTrace, SpeakTrace, TraceType, VisualTrace } from '@voiceflow/general-types';
 import { invokeBlockHandler } from '@/lib/Utils/makeTraceProcessor/block';
 import { invokeChoiceHandler } from '@/lib/Utils/makeTraceProcessor/choice';
 import { invokeDebugHandler } from '@/lib/Utils/makeTraceProcessor/debug';
@@ -8,10 +8,11 @@ import { invokeSpeakHandler, SpeakTraceHandler } from '@/lib/Utils/makeTraceProc
 import { invokeStreamHandler } from '@/lib/Utils/makeTraceProcessor/stream';
 import { expect } from 'chai';
 import sinon from 'sinon';
-import { BLOCK_TRACE, CHOICE_TRACE, DEBUG_TRACE, END_TRACE, FLOW_TRACE, SPEAK_TRACE, SPEAK_TRACE_AUDIO, STREAM_TRACE } from '../../fixture';
+import { BLOCK_TRACE, CHOICE_TRACE, DEBUG_TRACE, END_TRACE, FAKE_VISUAL_TRACE, FLOW_TRACE, SPEAK_TRACE, SPEAK_TRACE_AUDIO, STREAM_TRACE, VISUAL_TRACE_APL, VISUAL_TRACE_IMAGE } from '../../fixture';
 import { throwNotImplementedException } from '@/lib/Utils/makeTraceProcessor/default';
-import { blockHandler, choiceHandler, debugHandler, defaultHandler, endHandler, fakeSpeakTrace, flowHandler, RESULT, speakHandler, streamHandler, traceHandlerMap, unknownTraceType } from './fixtures';
-import * as Utils from '@/lib/Utils';
+import { blockHandler, choiceHandler, debugHandler, defaultHandler, endHandler, FAKE_SPEAK_TRACE, flowHandler, RESULT, speakHandler, streamHandler, TRACE_HANDLER_MAP, UNKNOWN_TRACE_TYPE, visualHandler } from './fixtures';
+import { makeTraceProcessor } from '@/lib/Utils';
+import { invokeVisualHandler, VisualTraceHandler } from '@/lib/Utils/makeTraceProcessor/visual';
 
 describe('makeTraceProcessor', () => {
     afterEach(() => {
@@ -111,7 +112,7 @@ describe('makeTraceProcessor', () => {
         });
 
         it('invokeSpeakHandler, unknown speak subtype', () => {
-            const callback = () => invokeSpeakHandler(defaultHandler, fakeSpeakTrace as SpeakTrace, speakHandler)
+            const callback = () => invokeSpeakHandler(defaultHandler, FAKE_SPEAK_TRACE as SpeakTrace, speakHandler)
             expect(callback).to.throw("VError: makeTraceProcessor's returned callback received an unknown SpeakTrace subtype");
         });
 
@@ -129,18 +130,60 @@ describe('makeTraceProcessor', () => {
             const result = invokeStreamHandler(defaultHandler, STREAM_TRACE, undefined);
             expect(result).to.eql(TraceType.STREAM);
         });
+
+        it('invokeVisualHandler, invokes tts handler', () => {
+            const handler: VisualTraceHandler = {
+                handleAPL: visualHandler.handleAPL
+            };
+
+            const result = invokeVisualHandler(defaultHandler, VISUAL_TRACE_APL, handler);
+
+            const { visualType, ...restPayload } = VISUAL_TRACE_APL.payload;
+            expect(result).to.eql(restPayload);
+        });
+
+        it('invokeVisualHandler, invokes audio handler', () => {
+            const handler: VisualTraceHandler = {
+                handleImage: visualHandler.handleImage
+            };
+
+            const result = invokeVisualHandler(defaultHandler, VISUAL_TRACE_IMAGE, handler);
+
+            const { visualType, ...restPayload } = VISUAL_TRACE_IMAGE.payload;
+            expect(result).to.eql(restPayload);
+        });
+
+        it('invokeVisualHandler, invokes default handler', () => {
+            const result = invokeVisualHandler(defaultHandler, VISUAL_TRACE_IMAGE, undefined);
+            expect(result).to.eql(TraceType.VISUAL);
+        });
+
+        it('invokeVisualHandler, invokes default apl handler', () => {
+            const result = invokeVisualHandler(defaultHandler, VISUAL_TRACE_APL, {});
+            expect(result).to.eql(TraceType.VISUAL);
+        });
+
+        it('invokeVisualHandler, invokes default image handler', () => {
+            const result = invokeVisualHandler(defaultHandler, VISUAL_TRACE_IMAGE, {});
+            expect(result).to.eql(TraceType.VISUAL);
+        });
+
+        it('invokeVisualHandler, unknown visual subtype', () => {
+            const callback = () => invokeVisualHandler(defaultHandler, FAKE_VISUAL_TRACE as VisualTrace, visualHandler)
+            expect(callback).to.throw("VError: makeTraceProcessor's returned callback received an unknown SpeakTrace subtype");
+        });
     });
 
     describe('default handler', () => {
         it('throwNotImplementedException', () => {
             const callback = () => throwNotImplementedException(TraceType.BLOCK);
-            expect(callback).to.throw(`VFError: a handler for "${TraceType.BLOCK}" was not implemented`)
+            expect(callback).to.throw(`VFError: a handler for "${TraceType.BLOCK}" was not implemented`);
         });
     });
 
     describe('makeTraceProcessor', () => {
         it('makeTraceProcessor', () => {
-            const traceProcessor = Utils.makeTraceProcessor(traceHandlerMap);
+            const traceProcessor = makeTraceProcessor(TRACE_HANDLER_MAP);
         
             const data = traceProcessor(BLOCK_TRACE);
 
@@ -148,9 +191,9 @@ describe('makeTraceProcessor', () => {
         });
 
         it('makeTraceProcessor, exception', () => {
-            const traceProcessor = Utils.makeTraceProcessor(traceHandlerMap);
+            const traceProcessor = makeTraceProcessor(TRACE_HANDLER_MAP);
         
-            const callback = () => traceProcessor(unknownTraceType as GeneralTrace);
+            const callback = () => traceProcessor(UNKNOWN_TRACE_TYPE as GeneralTrace);
 
             expect(callback).to.throw('VFError: an unknown trace type was passed into makeTraceProcessor')
         });

@@ -1,4 +1,4 @@
-import { TraceType } from '@/../general-types/build';
+import { TraceType } from '@voiceflow/general-types';
 import { TraceHandlerMap } from '@/lib/Utils/makeTraceProcessor';
 import { BlockTraceHandler } from '@/lib/Utils/makeTraceProcessor/block';
 import { ChoiceTraceHandler } from '@/lib/Utils/makeTraceProcessor/choice';
@@ -7,15 +7,16 @@ import { EndTraceHandler } from '@/lib/Utils/makeTraceProcessor/end';
 import { FlowTraceHandler } from '@/lib/Utils/makeTraceProcessor/flow';
 import { SpeakTraceHandler } from '@/lib/Utils/makeTraceProcessor/speak';
 import { StreamTraceHandler } from '@/lib/Utils/makeTraceProcessor/stream';
+import { VisualTraceHandler } from '@/lib/Utils/makeTraceProcessor/visual';
 
-export const fakeSpeakTrace = {
+export const FAKE_SPEAK_TRACE = {
     type: TraceType.SPEAK,
     payload: {
         type: 'unknown'
     }
 };
 
-export const unknownTraceType = {
+export const UNKNOWN_TRACE_TYPE = {
     type: 'invalid'
 };
 
@@ -51,11 +52,20 @@ export const speakHandler: SpeakTraceHandler = {
     }
 };
 
+export const visualHandler: VisualTraceHandler = {
+    handleAPL: (aplPayload) => {
+        return aplPayload;
+    },
+    handleImage: (imgPayload) => {
+        return imgPayload;
+    }
+}
+
 export const streamHandler: StreamTraceHandler = (src, action, token) => {
     return [src, action, token];
 }
 
-export const traceHandlerMap: TraceHandlerMap = {
+export const TRACE_HANDLER_MAP: TraceHandlerMap = {
     [TraceType.BLOCK]: blockHandler,
     [TraceType.CHOICE]: choiceHandler,
     [TraceType.DEBUG]: debugHandler,

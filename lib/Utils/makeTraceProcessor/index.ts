@@ -8,6 +8,7 @@ import { EndTraceHandler, invokeEndHandler } from './end';
 import { FlowTraceHandler, invokeFlowHandler } from './flow';
 import { invokeSpeakHandler, SpeakTraceHandler } from './speak';
 import { invokeStreamHandler, StreamTraceHandler } from './stream';
+import { invokeVisualHandler, VisualTraceHandler } from './visual';
 
 export type TraceHandlerMap = Partial<{
   [TraceType.BLOCK]: BlockTraceHandler;
@@ -17,6 +18,7 @@ export type TraceHandlerMap = Partial<{
   [TraceType.FLOW]: FlowTraceHandler;
   [TraceType.SPEAK]: SpeakTraceHandler;
   [TraceType.STREAM]: StreamTraceHandler;
+  [TraceType.VISUAL]: VisualTraceHandler;
 }>;
 
 export type InvokeHandler = (DefaultHandler: DefaultHandler, trace: any, handler: any) => any;
@@ -29,6 +31,7 @@ const invokeHandlerMap = new Map<TraceType, InvokeHandler>([
   [TraceType.FLOW, invokeFlowHandler],
   [TraceType.SPEAK, invokeSpeakHandler],
   [TraceType.STREAM, invokeStreamHandler],
+  [TraceType.VISUAL, invokeVisualHandler]
 ]);
 
 const makeTraceProcessor = (handlers: TraceHandlerMap, defaultHandler: DefaultHandler = throwNotImplementedException) => (trace: GeneralTrace) => {

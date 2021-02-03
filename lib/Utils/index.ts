@@ -1,1 +1,3 @@
-export { default as  makeTraceProcessor } from './makeTraceProcessor';
+import makeTraceProcessor from "./makeTraceProcessor";
+
+export { makeTraceProcessor }

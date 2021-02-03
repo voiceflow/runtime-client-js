@@ -1,5 +1,6 @@
-import { BlockTrace, ChoiceTrace, DebugTrace, ExitTrace, FlowTrace, SpeakTrace, StreamTrace, TraceType } from "@voiceflow/general-types";
-import { TraceStreamAction } from "@voiceflow/general-types/lib/nodes/stream";
+import { VisualTrace, BlockTrace, ChoiceTrace, DebugTrace, ExitTrace, FlowTrace, SpeakTrace, StreamTrace, TraceType, DeviceType } from "@voiceflow/general-types";
+import { TraceStreamAction } from "@voiceflow/general-types/build/nodes/stream";
+import { APLType, CanvasVisibility, VisualType } from "@voiceflow/general-types/build/nodes/visual";
 
 export const SPEAK_TRACE: SpeakTrace = {
   type: TraceType.SPEAK,
@@ -70,3 +71,32 @@ export const DEBUG_TRACE: DebugTrace = {
 export const END_TRACE: ExitTrace = {
   type: TraceType.END,
 };
+
+export const VISUAL_TRACE_APL: VisualTrace & { payload: { visualType: VisualType.APL } } = {
+  type: TraceType.VISUAL,
+  payload: {
+    visualType: VisualType.APL,
+    aplType: APLType.JSON
+  }
+}
+
+export const VISUAL_TRACE_IMAGE: VisualTrace & { payload: { visualType: VisualType.IMAGE } } = {
+  type: TraceType.VISUAL,
+  payload: {
+    visualType: VisualType.IMAGE,
+    image: 'image.png',
+    device: DeviceType.MOBILE,
+    dimensions: {
+      width: 100,
+      height: 200,
+    },
+    canvasVisibility: CanvasVisibility.CROPPED,
+  }
+}
+
+export const FAKE_VISUAL_TRACE = {
+  type: TraceType.VISUAL,
+  payload: {
+    visualType: 'fake'
+  }
+}

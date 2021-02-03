@@ -11,16 +11,12 @@ export type SpeakTraceHandler = Partial<{
 
 export const invokeSpeakHandler = (defaultHandler: DefaultHandler, trace: SpeakTrace, speakHandlers?: SpeakTraceHandler) => {
   const {
-    payload: { type: speakTraceType },
+    payload: { type: speakTraceType, message: speakMessage, src: speakSrc },
   } = trace;
 
   if (!speakHandlers) {
     return defaultHandler(TraceType.SPEAK);
   }
-
-  const {
-    payload: { message: speakMessage, src: speakSrc },
-  } = trace;
 
   if (speakTraceType === 'message') {
     return speakHandlers.handleTTS ? speakHandlers.handleTTS(speakMessage, speakSrc) : defaultHandler(TraceType.SPEAK);
