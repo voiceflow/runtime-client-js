@@ -1,6 +1,4 @@
-import { StreamTrace, TraceType } from '@voiceflow/general-types';
-
-import { DefaultHandler } from './default';
+import { StreamTrace } from '@voiceflow/general-types';
 
 export type StreamTraceHandler = (
   src: StreamTrace['payload']['src'],
@@ -8,9 +6,9 @@ export type StreamTraceHandler = (
   token: StreamTrace['payload']['token']
 ) => any;
 
-export const invokeStreamHandler = (defaultHandler: DefaultHandler, trace: StreamTrace, handler?: StreamTraceHandler) => {
+export const invokeStreamHandler = (trace: StreamTrace, handler: StreamTraceHandler) => {
   const {
     payload: { src, action, token },
   } = trace;
-  return handler ? handler(src, action, token) : defaultHandler(TraceType.STREAM);
+  return handler(src, action, token);
 };

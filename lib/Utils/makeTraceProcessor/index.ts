@@ -3,7 +3,6 @@ import { GeneralTrace, TraceType } from '@voiceflow/general-types';
 import { BlockTraceHandler, invokeBlockHandler } from './block';
 import { ChoiceTraceHandler, invokeChoiceHandler } from './choice';
 import { DebugTraceHandler, invokeDebugHandler } from './debug';
-import { DefaultHandler, throwNotImplementedException } from './default';
 import { EndTraceHandler, invokeEndHandler } from './end';
 import { FlowTraceHandler, invokeFlowHandler } from './flow';
 import { invokeSpeakHandler, SpeakTraceHandler } from './speak';
@@ -21,7 +20,7 @@ export type TraceHandlerMap = Partial<{
   [TraceType.VISUAL]: VisualTraceHandler;
 }>;
 
-export type InvokeHandler = (DefaultHandler: DefaultHandler, trace: any, handler: any) => any;
+export type InvokeHandler = (trace: any, handler: any) => any;
 
 const invokeHandlerMap = new Map<TraceType, InvokeHandler>([
   [TraceType.BLOCK, invokeBlockHandler],
@@ -34,14 +33,20 @@ const invokeHandlerMap = new Map<TraceType, InvokeHandler>([
   [TraceType.VISUAL, invokeVisualHandler],
 ]);
 
-const makeTraceProcessor = (handlers: TraceHandlerMap, defaultHandler: DefaultHandler = throwNotImplementedException) => (trace: GeneralTrace) => {
+const makeTraceProcessor = (handlers: TraceHandlerMap) => (trace: GeneralTrace) => {
   const invokeHandler = invokeHandlerMap.get(trace.type);
 
   if (!invokeHandler) {
     throw new Error('VFError: an unknown trace type was passed into makeTraceProcessor');
   }
 
-  return invokeHandler(defaultHandler, trace, handlers[trace.type]);
+  const handler = handlers[trace.type];
+
+  if (!handler) {
+    throw new Error(`VFError: handler for ${trace.type} was not implemented`);
+  }
+
+  return invokeHandler(trace, handlers[trace.type]);
 };
 
 export default makeTraceProcessor;

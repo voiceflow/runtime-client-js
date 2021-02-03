@@ -1,9 +1,5 @@
-import { ExitTrace, TraceType } from '@voiceflow/general-types';
-
-import { DefaultHandler } from './default';
+import { ExitTrace } from '@voiceflow/general-types';
 
 export type EndTraceHandler = () => any;
 
-export const invokeEndHandler = (defaultHandler: DefaultHandler, _: ExitTrace, handler?: EndTraceHandler) => {
-  return handler ? handler() : defaultHandler(TraceType.END);
-};
+export const invokeEndHandler = (_: ExitTrace, handler: EndTraceHandler) => handler();

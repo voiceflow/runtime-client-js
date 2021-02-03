@@ -1,7 +1,5 @@
-import { SpeakTrace, TraceType } from '@voiceflow/general-types';
+import { SpeakTrace } from '@voiceflow/general-types';
 import _ from 'lodash';
-
-import { DefaultHandler } from './default';
 
 export type SpeakTraceAudioHandler = (message: SpeakTrace['payload']['message'], src: SpeakTrace['payload']['src']) => any;
 export type SpeakTraceTTSHandler = (message: SpeakTrace['payload']['message'], src: SpeakTrace['payload']['src']) => any;
@@ -16,24 +14,26 @@ export type SpeakTraceHandlerMap = Partial<{
 }>;
 export type SpeakTraceHandler = SpeakTraceHandlerFunction | SpeakTraceHandlerMap;
 
-export const invokeSpeakHandler = (defaultHandler: DefaultHandler, trace: SpeakTrace, speakHandler?: SpeakTraceHandler) => {
+export const invokeSpeakHandler = (trace: SpeakTrace, speakHandler: SpeakTraceHandler) => {
   const {
     payload: { type: speakTraceType, message: speakMessage, src: speakSrc },
   } = trace;
-
-  if (!speakHandler) {
-    return defaultHandler(TraceType.SPEAK);
-  }
 
   if (_.isFunction(speakHandler)) {
     return speakHandler(speakMessage, speakSrc, speakTraceType);
   }
 
   if (speakTraceType === 'message') {
-    return speakHandler.handleTTS ? speakHandler.handleTTS(speakMessage, speakSrc) : defaultHandler(TraceType.SPEAK);
+    if (!speakHandler.handleTTS) {
+      throw new Error("VFError: missing handler for SpeakTrace's speak subtype");
+    }
+    return speakHandler.handleTTS(speakMessage, speakSrc);
   }
   if (speakTraceType === 'audio') {
-    return speakHandler.handleAudio ? speakHandler.handleAudio(speakMessage, speakSrc) : defaultHandler(TraceType.SPEAK);
+    if (!speakHandler.handleAudio) {
+      throw new Error("VFError: missing handler for SpeakTrace's audio subtype");
+    }
+    return speakHandler.handleAudio(speakMessage, speakSrc);
   }
-  throw new TypeError("VError: makeTraceProcessor's returned callback received an unknown SpeakTrace subtype");
+  throw new TypeError("VFError: makeTraceProcessor's returned callback received an unknown SpeakTrace subtype");
 };

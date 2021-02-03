@@ -1,8 +1,8 @@
 import { GeneralTrace, TraceType } from '@voiceflow/general-types';
 
-export const SSML_TAG_REGEX = /<\/?[^>]+(>|$)/g;
+import { validTraceTypes } from '../Common';
 
-export const validTraceTypes = new Set(Object.keys(TraceType));
+export const SSML_TAG_REGEX = /<\/?[^>]+(>|$)/g;
 
 export const isValidTraceType = (type: string): type is TraceType => validTraceTypes.has(type.toUpperCase());
 
