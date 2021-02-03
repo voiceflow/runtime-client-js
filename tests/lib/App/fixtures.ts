@@ -102,6 +102,9 @@ export const START_REQUEST_BODY: InteractRequestBody = {
 };
 
 export const STATE_REQUEST_BODY_WITH_CUSTOM_VARIABLES: InteractRequestBody = {
+  config: {
+    tts: false,
+  },
   state: {
     ...VF_APP_INITIAL_STATE,
     variables: {

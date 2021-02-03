@@ -27,9 +27,11 @@ class App<S extends State['variables']> {
 
   private initVariables: Partial<S> | undefined;
 
+  private dataFilterer: DataFilterer;
+
   public variables = new VariableManager<S>(this.getState.bind(this));
 
-  constructor({ versionID, endpoint = DEFAULT_ENDPOINT, variables }: AppConfig<S>) {
+  constructor({ versionID, endpoint = DEFAULT_ENDPOINT, dataConfig, variables }: AppConfig<S>) {
     this.versionID = versionID;
 
     if (variables) {
