@@ -23,7 +23,7 @@ import {
   USER_RESPONSE,
   VERSION_ID,
   VF_APP_INITIAL_STATE,
-} from './fixtures';
+} from '../fixtures';
 
 chai.use(chaiAsPromise);
 
@@ -92,6 +92,7 @@ describe('App', () => {
     expect(axiosInstance.post.args[0]).to.eql([`/interact/${VERSION_ID}`, START_REQUEST_BODY]);
 
     expect(data.toJSON()).to.eql(START_RESPONSE_BODY);
+    expect(VFApp.getContext()?.toJSON()).to.eql(START_RESPONSE_BODY);
   });
 
   it('start, pulls the cached initial state', async () => {
@@ -133,6 +134,56 @@ describe('App', () => {
     expect(axiosInstance.post.args[1]).to.eql([`/interact/${VERSION_ID}`, SEND_TEXT_REQUEST_BODY]);
 
     expect(data.toJSON()).to.eql(SEND_TEXT_RESPONSE_BODY);
+  });
+
+  it('sendText, empty', async () => {
+    const { VFApp, axiosInstance } = createVFApp();
+
+    axiosInstance.get.resolves(asHttpResponse(VF_APP_INITIAL_STATE));
+    axiosInstance.post.resolves(asHttpResponse(START_RESPONSE_BODY));
+
+    await VFApp.start();
+
+    axiosInstance.post.resolves(asHttpResponse(SEND_TEXT_RESPONSE_BODY));
+
+    const data = await VFApp.sendText('');
+
+    expect(axiosInstance.post.callCount).to.eql(2);
+    expect(axiosInstance.post.args[1]).to.eql([`/interact/${VERSION_ID}`, { ...SEND_TEXT_REQUEST_BODY, request: null }]);
+
+    expect(data.toJSON()).to.eql(SEND_TEXT_RESPONSE_BODY);
+  });
+
+  it('sendText, invalid object', async () => {
+    const { VFApp, axiosInstance } = createVFApp();
+
+    axiosInstance.get.resolves(asHttpResponse(VF_APP_INITIAL_STATE));
+    axiosInstance.post.resolves(asHttpResponse(START_RESPONSE_BODY));
+
+    await VFApp.start();
+
+    axiosInstance.post.resolves(asHttpResponse(SEND_TEXT_RESPONSE_BODY));
+
+    await VFApp.sendText({} as any);
+
+    expect(axiosInstance.post.callCount).to.eql(2);
+    expect(axiosInstance.post.args[1]).to.eql([`/interact/${VERSION_ID}`, { ...SEND_TEXT_REQUEST_BODY, request: null }]);
+  });
+
+  it('sendText, falsy', async () => {
+    const { VFApp, axiosInstance } = createVFApp();
+
+    axiosInstance.get.resolves(asHttpResponse(VF_APP_INITIAL_STATE));
+    axiosInstance.post.resolves(asHttpResponse(START_RESPONSE_BODY));
+
+    await VFApp.start();
+
+    axiosInstance.post.resolves(asHttpResponse(SEND_TEXT_RESPONSE_BODY));
+
+    await VFApp.sendText(undefined as any);
+
+    expect(axiosInstance.post.callCount).to.eql(2);
+    expect(axiosInstance.post.args[1]).to.eql([`/interact/${VERSION_ID}`, { ...SEND_TEXT_REQUEST_BODY, request: null }]);
   });
 
   it('sendText, start was not previously called', async () => {
