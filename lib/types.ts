@@ -4,7 +4,7 @@ import { State } from '@voiceflow/runtime';
 export type AppConfig = {
   versionID: string;
   endpoint?: string;
-  config?: DataConfig;
+  dataConfig?: DataConfig;
 };
 
 export type DataConfig = {

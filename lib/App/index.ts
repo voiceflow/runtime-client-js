@@ -21,7 +21,7 @@ class App {
 
   private context: Context | null = null;
 
-  constructor({ versionID, endpoint = DEFAULT_ENDPOINT, config }: AppConfig) {
+  constructor({ versionID, endpoint = DEFAULT_ENDPOINT, dataConfig }: AppConfig) {
     this.versionID = versionID;
 
     const axiosInstance = axios.create({ baseURL: endpoint });
@@ -31,7 +31,7 @@ class App {
       tts: false,
       ssml: false,
       includeTypes: [],
-      ...config,
+      ...dataConfig,
     };
   }
 
@@ -65,6 +65,7 @@ class App {
 
   setContext(contextJSON: AppContext): Context {
     this.context = new Context(contextJSON, this.dataConfig);
+
     return this.context;
   }
 
