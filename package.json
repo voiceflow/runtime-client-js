@@ -52,6 +52,9 @@
     "typedoc": "^0.20.12",
     "typescript": "^3.9"
   },
+  "files": [
+    "build"
+  ],
   "homepage": "https://github.com/voiceflow/runtime-client-sdk#readme",
   "husky": {
     "hooks": {

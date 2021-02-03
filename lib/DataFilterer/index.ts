@@ -1,47 +1,37 @@
 import { GeneralTrace, TraceType } from '@voiceflow/general-types';
 
-import { DataConfig } from '../App/types';
-import { SSML_TAG_REGEX } from './constants';
+import { DataConfig } from '@/lib/types';
+
+import { isValidTraceType, stripSSMLFromSpeak } from './utils';
 
 class DataFilterer {
-  private dataConfig: DataConfig;
+  private includeTypes = new Set<TraceType>([TraceType.SPEAK]);
 
-  private validTraceTypes = Object.keys(TraceType);
+  private traceFilters: ((trace: GeneralTrace) => GeneralTrace)[] = [];
 
-  constructor(dataConfig: DataConfig) {
-    this.dataConfig = dataConfig;
-
-    this.dataConfig.includeTypes!.forEach((includeType) => {
-      if (!this.validTraceTypes.includes(includeType.toUpperCase())) {
-        throw new TypeError(`includeType type '${includeType}' does not match valid trace type`);
+  constructor(dataConfig?: DataConfig) {
+    dataConfig?.includeTypes?.forEach((includeType) => {
+      if (!isValidTraceType(includeType)) {
+        throw new TypeError(`includeType type '${includeType}' is not a valid trace type`);
       }
+      this.includeTypes.add(includeType);
     });
 
-    if (!this.dataConfig.includeTypes!.includes(TraceType.SPEAK)) {
-      this.dataConfig.includeTypes!.push(TraceType.SPEAK);
+    // strip ssml tags from speak steps by default
+    if (!dataConfig?.ssml) {
+      this.traceFilters.push(stripSSMLFromSpeak);
     }
   }
 
-  filter(traces: GeneralTrace[]): GeneralTrace[] {
-    traces = traces.filter(({ type }) => this.dataConfig.includeTypes!.includes(type));
-
-    if (!this.dataConfig.ssml) {
-      traces = traces.map(this.stripSSMLFromSpeak);
-    }
-
-    return traces;
-  }
-
-  private stripSSMLFromSpeak(trace: GeneralTrace): GeneralTrace {
-    return trace.type !== TraceType.SPEAK
-      ? trace
-      : {
-          ...trace,
-          payload: {
-            ...trace.payload,
-            message: trace.payload.message.replace(SSML_TAG_REGEX, ''),
-          },
-        };
+  filterTraces(traces: GeneralTrace[]): GeneralTrace[] {
+    return traces
+      .filter(({ type }) => this.includeTypes!.has(type))
+      .map((trace) => {
+        this.traceFilters.forEach((filter) => {
+          trace = filter(trace);
+        });
+        return trace;
+      });
   }
 }
 

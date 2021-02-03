@@ -12,8 +12,6 @@ import {
   CHOICES_1,
   CHOICES_2,
   CHOICES_3,
-  EXPOSED_VF_APP_NEXT_STATE_1,
-  EXPOSED_VF_APP_NEXT_STATE_2,
   SEND_TEXT_REQUEST_BODY,
   SEND_TEXT_REQUEST_BODY_TTS_ON,
   SEND_TEXT_RESPONSE_BODY,
@@ -25,7 +23,7 @@ import {
   USER_RESPONSE,
   VERSION_ID,
   VF_APP_INITIAL_STATE,
-} from './fixtures';
+} from '../fixtures';
 
 chai.use(chaiAsPromise);
 
@@ -76,7 +74,7 @@ describe('App', () => {
       },
     ]);
 
-    expect(VFApp.getVersion()).to.eql(versionID);
+    expect(VFApp.getVersionID()).to.eql(versionID);
   });
 
   it('start', async () => {
@@ -93,7 +91,8 @@ describe('App', () => {
     expect(axiosInstance.post.callCount).to.eql(1);
     expect(axiosInstance.post.args[0]).to.eql([`/interact/${VERSION_ID}`, START_REQUEST_BODY]);
 
-    expect(data).to.eql(EXPOSED_VF_APP_NEXT_STATE_1);
+    expect(data.toJSON()).to.eql(START_RESPONSE_BODY);
+    expect(VFApp.getContext()?.toJSON()).to.eql(START_RESPONSE_BODY);
   });
 
   it('start, pulls the cached initial state', async () => {
@@ -115,8 +114,8 @@ describe('App', () => {
     expect(axiosInstance.post.args[0]).to.eql([`/interact/${VERSION_ID}`, START_REQUEST_BODY]);
     expect(axiosInstance.post.args[1]).to.eql([`/interact/${VERSION_ID}`, START_REQUEST_BODY]);
 
-    expect(data1).to.eql(EXPOSED_VF_APP_NEXT_STATE_1);
-    expect(data2).to.eql(EXPOSED_VF_APP_NEXT_STATE_1);
+    expect(data1.toJSON()).to.eql(START_RESPONSE_BODY);
+    expect(data2.toJSON()).to.eql(START_RESPONSE_BODY);
   });
 
   it('sendText', async () => {
@@ -134,14 +133,64 @@ describe('App', () => {
     expect(axiosInstance.post.callCount).to.eql(2);
     expect(axiosInstance.post.args[1]).to.eql([`/interact/${VERSION_ID}`, SEND_TEXT_REQUEST_BODY]);
 
-    expect(data).to.eql(EXPOSED_VF_APP_NEXT_STATE_2);
+    expect(data.toJSON()).to.eql(SEND_TEXT_RESPONSE_BODY);
+  });
+
+  it('sendText, empty', async () => {
+    const { VFApp, axiosInstance } = createVFApp();
+
+    axiosInstance.get.resolves(asHttpResponse(VF_APP_INITIAL_STATE));
+    axiosInstance.post.resolves(asHttpResponse(START_RESPONSE_BODY));
+
+    await VFApp.start();
+
+    axiosInstance.post.resolves(asHttpResponse(SEND_TEXT_RESPONSE_BODY));
+
+    const data = await VFApp.sendText('');
+
+    expect(axiosInstance.post.callCount).to.eql(2);
+    expect(axiosInstance.post.args[1]).to.eql([`/interact/${VERSION_ID}`, { ...SEND_TEXT_REQUEST_BODY, request: null }]);
+
+    expect(data.toJSON()).to.eql(SEND_TEXT_RESPONSE_BODY);
+  });
+
+  it('sendText, invalid object', async () => {
+    const { VFApp, axiosInstance } = createVFApp();
+
+    axiosInstance.get.resolves(asHttpResponse(VF_APP_INITIAL_STATE));
+    axiosInstance.post.resolves(asHttpResponse(START_RESPONSE_BODY));
+
+    await VFApp.start();
+
+    axiosInstance.post.resolves(asHttpResponse(SEND_TEXT_RESPONSE_BODY));
+
+    await VFApp.sendText({} as any);
+
+    expect(axiosInstance.post.callCount).to.eql(2);
+    expect(axiosInstance.post.args[1]).to.eql([`/interact/${VERSION_ID}`, { ...SEND_TEXT_REQUEST_BODY, request: null }]);
+  });
+
+  it('sendText, falsy', async () => {
+    const { VFApp, axiosInstance } = createVFApp();
+
+    axiosInstance.get.resolves(asHttpResponse(VF_APP_INITIAL_STATE));
+    axiosInstance.post.resolves(asHttpResponse(START_RESPONSE_BODY));
+
+    await VFApp.start();
+
+    axiosInstance.post.resolves(asHttpResponse(SEND_TEXT_RESPONSE_BODY));
+
+    await VFApp.sendText(undefined as any);
+
+    expect(axiosInstance.post.callCount).to.eql(2);
+    expect(axiosInstance.post.args[1]).to.eql([`/interact/${VERSION_ID}`, { ...SEND_TEXT_REQUEST_BODY, request: null }]);
   });
 
   it('sendText, start was not previously called', async () => {
     const { VFApp } = createVFApp();
 
     return expect(VFApp.sendText('call sendText without calling .start() first'))
-      .to.be.eventually.be.rejectedWith('the appState in VFClient.App was not initialized')
+      .to.be.eventually.be.rejectedWith('the context in VFClient.App was not initialized')
       .and.be.an.instanceOf(Error);
   });
 
@@ -168,19 +217,10 @@ describe('App', () => {
     axiosInstance.get.resolves(asHttpResponse(VF_APP_INITIAL_STATE));
     axiosInstance.post.resolves(asHttpResponse(START_RESPONSE_BODY));
 
-    await VFApp.start();
-
-    const { chips } = VFApp;
+    const context = await VFApp.start();
+    const chips = context.getChips();
 
     expect(chips).to.eql(CHOICE_TRACE.payload.choices);
-  });
-
-  it('get chips, returns empty arr if app not initialized', async () => {
-    const { VFApp } = createVFApp();
-
-    const { chips } = VFApp;
-
-    expect(chips).to.eql([]);
   });
 
   it("get chips, returns empty arr if trace doesn't end with ChoiceTrace", async () => {
@@ -193,9 +233,8 @@ describe('App', () => {
 
     axiosInstance.post.resolves(asHttpResponse(SEND_TEXT_RESPONSE_BODY));
 
-    await VFApp.sendText(USER_RESPONSE);
-
-    const { chips } = VFApp;
+    const context = await VFApp.sendText(USER_RESPONSE);
+    const chips = context.getChips();
 
     expect(chips).to.eql([]);
   });
@@ -206,9 +245,8 @@ describe('App', () => {
     axiosInstance.get.resolves(asHttpResponse(VF_APP_INITIAL_STATE));
     axiosInstance.post.resolves(asHttpResponse(START_RESPONSE_BODY_WITH_NO_CHOICES));
 
-    await VFApp.start();
-
-    const { chips } = VFApp;
+    const context = await VFApp.start();
+    const chips = context.getChips();
 
     expect(chips).to.eql([]);
   });
@@ -219,13 +257,12 @@ describe('App', () => {
     axiosInstance.get.resolves(asHttpResponse(VF_APP_INITIAL_STATE));
     axiosInstance.post.resolves(asHttpResponse(START_RESPONSE_BODY_WITH_MULTIPLE_CHOICES));
 
-    await VFApp.start();
-
-    const { chips } = VFApp;
+    const context = await VFApp.start();
+    const chips = context.getChips();
 
     expect(chips).to.eql([...CHOICES_1, ...CHOICES_2, ...CHOICES_3]);
   });
-                
+
   it('advanced config, SSML set to true', async () => {
     const { VFApp, axiosInstance } = createVFApp({
       versionID: VERSION_ID,
@@ -233,27 +270,25 @@ describe('App', () => {
         tts: true,
         ssml: true,
         includeTypes: ['debug', 'choice'],
-      }
+      },
     });
 
     axiosInstance.get.resolves(asHttpResponse(VF_APP_INITIAL_STATE));
     axiosInstance.post.resolves(asHttpResponse(START_RESPONSE_BODY));
 
     await VFApp.start();
-    
+
     axiosInstance.post.resolves(asHttpResponse(SEND_TEXT_RESPONSE_BODY_WITH_SSML_AND_TTS));
 
-    const data = await VFApp.sendText(USER_RESPONSE);
+    const context = await VFApp.sendText(USER_RESPONSE);
+    const response = context.getResponse();
 
     expect(axiosInstance.post.callCount).to.eql(2);
-    expect(axiosInstance.post.args[1]).to.eql([
-      `/interact/${VERSION_ID}`,
-      SEND_TEXT_REQUEST_BODY_TTS_ON
-    ]);
-    
-    expect((data.trace[0] as any).payload.message).to.eql('<voice>Books ought to have to have good endings.</voice>');
-    expect((data.trace[0] as any).payload.src).to.eql('data:audio/mpeg;base64,SUQzBAAAAAAA');
-    expect(data.trace.length).to.eql(2);
+    expect(axiosInstance.post.args[1]).to.eql([`/interact/${VERSION_ID}`, SEND_TEXT_REQUEST_BODY_TTS_ON]);
+
+    expect((response[0] as any).payload.message).to.eql('<voice>Books ought to have to have good endings.</voice>');
+    expect((response[0] as any).payload.src).to.eql('data:audio/mpeg;base64,SUQzBAAAAAAA');
+    expect(response.length).to.eql(2);
   });
 
   it('advanced config, SSML set to false', async () => {
@@ -263,30 +298,24 @@ describe('App', () => {
         tts: true,
         ssml: false,
         includeTypes: ['speak', 'debug', 'choice'],
-      }
+      },
     });
 
     axiosInstance.get.resolves(asHttpResponse(VF_APP_INITIAL_STATE));
     axiosInstance.post.resolves(asHttpResponse(START_RESPONSE_BODY));
 
     await VFApp.start();
-    
+
     axiosInstance.post.resolves(asHttpResponse(SEND_TEXT_RESPONSE_BODY_WITH_SSML_AND_TTS));
 
-    const data = await VFApp.sendText(USER_RESPONSE);
+    const context = await VFApp.sendText(USER_RESPONSE);
+    const response = context.getResponse();
 
     expect(axiosInstance.post.callCount).to.eql(2);
-    expect(axiosInstance.post.args[1]).to.eql([
-      `/interact/${VERSION_ID}`,
-      SEND_TEXT_REQUEST_BODY_TTS_ON
-    ]);
-    
-    expect((data.trace[0] as any).payload.message).to.eql('Books ought to have to have good endings.');
-    expect((data.trace[0] as any).payload.src).to.eql('data:audio/mpeg;base64,SUQzBAAAAAAA');
-    expect(data.trace.length).to.eql(2);
-  });
+    expect(axiosInstance.post.args[1]).to.eql([`/interact/${VERSION_ID}`, SEND_TEXT_REQUEST_BODY_TTS_ON]);
 
-  it('advanced config, includeTypes error', async () => {
-      expect(() => createVFApp({versionID: VERSION_ID, dataConfig: {includeTypes: ['fake']}})).to.throw();
+    expect((response[0] as any).payload.message).to.eql('Books ought to have to have good endings.');
+    expect((response[0] as any).payload.src).to.eql('data:audio/mpeg;base64,SUQzBAAAAAAA');
+    expect(response.length).to.eql(2);
   });
 });
