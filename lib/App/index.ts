@@ -1,32 +1,45 @@
-import { GeneralRequest, GeneralTrace, RequestType, SpeakTrace, TraceType } from '@voiceflow/general-types';
+import { GeneralRequest, GeneralTrace, RequestType, TraceType } from '@voiceflow/general-types';
 import { State } from '@voiceflow/runtime';
 import axios from 'axios';
 import _ from 'lodash';
 
 import Client from '@/lib/Client';
 import { InteractRequestBody } from '@/lib/Client/type';
+import DataFilterer from '@/lib/DataFilterer';
 
 import { DeepReadonly } from '../Typings';
-import { DEFAULT_ENDPOINT, SSML_TAG_REGEX } from './constants';
-import { AppConfig, AppState, Choice, InternalAppState } from './types';
+import { DEFAULT_ENDPOINT } from './constants';
+import { AppConfig, AppState, Choice, DataConfig, InternalAppState } from './types';
 
 export * from './types';
-export * from './constants';
 
 class App {
   private versionID: string; // version ID of the VF project that the SDK communicates with
 
   private client: Client;
 
+  private dataConfig: DataConfig;
+
   private cachedInitAppState: InternalAppState | null = null;
 
   private appState: InternalAppState | null = null;
 
-  constructor({ versionID, endpoint = DEFAULT_ENDPOINT }: AppConfig) {
+  private dataFilterer: DataFilterer;
+
+  constructor({ versionID, endpoint = DEFAULT_ENDPOINT, dataConfig }: AppConfig) {
     this.versionID = versionID;
 
     const axiosInstance = axios.create({ baseURL: endpoint });
     this.client = new Client(axiosInstance);
+
+    this.dataConfig = {
+      tts: false,
+      ssml: false,
+      includeTypes: [],
+    };
+    this.dataConfig = Object.assign(this.dataConfig, dataConfig);
+
+    this.dataFilterer = new DataFilterer(this.dataConfig);
   }
 
   get chips(): DeepReadonly<Choice[]> {
@@ -66,7 +79,7 @@ class App {
     this.appState = { state, trace };
     return {
       state,
-      trace: this.filterTraces(trace).map(this.stripSSMLFromSpeak),
+      trace: this.dataFilterer.filter(trace),
       end: this.isConversationEnding(trace),
     };
   }
@@ -75,26 +88,13 @@ class App {
     return {
       state,
       request: this.makeGeneralRequest(text),
+      config: { tts: this.dataConfig.tts },
     };
   }
 
   private makeGeneralRequest(payload?: string): GeneralRequest {
     if (!payload) return null;
     return { type: RequestType.TEXT, payload };
-  }
-
-  private filterTraces(traces: GeneralTrace[]) {
-    return traces.filter(({ type }) => type === TraceType.SPEAK) as SpeakTrace[];
-  }
-
-  private stripSSMLFromSpeak(trace: SpeakTrace): GeneralTrace {
-    return {
-      ...trace,
-      payload: {
-        ...trace.payload,
-        message: trace.payload.message.replace(SSML_TAG_REGEX, ''),
-      },
-    };
   }
 
   private isConversationEnding(trace: GeneralTrace[]): boolean {

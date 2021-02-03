@@ -1,4 +1,4 @@
-import { GeneralRequest, GeneralTrace } from '@voiceflow/general-types';
+import { Config, GeneralRequest, GeneralTrace } from '@voiceflow/general-types';
 import { State } from '@voiceflow/runtime';
 
 export type InteractResponse = {
@@ -10,4 +10,5 @@ export type InteractResponse = {
 export type InteractRequestBody = {
   state: State;
   request: GeneralRequest;
+  config?: Config;
 };
