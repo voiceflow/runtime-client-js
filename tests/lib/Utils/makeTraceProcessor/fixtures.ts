@@ -5,9 +5,9 @@ import { ChoiceTraceHandler } from '@/lib/Utils/makeTraceProcessor/choice';
 import { DebugTraceHandler } from '@/lib/Utils/makeTraceProcessor/debug';
 import { EndTraceHandler } from '@/lib/Utils/makeTraceProcessor/end';
 import { FlowTraceHandler } from '@/lib/Utils/makeTraceProcessor/flow';
-import { SpeakTraceHandler } from '@/lib/Utils/makeTraceProcessor/speak';
+import { SpeakTraceHandlerFunction, SpeakTraceHandlerMap } from '@/lib/Utils/makeTraceProcessor/speak';
 import { StreamTraceHandler } from '@/lib/Utils/makeTraceProcessor/stream';
-import { VisualTraceHandler } from '@/lib/Utils/makeTraceProcessor/visual';
+import { VisualTraceHandlerFunction, VisualTraceHandlerMap } from '@/lib/Utils/makeTraceProcessor/visual';
 
 export const FAKE_SPEAK_TRACE = {
     type: TraceType.SPEAK,
@@ -43,7 +43,7 @@ export const flowHandler: FlowTraceHandler = (diagramID: string) => {
     return diagramID;
 }
 
-export const speakHandler: SpeakTraceHandler = {
+export const speakHandlerMap: SpeakTraceHandlerMap = {
     handleTTS: (message, src) => {
         return [message, src];
     },
@@ -52,7 +52,7 @@ export const speakHandler: SpeakTraceHandler = {
     }
 };
 
-export const visualHandler: VisualTraceHandler = {
+export const visualHandlerMap: VisualTraceHandlerMap = {
     handleAPL: (aplPayload) => {
         return aplPayload;
     },
@@ -60,6 +60,10 @@ export const visualHandler: VisualTraceHandler = {
         return imgPayload;
     }
 }
+
+export const speakHandlerFunc: SpeakTraceHandlerFunction = (message, src, type) => [message, src, type];
+
+export const visualHandlerFunc: VisualTraceHandlerFunction = (payload, type) => [payload, type];
 
 export const streamHandler: StreamTraceHandler = (src, action, token) => {
     return [src, action, token];
@@ -71,6 +75,6 @@ export const TRACE_HANDLER_MAP: TraceHandlerMap = {
     [TraceType.DEBUG]: debugHandler,
     [TraceType.END]: endHandler,
     [TraceType.FLOW]: flowHandler,
-    [TraceType.SPEAK]: speakHandler,
+    [TraceType.SPEAK]: speakHandlerMap,
     [TraceType.STREAM]: streamHandler,
 };
