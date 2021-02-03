@@ -121,12 +121,6 @@ export const START_RESPONSE_BODY_WITH_NO_CHOICES = {
   trace: [..._.initial(START_RESPONSE_BODY.trace), CHOICE_TRACE_WITH_NO_CHOICES],
 };
 
-export const EXPOSED_VF_APP_NEXT_STATE_1: ResponseContext = {
-  state: VF_APP_NEXT_STATE_1,
-  trace: [SPEAK_TRACE],
-  request: null,
-};
-
 export const USER_RESPONSE = 'This is what the user says in response to the voice assistant';
 
 export const SEND_TEXT_REQUEST_BODY: RequestContext = {
@@ -193,12 +187,6 @@ export const SEND_TEXT_RESPONSE_BODY_WITH_SSML_AND_TTS: ResponseContext = {
   ],
 };
 
-export const EXPOSED_VF_APP_NEXT_STATE_2: ResponseContext = {
-  state: VF_APP_NEXT_STATE_2,
-  trace: [SPEAK_TRACE],
-  request: null,
-};
-
 export const CHOICES_1 = [
   { name: 'Do you have small available?' },
   { name: "I'd like to order a large please" },
@@ -240,6 +228,5 @@ export const START_RESPONSE_BODY_WITH_MULTIPLE_CHOICES: ResponseContext = {
         choices: CHOICES_3,
       },
     },
-    END_TRACE,
   ],
 };

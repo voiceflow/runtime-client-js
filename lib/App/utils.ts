@@ -10,7 +10,7 @@ export const configAdapter = ({ tts = false }: DataConfig): Config => ({
 });
 
 export const makeRequestBody = (context: Context, request: GeneralRequest = null, dataConfig: DataConfig): RequestContext => {
-  const { state } = context.getJSON();
+  const { state } = context.toJSON();
   return {
     state,
     request,

@@ -12,8 +12,6 @@ import {
   CHOICES_1,
   CHOICES_2,
   CHOICES_3,
-  EXPOSED_VF_APP_NEXT_STATE_1,
-  EXPOSED_VF_APP_NEXT_STATE_2,
   SEND_TEXT_REQUEST_BODY,
   SEND_TEXT_REQUEST_BODY_TTS_ON,
   SEND_TEXT_RESPONSE_BODY,
@@ -25,7 +23,7 @@ import {
   USER_RESPONSE,
   VERSION_ID,
   VF_APP_INITIAL_STATE,
-} from '../fixtures';
+} from './fixtures';
 
 chai.use(chaiAsPromise);
 

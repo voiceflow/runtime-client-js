@@ -66,7 +66,7 @@ class App {
     if (!this.cachedInitState) {
       this.cachedInitState = await this.client.getAppInitialState(this.versionID);
     }
-    this.context = new Context({ request: null, state: this.cachedInitState, trace: [] }, this.dataConfig);
+    this.context = new Context({ request: null, state: _.cloneDeep(this.cachedInitState), trace: [] }, this.dataConfig);
   }
 
   setContext(contextJSON: ResponseContext): Context {
@@ -79,7 +79,7 @@ class App {
     return this.context;
   }
 
-  getVersion() {
+  getVersionID() {
     return this.versionID;
   }
 }

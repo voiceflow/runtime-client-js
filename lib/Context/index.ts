@@ -11,9 +11,6 @@ class Context {
   }
 
   get chips(): Choice[] {
-    if (this.context === null) {
-      return [];
-    }
     return this.context.trace.reduce<Choice[]>((acc, trace) => (trace.type !== TraceType.CHOICE ? acc : [...acc, ...trace.payload.choices]), []);
   }
 
@@ -32,12 +29,12 @@ class Context {
   }
 
   // returns the raw context object
-  getJSON() {
+  toJSON() {
     return this.context;
   }
 
   isEnding(): boolean {
-    return this.end;
+    return this.context.trace.some((trace) => trace.type === TraceType.END);
   }
 }
 

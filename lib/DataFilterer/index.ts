@@ -10,13 +10,14 @@ class DataFilterer {
   private traceFilters: ((trace: GeneralTrace) => GeneralTrace)[] = [];
 
   constructor(dataConfig?: DataConfig) {
-    dataConfig?.includeTypes!.forEach((includeType) => {
+    dataConfig?.includeTypes?.forEach((includeType) => {
       if (!isValidTraceType(includeType)) {
         throw new TypeError(`includeType type '${includeType}' is not a valid trace type`);
       }
       this.includeTypes.add(includeType);
     });
 
+    // strip ssml tags from speak steps by default
     if (!dataConfig?.ssml) {
       this.traceFilters.push(stripSSMLFromSpeak);
     }
