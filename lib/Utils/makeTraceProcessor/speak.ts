@@ -1,10 +1,15 @@
 import { SpeakTrace, TraceType } from '@voiceflow/general-types';
 import _ from 'lodash';
+
 import { DefaultHandler } from './default';
 
 export type SpeakTraceAudioHandler = (message: SpeakTrace['payload']['message'], src: SpeakTrace['payload']['src']) => any;
 export type SpeakTraceTTSHandler = (message: SpeakTrace['payload']['message'], src: SpeakTrace['payload']['src']) => any;
-export type SpeakTraceHandlerFunction = (message: SpeakTrace['payload']['message'], src: SpeakTrace['payload']['src'], type: SpeakTrace['payload']['type']) => any;
+export type SpeakTraceHandlerFunction = (
+  message: SpeakTrace['payload']['message'],
+  src: SpeakTrace['payload']['src'],
+  type: SpeakTrace['payload']['type']
+) => any;
 export type SpeakTraceHandlerMap = Partial<{
   handleAudio: SpeakTraceAudioHandler;
   handleTTS: SpeakTraceTTSHandler;

@@ -1,6 +1,7 @@
 import { TraceType, VisualTrace } from '@voiceflow/general-types';
 import { VisualType } from '@voiceflow/general-types/build/nodes/visual';
 import _ from 'lodash';
+
 import { DefaultHandler } from './default';
 
 type APLPayload = Omit<VisualTrace['payload'] & { visualType: VisualType.APL }, 'visualType'>;
@@ -22,7 +23,7 @@ export const invokeVisualHandler = (defaultHandler: DefaultHandler, trace: Visua
   if (!visualHandler) {
     return defaultHandler(TraceType.VISUAL);
   }
-  
+
   if (_.isFunction(visualHandler)) {
     return visualHandler(rest, visualType);
   }
