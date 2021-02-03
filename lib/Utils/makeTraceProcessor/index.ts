@@ -21,18 +21,24 @@ export type TraceHandlerMap = Partial<{
 
 export type InvokeHandler = (DefaultHandler: DefaultHandler, trace: any, handler: any) => void;
 
-const invokeHandlerMap: Record<TraceType, InvokeHandler> = {
-  [TraceType.BLOCK]: invokeBlockHandler,
-  [TraceType.CHOICE]: invokeChoiceHandler,
-  [TraceType.DEBUG]: invokeDebugHandler,
-  [TraceType.END]: invokeEndHandler,
-  [TraceType.FLOW]: invokeFlowHandler,
-  [TraceType.SPEAK]: invokeSpeakHandler,
-  [TraceType.STREAM]: invokeStreamHandler
-}
+const invokeHandlerMap = new Map<TraceType, InvokeHandler>([
+  [TraceType.BLOCK, invokeBlockHandler],
+  [TraceType.CHOICE, invokeChoiceHandler],
+  [TraceType.DEBUG, invokeDebugHandler],
+  [TraceType.END, invokeEndHandler],
+  [TraceType.FLOW, invokeFlowHandler],
+  [TraceType.SPEAK, invokeSpeakHandler],
+  [TraceType.STREAM, invokeStreamHandler],
+]);
 
 const makeTraceProcessor = (handlers: TraceHandlerMap, defaultHandler: DefaultHandler = throwNotImplementedException) => (trace: GeneralTrace) => {
-  return invokeHandlerMap[trace.type](defaultHandler, trace, handlers[trace.type]);
+  const invokeHandler = invokeHandlerMap.get(trace.type);
+  
+  if (!invokeHandler) {
+    throw new Error("VFError: an unknown trace type was passed into makeTraceProcessor");
+  }
+
+  return invokeHandler(defaultHandler, trace, handlers[trace.type]);
 };
 
 export default makeTraceProcessor;
