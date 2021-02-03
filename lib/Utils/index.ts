@@ -1,7 +1,1 @@
-import * as makeTraceProcessor from './makeTraceProcessor';
-
-const utils = {
-  makeTraceProcessor,
-};
-
-export default utils;
+export { default as  makeTraceProcessor } from './makeTraceProcessor';

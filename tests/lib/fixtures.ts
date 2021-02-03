@@ -1,69 +1,13 @@
-import { BlockTrace, ChoiceTrace, DebugTrace, ExitTrace, FlowTrace, RequestType, SpeakTrace, StreamTrace, TraceType } from '@voiceflow/general-types';
-import { TraceStreamAction } from '@voiceflow/general-types/build/nodes/stream';
+import { STREAM_TRACE, SPEAK_TRACE, DEBUG_TRACE, END_TRACE, FLOW_TRACE, CHOICE_TRACE, BLOCK_TRACE, CHOICE_TRACE_WITH_NO_CHOICES } from "../fixture";
+import { RequestType, TraceType } from '@voiceflow/general-types';
 import { State } from '@voiceflow/runtime';
 import _ from 'lodash';
 
 import { RequestContext, ResponseContext } from '@/lib/types';
 
+export { CHOICE_TRACE } from "../fixture";
+
 export const VERSION_ID = 'dummy-version-id';
-
-export const SPEAK_TRACE: SpeakTrace = {
-  type: TraceType.SPEAK,
-  payload: {
-    message: 'Books ought to have to have good endings.',
-  },
-};
-export const BLOCK_TRACE: BlockTrace = {
-  type: TraceType.BLOCK,
-  payload: {
-    blockID: 'some-block-id',
-  },
-};
-
-export const CHOICE_TRACE: ChoiceTrace = {
-  type: TraceType.CHOICE,
-  payload: {
-    choices: [
-      { name: 'Do you have small available?' },
-      { name: "I'd like to order a large please" },
-      { name: "I'd like the small  thank you very much" },
-    ],
-  },
-};
-
-export const CHOICE_TRACE_WITH_NO_CHOICES: ChoiceTrace = {
-  type: TraceType.CHOICE,
-  payload: {
-    choices: [],
-  },
-};
-
-export const FLOW_TRACE: FlowTrace = {
-  type: TraceType.FLOW,
-  payload: {
-    diagramID: 'some-diagram-id',
-  },
-};
-
-export const STREAM_TRACE: StreamTrace = {
-  type: TraceType.STREAM,
-  payload: {
-    src: 'the source-string',
-    action: TraceStreamAction.LOOP,
-    token: 'some token for the stream',
-  },
-};
-
-export const DEBUG_TRACE: DebugTrace = {
-  type: TraceType.DEBUG,
-  payload: {
-    message: '*** this is some debugging message ***',
-  },
-};
-
-export const END_TRACE: ExitTrace = {
-  type: TraceType.END,
-};
 
 export const VF_APP_INITIAL_STATE: State = {
   stack: [
