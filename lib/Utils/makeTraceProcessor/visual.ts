@@ -1,16 +1,16 @@
-import { VisualTrace, TraceType } from '@voiceflow/general-types';
+import { TraceType, VisualTrace } from '@voiceflow/general-types';
 import { VisualType } from '@voiceflow/general-types/build/nodes/visual';
 
 import { DefaultHandler } from './default';
 
-type APLPayload = Omit<VisualTrace['payload'] & { visualType: VisualType.APL}, 'visualType'>;
-type ImagePayload = Omit<VisualTrace['payload'] & { visualType: VisualType.IMAGE}, 'visualType'>
+type APLPayload = Omit<VisualTrace['payload'] & { visualType: VisualType.APL }, 'visualType'>;
+type ImagePayload = Omit<VisualTrace['payload'] & { visualType: VisualType.IMAGE }, 'visualType'>;
 export type VisualTraceAPLHandler = (aplPayload: APLPayload) => any;
 export type VisualTraceImageHandler = (imgPayload: ImagePayload) => any;
 export type VisualTraceHandler = Partial<{
-    handleAPL: VisualTraceAPLHandler;
-    handleImage: VisualTraceImageHandler;
-}>
+  handleAPL: VisualTraceAPLHandler;
+  handleImage: VisualTraceImageHandler;
+}>;
 
 export const invokeVisualHandler = (defaultHandler: DefaultHandler, trace: VisualTrace, visualHandlers?: VisualTraceHandler) => {
   const {

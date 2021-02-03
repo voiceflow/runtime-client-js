@@ -31,7 +31,7 @@ const invokeHandlerMap = new Map<TraceType, InvokeHandler>([
   [TraceType.FLOW, invokeFlowHandler],
   [TraceType.SPEAK, invokeSpeakHandler],
   [TraceType.STREAM, invokeStreamHandler],
-  [TraceType.VISUAL, invokeVisualHandler]
+  [TraceType.VISUAL, invokeVisualHandler],
 ]);
 
 const makeTraceProcessor = (handlers: TraceHandlerMap, defaultHandler: DefaultHandler = throwNotImplementedException) => (trace: GeneralTrace) => {

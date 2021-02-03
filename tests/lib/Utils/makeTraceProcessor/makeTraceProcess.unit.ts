@@ -11,8 +11,8 @@ import sinon from 'sinon';
 import { BLOCK_TRACE, CHOICE_TRACE, DEBUG_TRACE, END_TRACE, FAKE_VISUAL_TRACE, FLOW_TRACE, SPEAK_TRACE, SPEAK_TRACE_AUDIO, STREAM_TRACE, VISUAL_TRACE_APL, VISUAL_TRACE_IMAGE } from '../../fixtures';
 import { throwNotImplementedException } from '@/lib/Utils/makeTraceProcessor/default';
 import { blockHandler, choiceHandler, debugHandler, defaultHandler, endHandler, FAKE_SPEAK_TRACE, flowHandler, RESULT, speakHandler, streamHandler, TRACE_HANDLER_MAP, UNKNOWN_TRACE_TYPE, visualHandler } from './fixtures';
-import { makeTraceProcessor } from '@/lib/Utils';
 import { invokeVisualHandler, VisualTraceHandler } from '@/lib/Utils/makeTraceProcessor/visual';
+import makeTraceProcessor from '@/lib/Utils/makeTraceProcessor';
 
 describe('makeTraceProcessor', () => {
     afterEach(() => {
