@@ -74,7 +74,7 @@ describe('App', () => {
       },
     ]);
 
-    expect(VFApp.getVersion()).to.eql(versionID);
+    expect(VFApp.getVersionID()).to.eql(versionID);
   });
 
   it('start', async () => {
@@ -91,7 +91,7 @@ describe('App', () => {
     expect(axiosInstance.post.callCount).to.eql(1);
     expect(axiosInstance.post.args[0]).to.eql([`/interact/${VERSION_ID}`, START_REQUEST_BODY]);
 
-    expect(data.getJSON()).to.eql(START_RESPONSE_BODY);
+    expect(data.toJSON()).to.eql(START_RESPONSE_BODY);
   });
 
   it('start, pulls the cached initial state', async () => {
@@ -113,8 +113,8 @@ describe('App', () => {
     expect(axiosInstance.post.args[0]).to.eql([`/interact/${VERSION_ID}`, START_REQUEST_BODY]);
     expect(axiosInstance.post.args[1]).to.eql([`/interact/${VERSION_ID}`, START_REQUEST_BODY]);
 
-    expect(data1.getJSON()).to.eql(START_RESPONSE_BODY);
-    expect(data2.getJSON()).to.eql(START_RESPONSE_BODY);
+    expect(data1.toJSON()).to.eql(START_RESPONSE_BODY);
+    expect(data2.toJSON()).to.eql(START_RESPONSE_BODY);
   });
 
   it('sendText', async () => {
@@ -132,7 +132,7 @@ describe('App', () => {
     expect(axiosInstance.post.callCount).to.eql(2);
     expect(axiosInstance.post.args[1]).to.eql([`/interact/${VERSION_ID}`, SEND_TEXT_REQUEST_BODY]);
 
-    expect(data.getJSON()).to.eql(SEND_TEXT_RESPONSE_BODY);
+    expect(data.toJSON()).to.eql(SEND_TEXT_RESPONSE_BODY);
   });
 
   it('sendText, start was not previously called', async () => {
@@ -166,7 +166,8 @@ describe('App', () => {
     axiosInstance.get.resolves(asHttpResponse(VF_APP_INITIAL_STATE));
     axiosInstance.post.resolves(asHttpResponse(START_RESPONSE_BODY));
 
-    const { chips } = await VFApp.start();
+    const context = await VFApp.start();
+    const chips = context.getChips();
 
     expect(chips).to.eql(CHOICE_TRACE.payload.choices);
   });
@@ -181,7 +182,8 @@ describe('App', () => {
 
     axiosInstance.post.resolves(asHttpResponse(SEND_TEXT_RESPONSE_BODY));
 
-    const { chips } = await VFApp.sendText(USER_RESPONSE);
+    const context = await VFApp.sendText(USER_RESPONSE);
+    const chips = context.getChips();
 
     expect(chips).to.eql([]);
   });
@@ -192,7 +194,8 @@ describe('App', () => {
     axiosInstance.get.resolves(asHttpResponse(VF_APP_INITIAL_STATE));
     axiosInstance.post.resolves(asHttpResponse(START_RESPONSE_BODY_WITH_NO_CHOICES));
 
-    const { chips } = await VFApp.start();
+    const context = await VFApp.start();
+    const chips = context.getChips();
 
     expect(chips).to.eql([]);
   });
@@ -203,7 +206,8 @@ describe('App', () => {
     axiosInstance.get.resolves(asHttpResponse(VF_APP_INITIAL_STATE));
     axiosInstance.post.resolves(asHttpResponse(START_RESPONSE_BODY_WITH_MULTIPLE_CHOICES));
 
-    const { chips } = await VFApp.start();
+    const context = await VFApp.start();
+    const chips = context.getChips();
 
     expect(chips).to.eql([...CHOICES_1, ...CHOICES_2, ...CHOICES_3]);
   });
@@ -225,7 +229,8 @@ describe('App', () => {
 
     axiosInstance.post.resolves(asHttpResponse(SEND_TEXT_RESPONSE_BODY_WITH_SSML_AND_TTS));
 
-    const { response } = await VFApp.sendText(USER_RESPONSE);
+    const context = await VFApp.sendText(USER_RESPONSE);
+    const response = context.getResponse();
 
     expect(axiosInstance.post.callCount).to.eql(2);
     expect(axiosInstance.post.args[1]).to.eql([`/interact/${VERSION_ID}`, SEND_TEXT_REQUEST_BODY_TTS_ON]);
@@ -252,7 +257,8 @@ describe('App', () => {
 
     axiosInstance.post.resolves(asHttpResponse(SEND_TEXT_RESPONSE_BODY_WITH_SSML_AND_TTS));
 
-    const { response } = await VFApp.sendText(USER_RESPONSE);
+    const context = await VFApp.sendText(USER_RESPONSE);
+    const response = context.getResponse();
 
     expect(axiosInstance.post.callCount).to.eql(2);
     expect(axiosInstance.post.args[1]).to.eql([`/interact/${VERSION_ID}`, SEND_TEXT_REQUEST_BODY_TTS_ON]);

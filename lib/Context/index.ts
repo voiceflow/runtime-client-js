@@ -10,22 +10,18 @@ class Context {
     this.dataFilterer = new DataFilterer(dataConfig);
   }
 
-  get chips(): Choice[] {
+  getChips(): Choice[] {
     return this.context.trace.reduce<Choice[]>((acc, trace) => (trace.type !== TraceType.CHOICE ? acc : [...acc, ...trace.payload.choices]), []);
   }
 
   // returns the filtered trace
-  get response() {
+  getResponse() {
     return this.dataFilterer.filterTraces(this.context.trace);
   }
 
   // returns the entire raw trace of the context
-  get trace() {
+  getTrace() {
     return this.context.trace;
-  }
-
-  get end(): boolean {
-    return this.context.trace.some((trace) => trace.type === TraceType.END);
   }
 
   // returns the raw context object
