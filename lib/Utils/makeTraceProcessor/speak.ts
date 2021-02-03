@@ -4,10 +4,10 @@ import { DefaultHandler } from './default';
 
 export type SpeakTraceAudioHandler = (message: SpeakTrace['payload']['message'], src: SpeakTrace['payload']['src']) => void;
 export type SpeakTraceTTSHandler = (message: SpeakTrace['payload']['message'], src: SpeakTrace['payload']['src']) => void;
-export type SpeakTraceHandler = {
+export type SpeakTraceHandler = Partial<{
   handleAudio: SpeakTraceAudioHandler;
   handleTTS: SpeakTraceTTSHandler;
-};
+}>;
 
 export const invokeSpeakHandler = (defaultHandler: DefaultHandler, trace: SpeakTrace, speakHandlers?: SpeakTraceHandler) => {
   const {
