@@ -66,7 +66,7 @@ describe('makeTraceProcessor', () => {
 
         it('invokes tts handler', () => {
             const handler: SpeakTraceHandlerMap = {
-                handleTTS: speakHandlerMap.handleTTS
+                handleSpeech: speakHandlerMap.handleSpeech
             }
 
             const result = invokeSpeakHandler(SPEAK_TRACE, handler);

@@ -10,7 +10,7 @@ export type SpeakTraceHandlerFunction = (
 ) => any;
 export type SpeakTraceHandlerMap = Partial<{
   handleAudio: SpeakTraceAudioHandler;
-  handleTTS: SpeakTraceTTSHandler;
+  handleSpeech: SpeakTraceTTSHandler;
 }>;
 export type SpeakTraceHandler = SpeakTraceHandlerFunction | SpeakTraceHandlerMap;
 
@@ -24,10 +24,10 @@ export const invokeSpeakHandler = (trace: SpeakTrace, speakHandler: SpeakTraceHa
   }
 
   if (speakTraceType === 'message') {
-    if (!speakHandler.handleTTS) {
+    if (!speakHandler.handleSpeech) {
       throw new Error("VFError: missing handler for SpeakTrace's speak subtype");
     }
-    return speakHandler.handleTTS(speakMessage, speakSrc);
+    return speakHandler.handleSpeech(speakMessage, speakSrc);
   }
   if (speakTraceType === 'audio') {
     if (!speakHandler.handleAudio) {

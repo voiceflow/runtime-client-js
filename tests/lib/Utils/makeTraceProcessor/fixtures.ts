@@ -44,7 +44,7 @@ export const flowHandler: FlowTraceHandler = (diagramID: string) => {
 }
 
 export const speakHandlerMap: SpeakTraceHandlerMap = {
-    handleTTS: (message, src) => {
+    handleSpeech: (message, src) => {
         return [message, src];
     },
     handleAudio: (message, src) => {
