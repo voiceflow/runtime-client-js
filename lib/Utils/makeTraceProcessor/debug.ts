@@ -2,7 +2,7 @@ import { DebugTrace, TraceType } from '@voiceflow/general-types';
 
 import { DefaultHandler } from './default';
 
-export type DebugTraceHandler = (message: DebugTrace['payload']['message']) => void;
+export type DebugTraceHandler = (message: DebugTrace['payload']['message']) => any;
 
 export const invokeDebugHandler = (defaultHandler: DefaultHandler, trace: DebugTrace, handler?: DebugTraceHandler) => {
   const {

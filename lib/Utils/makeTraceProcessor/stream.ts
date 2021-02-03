@@ -6,7 +6,7 @@ export type StreamTraceHandler = (
   src: StreamTrace['payload']['src'],
   action: StreamTrace['payload']['action'],
   token: StreamTrace['payload']['token']
-) => void;
+) => any;
 
 export const invokeStreamHandler = (defaultHandler: DefaultHandler, trace: StreamTrace, handler?: StreamTraceHandler) => {
   const {

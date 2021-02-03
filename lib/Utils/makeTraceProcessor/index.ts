@@ -19,7 +19,7 @@ export type TraceHandlerMap = Partial<{
   [TraceType.STREAM]: StreamTraceHandler;
 }>;
 
-export type InvokeHandler = (DefaultHandler: DefaultHandler, trace: any, handler: any) => void;
+export type InvokeHandler = (DefaultHandler: DefaultHandler, trace: any, handler: any) => any;
 
 const invokeHandlerMap = new Map<TraceType, InvokeHandler>([
   [TraceType.BLOCK, invokeBlockHandler],
@@ -33,9 +33,9 @@ const invokeHandlerMap = new Map<TraceType, InvokeHandler>([
 
 const makeTraceProcessor = (handlers: TraceHandlerMap, defaultHandler: DefaultHandler = throwNotImplementedException) => (trace: GeneralTrace) => {
   const invokeHandler = invokeHandlerMap.get(trace.type);
-  
+
   if (!invokeHandler) {
-    throw new Error("VFError: an unknown trace type was passed into makeTraceProcessor");
+    throw new Error('VFError: an unknown trace type was passed into makeTraceProcessor');
   }
 
   return invokeHandler(defaultHandler, trace, handlers[trace.type]);

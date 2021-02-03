@@ -2,8 +2,8 @@ import { SpeakTrace, TraceType } from '@voiceflow/general-types';
 
 import { DefaultHandler } from './default';
 
-export type SpeakTraceAudioHandler = (message: SpeakTrace['payload']['message'], src: SpeakTrace['payload']['src']) => void;
-export type SpeakTraceTTSHandler = (message: SpeakTrace['payload']['message'], src: SpeakTrace['payload']['src']) => void;
+export type SpeakTraceAudioHandler = (message: SpeakTrace['payload']['message'], src: SpeakTrace['payload']['src']) => any;
+export type SpeakTraceTTSHandler = (message: SpeakTrace['payload']['message'], src: SpeakTrace['payload']['src']) => any;
 export type SpeakTraceHandler = Partial<{
   handleAudio: SpeakTraceAudioHandler;
   handleTTS: SpeakTraceTTSHandler;
