@@ -8,10 +8,10 @@ import {
   CHOICES_2,
   CHOICES_3,
   SEND_TEXT_RESPONSE_BODY,
-  SPEAK_TRACE,
   START_RESPONSE_BODY,
   START_RESPONSE_BODY_WITH_MULTIPLE_CHOICES,
 } from './fixtures';
+import { SPEAK_TRACE } from '../fixtures';
 
 describe('Context', () => {
   afterEach(() => {

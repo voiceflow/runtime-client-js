@@ -50,6 +50,7 @@ describe('DataFilterer', () => {
         {
           ...SPEAK_TRACE,
           payload: {
+            ...SPEAK_TRACE.payload,
             message: '<voice>Books ought to have to have good endings.</voice>',
           },
         },
