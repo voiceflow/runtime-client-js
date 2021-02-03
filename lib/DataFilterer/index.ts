@@ -1,6 +1,7 @@
 import { GeneralTrace, TraceType } from '@voiceflow/general-types';
 
-import { DataConfig } from '../App/types';
+import { DataConfig } from '@/lib/types';
+
 import { SSML_TAG_REGEX } from './constants';
 
 class DataFilterer {

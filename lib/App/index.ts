@@ -1,17 +1,14 @@
-import { GeneralRequest, GeneralTrace, RequestType, TraceType } from '@voiceflow/general-types';
+import { GeneralRequest, RequestType } from '@voiceflow/general-types';
 import { State } from '@voiceflow/runtime';
 import axios from 'axios';
 import _ from 'lodash';
 
 import Client from '@/lib/Client';
-import { InteractRequestBody } from '@/lib/Client/type';
-import DataFilterer from '@/lib/DataFilterer';
+import Context from '@/lib/Context';
+import { AppConfig, AppContext, DataConfig } from '@/lib/types';
 
-import { DeepReadonly } from '../Typings';
 import { DEFAULT_ENDPOINT } from './constants';
-import { AppConfig, AppState, Choice, DataConfig, InternalAppState } from './types';
-
-export * from './types';
+import { makeRequestBody } from './utils';
 
 class App {
   private versionID: string; // version ID of the VF project that the SDK communicates with
@@ -20,13 +17,11 @@ class App {
 
   private dataConfig: DataConfig;
 
-  private cachedInitAppState: InternalAppState | null = null;
+  private cachedInitState: State | null = null;
 
-  private appState: InternalAppState | null = null;
+  private context: Context | null = null;
 
-  private dataFilterer: DataFilterer;
-
-  constructor({ versionID, endpoint = DEFAULT_ENDPOINT, dataConfig }: AppConfig) {
+  constructor({ versionID, endpoint = DEFAULT_ENDPOINT, config }: AppConfig) {
     this.versionID = versionID;
 
     const axiosInstance = axios.create({ baseURL: endpoint });
@@ -36,69 +31,45 @@ class App {
       tts: false,
       ssml: false,
       includeTypes: [],
+      ...config,
     };
-    this.dataConfig = Object.assign(this.dataConfig, dataConfig);
-
-    this.dataFilterer = new DataFilterer(this.dataConfig);
   }
 
-  get chips(): DeepReadonly<Choice[]> {
-    if (this.appState === null) {
-      return [];
-    }
-    return this.appState.trace.reduce<Choice[]>((acc, trace) => (trace.type !== TraceType.CHOICE ? acc : [...acc, ...trace.payload.choices]), []);
-  }
-
-  async start(): Promise<AppState> {
+  async start(): Promise<Context> {
     await this.getAppInitialState();
-
-    const { state } = this.appState!;
-    return this.updateState(await this.client.interact(this.makeRequestBody(state), this.versionID));
+    return this.sendRequest(null);
   }
 
-  async sendText(userResponse: string): Promise<AppState> {
-    if (this.appState === null) {
-      throw new Error('the appState in VFClient.App was not initialized');
-    } else if (this.isConversationEnding(this.appState.trace)) {
+  async sendText(userInput: string): Promise<Context> {
+    if (!userInput?.trim?.()) {
+      return this.sendRequest(null);
+    }
+    return this.sendRequest({ type: RequestType.TEXT, payload: userInput });
+  }
+
+  async sendRequest(request: GeneralRequest) {
+    if (this.context === null) {
+      throw new Error('the context in VFClient.App was not initialized');
+    } else if (this.context.isEnding()) {
       throw new Error('VFClient.sendText() was called but the conversation has ended');
     }
-
-    const { state } = this.appState;
-    return this.updateState(await this.client.interact(this.makeRequestBody(state, userResponse), this.versionID));
+    return this.setContext(await this.client.interact(makeRequestBody(this.context!, request, this.dataConfig), this.versionID));
   }
 
   private async getAppInitialState() {
-    if (this.cachedInitAppState === null) {
-      const initialState: State = await this.client.getAppInitialState(this.versionID);
-      this.cachedInitAppState = { state: initialState, trace: [] };
+    if (!this.cachedInitState) {
+      this.cachedInitState = await this.client.getAppInitialState(this.versionID);
     }
-    this.appState = _.cloneDeep(this.cachedInitAppState);
+    this.context = new Context({ request: null, state: this.cachedInitState, trace: [] }, this.dataConfig);
   }
 
-  private updateState({ state, trace }: InternalAppState): AppState {
-    this.appState = { state, trace };
-    return {
-      state,
-      trace: this.dataFilterer.filter(trace),
-      end: this.isConversationEnding(trace),
-    };
+  setContext(contextJSON: AppContext): Context {
+    this.context = new Context(contextJSON, this.dataConfig);
+    return this.context;
   }
 
-  private makeRequestBody(state: State, text?: string): InteractRequestBody {
-    return {
-      state,
-      request: this.makeGeneralRequest(text),
-      config: { tts: this.dataConfig.tts },
-    };
-  }
-
-  private makeGeneralRequest(payload?: string): GeneralRequest {
-    if (!payload) return null;
-    return { type: RequestType.TEXT, payload };
-  }
-
-  private isConversationEnding(trace: GeneralTrace[]): boolean {
-    return trace.length !== 0 && trace[trace.length - 1].type === TraceType.END;
+  getContext() {
+    return this.context;
   }
 
   getVersion() {
