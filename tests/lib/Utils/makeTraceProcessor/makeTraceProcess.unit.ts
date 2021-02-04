@@ -11,7 +11,7 @@ import sinon from 'sinon';
 import { BLOCK_TRACE, CHOICE_TRACE, DEBUG_TRACE, END_TRACE, FAKE_VISUAL_TRACE, FLOW_TRACE, SPEAK_TRACE, SPEAK_TRACE_AUDIO, STREAM_TRACE, VISUAL_TRACE_APL, VISUAL_TRACE_IMAGE } from '../../fixtures';
 import { blockHandler, choiceHandler, debugHandler, endHandler, FAKE_SPEAK_TRACE, flowHandler, RESULT, speakHandlerFunc, speakHandlerMap, streamHandler, TRACE_HANDLER_MAP, UNKNOWN_TRACE_TYPE, visualHandlerFunc, visualHandlerMap } from './fixtures';
 import { invokeVisualHandler, VisualTraceHandler } from '@/lib/Utils/makeTraceProcessor/visual';
-import makeTraceProcessor from '@/lib/Utils/makeTraceProcessor';
+import { makeTraceProcessor } from '@/lib/Utils/makeTraceProcessor';
 
 describe('makeTraceProcessor', () => {
     afterEach(() => {
@@ -169,7 +169,7 @@ describe('makeTraceProcessor', () => {
         
             const callback = () => traceProcessor(UNKNOWN_TRACE_TYPE as GeneralTrace);
 
-            expect(callback).to.throw('VFError: an unknown trace type was passed into makeTraceProcessor')
+            expect(callback).to.throw(`VFError: invalid trace type "invalid" was passed into makeTraceProcessor`)
         });
 
         it('makeTraceProcessor, unimplemented handler', () => {
@@ -177,7 +177,7 @@ describe('makeTraceProcessor', () => {
         
             const callback = () => traceProcessor(SPEAK_TRACE);
 
-            expect(callback).to.throw(`VFError: handler for ${TraceType.SPEAK} was not implemented`)
+            expect(callback).to.throw(`VFError: handler for "${TraceType.SPEAK}" was not implemented`)
         });
     });
 });

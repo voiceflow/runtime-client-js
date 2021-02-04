@@ -33,20 +33,18 @@ const invokeHandlerMap = new Map<TraceType, InvokeHandler>([
   [TraceType.VISUAL, invokeVisualHandler],
 ]);
 
-const makeTraceProcessor = (handlers: TraceHandlerMap) => (trace: GeneralTrace) => {
+export const makeTraceProcessor = (handlers: TraceHandlerMap) => (trace: GeneralTrace) => {
   const invokeHandler = invokeHandlerMap.get(trace.type);
 
   if (!invokeHandler) {
-    throw new Error('VFError: an unknown trace type was passed into makeTraceProcessor');
+    throw new Error(`VFError: invalid trace type "${trace.type}" was passed into makeTraceProcessor`);
   }
 
   const handler = handlers[trace.type];
 
   if (!handler) {
-    throw new Error(`VFError: handler for ${trace.type} was not implemented`);
+    throw new Error(`VFError: handler for "${trace.type}" was not implemented`);
   }
 
   return invokeHandler(trace, handlers[trace.type]);
 };
-
-export default makeTraceProcessor;
