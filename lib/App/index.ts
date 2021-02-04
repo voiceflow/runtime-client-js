@@ -69,7 +69,13 @@ class App<S extends Record<string, any> = Record<string, any>> {
     } else if (this.context.isEnding()) {
       throw new VFClientError('VFClient.sendText() was called but the conversation has ended');
     }
-    return this.setContext(await this.client.interact(makeRequestBody(this.context!, request, this.dataConfig), this.versionID));
+    this.setContext(await this.client.interact(makeRequestBody(this.context!, request, this.dataConfig), this.versionID));
+
+    if (this.dataConfig.traceProcessor) {
+      this.context.getResponse().forEach(this.dataConfig.traceProcessor);
+    }
+
+    return this.context;
   }
 
   private async getAppInitialState() {
@@ -86,10 +92,8 @@ class App<S extends Record<string, any> = Record<string, any>> {
     this.context = new Context({ request: null, state: _.cloneDeep(this.cachedInitState), trace: [] }, this.dataConfig);
   }
 
-  setContext(contextJSON: ResponseContext): Context<S> {
+  setContext(contextJSON: ResponseContext) {
     this.context = new Context(contextJSON, this.dataConfig);
-
-    return this.context;
   }
 
   getContext() {

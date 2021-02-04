@@ -26,6 +26,9 @@ import {
 } from '../Context/fixtures';
 import { STATE_REQUEST_BODY_WITH_CUSTOM_VARIABLES, VF_APP_CUSTOM_INITIAL_VARIABLES } from './fixtures';
 import { INTERACT_ENDPOINT, STATE_ENDPOINT } from '../fixtures';
+import { makeTraceProcessor } from '@/lib/Utils';
+import { TraceType } from '@voiceflow/general-types';
+import { DEBUG_TRACE, SPEAK_TRACE } from '../fixtures';
 
 chai.use(chaiAsPromise);
 
@@ -94,6 +97,36 @@ describe('App', () => {
         STATE_REQUEST_BODY_WITH_CUSTOM_VARIABLES
       ]);
     });
+  });
+
+  it('options, traceProcessor', async () => {
+    const result: string[] = [];
+
+    const traceProcessor = makeTraceProcessor({
+      [TraceType.SPEAK]: (message) => {
+        result.push(message)
+      },
+      [TraceType.DEBUG]: (message) => {
+        result.push(message);
+      }
+    });
+
+    const { VFApp, axiosInstance } = createVFApp({
+      dataConfig: {
+        traceProcessor,
+        includeTypes: ['debug']
+      }
+    });
+
+    axiosInstance.get.resolves(asHttpResponse(VF_APP_INITIAL_STATE));
+    axiosInstance.post.resolves(asHttpResponse(START_RESPONSE_BODY_WITH_MULTIPLE_CHOICES));
+
+    await VFApp.start();
+
+    expect(result).to.eql([
+      DEBUG_TRACE.payload.message,
+      SPEAK_TRACE.payload.message
+    ]);
   });
 
   it('start', async () => {
