@@ -5,7 +5,7 @@ import { Choice, DataConfig, ResponseContext } from '@/lib/types';
 
 import VariableManager from '../Variables';
 
-class Context<S extends Record<string, any>> {
+class Context<S extends Record<string, any> = Record<string, any>> {
   private dataFilterer: DataFilterer;
 
   public variables = new VariableManager<S>(this.toJSON.bind(this), this.setVariables.bind(this));
