@@ -7,16 +7,18 @@ import Client from '@/lib/Client';
 import Context from '@/lib/Context';
 import { DataConfig, ResponseContext } from '@/lib/types';
 
+import VariableManager from '../Variables';
 import { DEFAULT_ENDPOINT } from './constants';
 import { makeRequestBody } from './utils';
 
-export type AppConfig = {
+export type AppConfig<S extends State['variables']> = {
   versionID: string;
   endpoint?: string;
   dataConfig?: DataConfig;
+  variables?: Partial<S>;
 };
 
-class App {
+class App<S extends State['variables']> {
   private versionID: string; // version ID of the VF project that the SDK communicates with
 
   private client: Client;
@@ -27,8 +29,17 @@ class App {
 
   private context: Context | null = null;
 
-  constructor({ versionID, endpoint = DEFAULT_ENDPOINT, dataConfig }: AppConfig) {
+  public variables = new VariableManager<S>(this.internalGetState.bind(this));
+
+  private initVariables: Partial<S> | undefined;
+
+  constructor({ versionID, endpoint = DEFAULT_ENDPOINT, dataConfig, variables }: AppConfig<S>) {
     this.versionID = versionID;
+
+    if (variables) {
+      this.variables.validateInitialVars(variables);
+    }
+    this.initVariables = variables;
 
     const axiosInstance = axios.create({ baseURL: endpoint });
     this.client = new Client(axiosInstance);
@@ -55,16 +66,23 @@ class App {
 
   async sendRequest(request: GeneralRequest) {
     if (this.context === null) {
-      throw new Error('the context in VFClient.App was not initialized');
+      throw new Error('VFError: the context in VFClient.App was not initialized');
     } else if (this.context.isEnding()) {
-      throw new Error('VFClient.sendText() was called but the conversation has ended');
+      throw new Error('VFError: VFClient.sendText() was called but the conversation has ended');
     }
     return this.setContext(await this.client.interact(makeRequestBody(this.context!, request, this.dataConfig), this.versionID));
   }
 
   private async getAppInitialState() {
     if (!this.cachedInitState) {
-      this.cachedInitState = await this.client.getAppInitialState(this.versionID);
+      const { variables, ...restState } = await this.client.getAppInitialState(this.versionID);
+      this.cachedInitState = {
+        ...restState,
+        variables: {
+          ...variables,
+          ...this.initVariables,
+        },
+      };
     }
     this.context = new Context({ request: null, state: _.cloneDeep(this.cachedInitState), trace: [] }, this.dataConfig);
   }
@@ -81,6 +99,10 @@ class App {
 
   getVersionID() {
     return this.versionID;
+  }
+
+  private internalGetState() {
+    return this.context?.toJSON() ?? null;
   }
 }
 
