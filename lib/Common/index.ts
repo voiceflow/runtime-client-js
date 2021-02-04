@@ -2,9 +2,20 @@ import { TraceType } from '@voiceflow/general-types';
 
 export const validTraceTypes = new Set(Object.keys(TraceType));
 
-export const VFError = (message: string) => new Error(`VFError: ${message}`);
+export class VFClientError extends Error {
+  constructor(message: string) {
+    super(`VFError: ${message}`);
+  }
+}
+
+export class VFTypeError extends VFClientError {
+  constructor(message: string) {
+    super(message);
+  }
+}
 
 export default {
   validTraceTypes,
-  VFError,
+  VFClientError,
+  VFTypeError
 };

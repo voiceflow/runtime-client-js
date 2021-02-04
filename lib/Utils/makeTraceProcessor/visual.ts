@@ -1,3 +1,4 @@
+import { VFClientError, VFTypeError } from '@/lib/Common';
 import { VisualTrace } from '@voiceflow/general-types';
 import { VisualType } from '@voiceflow/general-types/build/nodes/visual';
 import _ from 'lodash';
@@ -24,15 +25,15 @@ export const invokeVisualHandler = (trace: VisualTrace, visualHandler: VisualTra
 
   if (visualType === VisualType.APL) {
     if (!visualHandler.handleAPL) {
-      throw new Error("VFError: missing handler for VisualTrace's apl subtype");
+      throw new VFClientError("missing handler for VisualTrace's apl subtype");
     }
     return visualHandler.handleAPL(rest as APLPayload);
   }
   if (visualType === VisualType.IMAGE) {
     if (!visualHandler.handleImage) {
-      throw new Error("VFError: missing handler for VisualTrace's image subtype");
+      throw new VFClientError("missing handler for VisualTrace's image subtype");
     }
     return visualHandler.handleImage(rest as ImagePayload);
   }
-  throw new TypeError("VFError: makeTraceProcessor's returned callback received an unknown VisualTrace subtype");
+  throw new VFTypeError("makeTraceProcessor's returned callback received an unknown VisualTrace subtype");
 };

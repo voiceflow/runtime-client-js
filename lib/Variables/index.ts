@@ -1,5 +1,6 @@
 import { State } from '@voiceflow/runtime';
 import _ from 'lodash';
+import { VFClientError, VFTypeError } from '../Common';
 
 import { ResponseContext } from '../types';
 
@@ -9,7 +10,7 @@ class VariableManager<S extends State['variables']> {
   get<K extends keyof S>(key: K): S[K] {
     const value = this.getVariables()[key];
     if (_.isUndefined(value)) {
-      throw new Error(`VFError: variable "${key}" is undefined`);
+      throw new VFClientError(`variable "${key}" is undefined`);
     }
     return value;
   }
@@ -30,7 +31,7 @@ class VariableManager<S extends State['variables']> {
 
   private validateVarAssignment(key: keyof S, val: unknown) {
     if (!this.isJSONSerializable(val)) {
-      throw new TypeError(`VError: assigned value for "${key}" is not JSON serializable`);
+      throw new VFTypeError(`assigned value for "${key}" is not JSON serializable`);
     }
   }
 
@@ -51,7 +52,7 @@ class VariableManager<S extends State['variables']> {
   private getVariables(): S {
     const appState = this._internalGetState();
     if (appState === null) {
-      throw new Error('VFError: cannot access variables, app state was not initialized');
+      throw new VFClientError('cannot access variables, app state was not initialized');
     }
     return appState.state.variables as S;
   }

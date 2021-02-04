@@ -102,6 +102,6 @@ describe('VariableManager', () => {
 
         const callback = () => varManager.validateInitialVars(NON_SERIALIZABLE_VARIABLE_MAP);
 
-        expect(callback).to.throw(`VError: assigned value for "nested" is not JSON serializable`);
+        expect(callback).to.throw(`VFError: assigned value for "nested" is not JSON serializable`);
     });
 });
