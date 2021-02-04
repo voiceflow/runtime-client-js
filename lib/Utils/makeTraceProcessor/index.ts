@@ -1,5 +1,6 @@
-import { VFClientError } from '@/lib/Common';
 import { GeneralTrace, TraceType } from '@voiceflow/general-types';
+
+import { VFClientError } from '@/lib/Common';
 
 import { BlockTraceHandler, invokeBlockHandler } from './block';
 import { ChoiceTraceHandler, invokeChoiceHandler } from './choice';

@@ -1,7 +1,7 @@
 import { State } from '@voiceflow/runtime';
 import _ from 'lodash';
-import { VFClientError, VFTypeError } from '../Common';
 
+import { VFClientError, VFTypeError } from '../Common';
 import { ResponseContext } from '../types';
 
 class VariableManager<S extends State['variables']> {

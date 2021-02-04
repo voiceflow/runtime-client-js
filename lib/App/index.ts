@@ -4,9 +4,9 @@ import axios from 'axios';
 import _ from 'lodash';
 
 import Client from '@/lib/Client';
+import { VFClientError } from '@/lib/Common';
 import Context from '@/lib/Context';
 import { DataConfig, ResponseContext } from '@/lib/types';
-import { VFClientError } from "@/lib/Common"
 
 import VariableManager from '../Variables';
 import { DEFAULT_ENDPOINT } from './constants';

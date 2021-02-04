@@ -17,5 +17,5 @@ export class VFTypeError extends VFClientError {
 export default {
   validTraceTypes,
   VFClientError,
-  VFTypeError
+  VFTypeError,
 };

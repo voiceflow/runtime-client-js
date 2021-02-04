@@ -1,7 +1,8 @@
-import { VFClientError, VFTypeError } from '@/lib/Common';
 import { VisualTrace } from '@voiceflow/general-types';
 import { VisualType } from '@voiceflow/general-types/build/nodes/visual';
 import _ from 'lodash';
+
+import { VFClientError, VFTypeError } from '@/lib/Common';
 
 type APLPayload = Omit<VisualTrace['payload'] & { visualType: VisualType.APL }, 'visualType'>;
 type ImagePayload = Omit<VisualTrace['payload'] & { visualType: VisualType.IMAGE }, 'visualType'>;

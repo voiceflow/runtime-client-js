@@ -1,6 +1,7 @@
-import { VFClientError, VFTypeError } from '@/lib/Common';
 import { SpeakTrace } from '@voiceflow/general-types';
 import _ from 'lodash';
+
+import { VFClientError, VFTypeError } from '@/lib/Common';
 
 export type SpeakTraceAudioHandler = (message: SpeakTrace['payload']['message'], src: SpeakTrace['payload']['src']) => any;
 export type SpeakTraceTTSHandler = (message: SpeakTrace['payload']['message'], src: SpeakTrace['payload']['src']) => any;
