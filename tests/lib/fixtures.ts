@@ -17,6 +17,14 @@ export const SPEAK_TRACE: SpeakTrace = {
   },
 };
 
+export const MAKE_SPEAK_TRACE = (payload: SpeakTrace['payload']): SpeakTrace => ({
+  type: TraceType.SPEAK,
+  payload: {
+    ...SPEAK_TRACE.payload,
+    ...payload
+  }
+});
+
 export const SPEAK_TRACE_AUDIO: SpeakTrace = {
   type: TraceType.SPEAK,
   payload: {
