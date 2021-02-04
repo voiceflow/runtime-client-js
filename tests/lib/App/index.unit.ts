@@ -23,11 +23,9 @@ import {
   USER_RESPONSE,
   VERSION_ID,
   VF_APP_INITIAL_STATE,
-  VF_APP_NEXT_STATE_1,
 } from '../Context/fixtures';
 import { STATE_REQUEST_BODY_WITH_CUSTOM_VARIABLES, VF_APP_CUSTOM_INITIAL_VARIABLES } from './fixtures';
 import { INTERACT_ENDPOINT, STATE_ENDPOINT } from '../fixtures';
-import { VFAppVariablesSchema } from '../Variables/fixture';
 
 chai.use(chaiAsPromise);
 
@@ -338,26 +336,5 @@ describe('App', () => {
     expect((response[0] as any).payload.message).to.eql('Books ought to have to have good endings.');
     expect((response[0] as any).payload.src).to.eql('data:audio/mpeg;base64,SUQzBAAAAAAA');
     expect(response.length).to.eql(2);
-  });
-
-  describe('variable manager', () => {
-    it('can access variable manager through app', async () => {
-      const { VFApp, axiosInstance } = createVFApp<VFAppVariablesSchema>();
-
-      axiosInstance.get.resolves(asHttpResponse(VF_APP_INITIAL_STATE));
-      axiosInstance.post.resolves(asHttpResponse(START_RESPONSE_BODY_WITH_MULTIPLE_CHOICES));
-
-      await VFApp.start();
-
-      const variables = VFApp.variables.getAll();
-
-      expect(variables).to.eql(VF_APP_NEXT_STATE_1.variables);
-    });
-
-    it('access variable manager without .start() call', () => {
-      const { VFApp } = createVFApp<VFAppVariablesSchema>();
-      const callback = () => VFApp.variables.getAll();
-      expect(callback).to.throw('VFError: cannot access variables, app state was not initialized');
-    });
   });
 });

@@ -1,16 +1,18 @@
 import sinon from 'sinon';
 import { State } from '@voiceflow/runtime';
-import { Gender, INTERNAL_APP_STATE, INTERNAL_VARIABLES_MAP, INTERNAL_VARIABLES_MAP_KEYS, NonSerializableSchema, NON_SERIALIZABLE_VARIABLE_MAP, StockOptions, VFAppVariablesSchema } from './fixture';
+import { Gender, INTERNAL_APP_STATE, INTERNAL_VARIABLES_MAP, INTERNAL_VARIABLES_MAP_KEYS, NON_SERIALIZABLE_VARIABLE_MAP, StockOptions, VFAppVariablesSchema } from './fixture';
 import { expect } from 'chai';
 import VariableManager from '@/lib/Variables';
 import { ResponseContext } from '@/lib/types';
+import { validateVarMerge } from '@/lib/Variables/utils';
 
 const createVariableManager = <S extends State['variables']>() => {
     const getState = sinon.stub<void[], ResponseContext | null>();
+    const setState = sinon.stub();
 
-    const varManager = new VariableManager<S>(getState);
+    const varManager = new VariableManager<S>(getState, setState);
 
-    return { varManager, getState };
+    return { varManager, getState, setState };
   };
 
 describe('VariableManager', () => {
@@ -76,7 +78,7 @@ describe('VariableManager', () => {
         const { varManager, getState } = createVariableManager<VFAppVariablesSchema>();
         getState.returns(INTERNAL_APP_STATE);
 
-        const result = varManager.getAllKeys();
+        const result = varManager.getKeys();
 
         expect(result).to.eql(INTERNAL_VARIABLES_MAP_KEYS);
     });
@@ -85,23 +87,30 @@ describe('VariableManager', () => {
         const { varManager, getState } = createVariableManager<VFAppVariablesSchema>();
         getState.returns(null);
 
-        const callback = () => varManager.getAllKeys();
+        const callback = () => varManager.getKeys();
         expect(callback).to.throw("VFError: cannot access variables, app state was not initialized");
     });
 
-    it('validateInitialVars', () => {
-        const { varManager } = createVariableManager<VFAppVariablesSchema>();
+    it('setMany', () => {
+        const { varManager, setState } = createVariableManager<VFAppVariablesSchema>()
+        const newState = {
+            name: 'Jesse Pinkman',
+            age: 27
+        };
+  
+        varManager.setMany(newState);
 
-        const callback = () => varManager.validateInitialVars(INTERNAL_VARIABLES_MAP);
+        expect(setState.callCount).to.eql(1);
+        expect(setState.args[0]).to.eql([ newState ]);
+    });
 
+    it('validateVarMerge', () => {
+        const callback = () => validateVarMerge(INTERNAL_VARIABLES_MAP);
         expect(callback).to.not.throw();
     });
 
-    it('validateInitialVars, non-serializable data exception', () => {
-        const { varManager } = createVariableManager<NonSerializableSchema>();
-
-        const callback = () => varManager.validateInitialVars(NON_SERIALIZABLE_VARIABLE_MAP);
-
+    it('validateVarMerge', () => {
+        const callback = () => validateVarMerge(NON_SERIALIZABLE_VARIABLE_MAP);
         expect(callback).to.throw(`VFError: assigned value for "nested" is not JSON serializable`);
     });
 });

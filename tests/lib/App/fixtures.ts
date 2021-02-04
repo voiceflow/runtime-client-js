@@ -1,11 +1,6 @@
 import { RequestContext } from "@/lib/types";
 import { VF_APP_INITIAL_STATE } from "../Context/fixtures";
-
-export type VFAppVariablesSchema = {
-    age: number | 0;
-    name: string | 0;
-    gender: 'M' | 'F' | 'Other' | 0;
-};
+import { VFAppVariablesSchema } from "../fixtures";
   
 export const VF_APP_CUSTOM_INITIAL_VARIABLES: Partial<VFAppVariablesSchema> = {
     age: 337,
