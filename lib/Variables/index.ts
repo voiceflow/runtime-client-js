@@ -1,11 +1,11 @@
-import { State } from '@voiceflow/runtime';
 import _ from 'lodash';
 
-import { VFClientError, VFTypeError } from '../Common';
+import { VFClientError } from '../Common';
 import { ResponseContext } from '../types';
+import { validateVarAssignment, validateVarMerge } from './utils';
 
-class VariableManager<S extends State['variables']> {
-  constructor(private _internalGetState: () => ResponseContext | null) {}
+class VariableManager<S extends Record<string,any>> {
+  constructor(private _internalGetState: () => ResponseContext | null, private _internalSetVars: (newVars: Partial<S>) => void) {}
 
   get<K extends keyof S>(key: K): S[K] {
     const value = this.getVariables()[key];
@@ -19,42 +19,28 @@ class VariableManager<S extends State['variables']> {
     return this.getVariables();
   }
 
-  getAllKeys(): Array<keyof S> {
+  getKeys(): Array<keyof S> {
     return Object.keys(this.getVariables());
   }
 
-  validateInitialVars(initVars: Partial<S>) {
-    Object.keys(initVars).forEach((key) => {
-      this.validateVarAssignment(key, initVars[key]);
-    });
+  set<K extends keyof S>(key: K, val: S[K]): void {
+    validateVarAssignment<S>(key, val);
+    this._internalSetVars({
+      [key]: val
+    } as S);
   }
 
-  private validateVarAssignment(key: keyof S, val: unknown) {
-    if (!this.isJSONSerializable(val)) {
-      throw new VFTypeError(`assigned value for "${key}" is not JSON serializable`);
-    }
-  }
-
-  private isJSONSerializable(data: unknown): boolean {
-    if (_.isUndefined(data) || _.isNumber(data) || _.isString(data) || _.isNull(data) || _.isBoolean(data)) {
-      return true;
-    }
-    if (!_.isPlainObject(data) && !_.isArray(data)) {
-      return false;
-    }
-
-    const anyData = data as any;
-    return Object.keys(anyData).every((key) => {
-      return this.isJSONSerializable(anyData[key]);
-    });
+  setMany(newVars: Partial<S>): void {
+    validateVarMerge(newVars);
+    this._internalSetVars(newVars)
   }
 
   private getVariables(): S {
-    const appState = this._internalGetState();
-    if (appState === null) {
+    const context = this._internalGetState();
+    if (context === null) {
       throw new VFClientError('cannot access variables, app state was not initialized');
     }
-    return appState.state.variables as S;
+    return context.state.variables as S;
   }
 }
 

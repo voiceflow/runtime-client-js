@@ -8,9 +8,9 @@ import { VFClientError } from '@/lib/Common';
 import Context from '@/lib/Context';
 import { DataConfig, ResponseContext } from '@/lib/types';
 
-import VariableManager from '../Variables';
 import { DEFAULT_ENDPOINT } from './constants';
 import { makeRequestBody } from './utils';
+import { validateVarMerge } from '../Variables/utils';
 
 export type AppConfig<S extends State['variables']> = {
   versionID: string;
@@ -19,7 +19,7 @@ export type AppConfig<S extends State['variables']> = {
   variables?: Partial<S>;
 };
 
-class App<S extends State['variables']> {
+class App<S extends Record<string, any> = Record<string, any>> {
   private versionID: string; // version ID of the VF project that the SDK communicates with
 
   private client: Client;
@@ -28,9 +28,7 @@ class App<S extends State['variables']> {
 
   private cachedInitState: State | null = null;
 
-  private context: Context | null = null;
-
-  public variables = new VariableManager<S>(this.internalGetState.bind(this));
+  private context: Context<S> | null = null;
 
   private initVariables: Partial<S> | undefined;
 
@@ -38,7 +36,7 @@ class App<S extends State['variables']> {
     this.versionID = versionID;
 
     if (variables) {
-      this.variables.validateInitialVars(variables);
+      validateVarMerge(variables);
     }
     this.initVariables = variables;
 
@@ -53,12 +51,12 @@ class App<S extends State['variables']> {
     };
   }
 
-  async start(): Promise<Context> {
+  async start(): Promise<Context<S>> {
     await this.getAppInitialState();
     return this.sendRequest(null);
   }
 
-  async sendText(userInput: string): Promise<Context> {
+  async sendText(userInput: string): Promise<Context<S>> {
     if (!userInput?.trim?.()) {
       return this.sendRequest(null);
     }
@@ -88,7 +86,7 @@ class App<S extends State['variables']> {
     this.context = new Context({ request: null, state: _.cloneDeep(this.cachedInitState), trace: [] }, this.dataConfig);
   }
 
-  setContext(contextJSON: ResponseContext): Context {
+  setContext(contextJSON: ResponseContext): Context<S> {
     this.context = new Context(contextJSON, this.dataConfig);
 
     return this.context;
@@ -100,10 +98,6 @@ class App<S extends State['variables']> {
 
   getVersionID() {
     return this.versionID;
-  }
-
-  private internalGetState() {
-    return this.context?.toJSON() ?? null;
   }
 }
 
