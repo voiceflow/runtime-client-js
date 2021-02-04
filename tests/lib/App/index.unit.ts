@@ -23,7 +23,7 @@ import {
   USER_RESPONSE,
   VERSION_ID,
   VF_APP_INITIAL_STATE,
-} from '../fixtures';
+} from '../Context/fixtures';
 
 chai.use(chaiAsPromise);
 
