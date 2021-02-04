@@ -8,9 +8,9 @@ import { VFClientError } from '@/lib/Common';
 import Context from '@/lib/Context';
 import { DataConfig, ResponseContext } from '@/lib/types';
 
+import { validateVarMerge } from '../Variables/utils';
 import { DEFAULT_ENDPOINT } from './constants';
 import { makeRequestBody } from './utils';
-import { validateVarMerge } from '../Variables/utils';
 
 export type AppConfig<S extends State['variables']> = {
   versionID: string;

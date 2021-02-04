@@ -44,10 +44,10 @@ class Context<S extends Record<string, any> = Record<string, any>> {
         ...this.context.state,
         variables: {
           ...this.context.state.variables,
-          ...newValues
-        }
-      }
-    }
+          ...newValues,
+        },
+      },
+    };
   }
 }
 

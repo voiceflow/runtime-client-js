@@ -4,7 +4,7 @@ import { VFClientError } from '../Common';
 import { ResponseContext } from '../types';
 import { validateVarAssignment, validateVarMerge } from './utils';
 
-class VariableManager<S extends Record<string,any>> {
+class VariableManager<S extends Record<string, any>> {
   constructor(private _internalGetState: () => ResponseContext | null, private _internalSetVars: (newVars: Partial<S>) => void) {}
 
   get<K extends keyof S>(key: K): S[K] {
@@ -26,13 +26,13 @@ class VariableManager<S extends Record<string,any>> {
   set<K extends keyof S>(key: K, val: S[K]): void {
     validateVarAssignment<S>(key, val);
     this._internalSetVars({
-      [key]: val
+      [key]: val,
     } as S);
   }
 
   setMany(newVars: Partial<S>): void {
     validateVarMerge(newVars);
-    this._internalSetVars(newVars)
+    this._internalSetVars(newVars);
   }
 
   private getVariables(): S {
