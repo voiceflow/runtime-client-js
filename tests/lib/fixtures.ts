@@ -100,3 +100,7 @@ export const FAKE_VISUAL_TRACE = {
     visualType: 'fake'
   }
 }
+
+export const INTERACT_ENDPOINT = (versionID: string) => `/interact/${versionID}`;
+
+export const STATE_ENDPOINT = (versionID: string) => `/interact/${versionID}/state`;

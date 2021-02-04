@@ -1,5 +1,6 @@
 import { State } from '@voiceflow/runtime';
 import _ from 'lodash';
+
 import { ResponseContext } from '../types';
 
 class VariableManager<S extends State['variables']> {
@@ -50,7 +51,7 @@ class VariableManager<S extends State['variables']> {
   private getVariables(): S {
     const appState = this._internalGetState();
     if (appState === null) {
-      throw new Error('VFError: cannot access variables, appState was not initialized');
+      throw new Error('VFError: cannot access variables, app state was not initialized');
     }
     return appState.state.variables as S;
   }

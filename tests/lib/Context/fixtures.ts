@@ -20,8 +20,8 @@ export const VF_APP_INITIAL_STATE: State = {
   storage: {},
   variables: {
     age: 0,
-    name: '',
-    gender: '',
+    name: 0,
+    gender: 0,
   },
 };
 
