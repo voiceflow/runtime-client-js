@@ -1,6 +1,8 @@
 import { SpeakTrace } from '@voiceflow/general-types';
 import _ from 'lodash';
 
+import { VFClientError, VFTypeError } from '@/lib/Common';
+
 export type SpeakTraceAudioHandler = (message: SpeakTrace['payload']['message'], src: SpeakTrace['payload']['src']) => any;
 export type SpeakTraceTTSHandler = (message: SpeakTrace['payload']['message'], src: SpeakTrace['payload']['src']) => any;
 export type SpeakTraceHandlerFunction = (
@@ -25,15 +27,15 @@ export const invokeSpeakHandler = (trace: SpeakTrace, speakHandler: SpeakTraceHa
 
   if (speakTraceType === 'message') {
     if (!speakHandler.handleSpeech) {
-      throw new Error("VFError: missing handler for SpeakTrace's speak subtype");
+      throw new VFClientError("missing handler for SpeakTrace's speak subtype");
     }
     return speakHandler.handleSpeech(speakMessage, speakSrc);
   }
   if (speakTraceType === 'audio') {
     if (!speakHandler.handleAudio) {
-      throw new Error("VFError: missing handler for SpeakTrace's audio subtype");
+      throw new VFClientError("missing handler for SpeakTrace's audio subtype");
     }
     return speakHandler.handleAudio(speakMessage, speakSrc);
   }
-  throw new TypeError("VFError: makeTraceProcessor's returned callback received an unknown SpeakTrace subtype");
+  throw new VFTypeError("makeTraceProcessor's returned callback received an unknown SpeakTrace subtype");
 };

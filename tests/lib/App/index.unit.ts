@@ -24,12 +24,14 @@ import {
   VERSION_ID,
   VF_APP_INITIAL_STATE,
 } from '../Context/fixtures';
+import { STATE_REQUEST_BODY_WITH_CUSTOM_VARIABLES, VF_APP_CUSTOM_INITIAL_VARIABLES } from './fixtures';
+import { INTERACT_ENDPOINT, STATE_ENDPOINT } from '../fixtures';
 
 chai.use(chaiAsPromise);
 
 const asHttpResponse = (data: object) => ({ data });
 
-const createVFApp = (appConfig?: AppConfig) => {
+const createVFApp = <T = any>(appConfig?: Partial<AppConfig<T>>) => {
   const axiosInstance = {
     get: sinon.stub(),
     post: sinon.stub(),
@@ -51,30 +53,47 @@ describe('App', () => {
     sinon.restore();
   });
 
-  it('constructor', () => {
-    const { axiosCreate } = createVFApp();
+  describe('constructor', () => {
+    it('constructor', () => {
+      const { axiosCreate } = createVFApp();
 
-    expect(axiosCreate.callCount).to.eql(1);
-    expect(axiosCreate.args[0]).to.eql([
-      {
-        baseURL: DEFAULT_ENDPOINT,
-      },
-    ]);
-  });
+      expect(axiosCreate.callCount).to.eql(1);
+      expect(axiosCreate.args[0]).to.eql([
+        {
+          baseURL: DEFAULT_ENDPOINT,
+        },
+      ]);
+    });
 
-  it('options', () => {
-    const versionID = 'customVersionID';
-    const endpoint = 'customEndpoint';
-    const { axiosCreate, VFApp } = createVFApp({ versionID, endpoint });
+    it('options', () => {
+      const versionID = 'customVersionID';
+      const endpoint = 'customEndpoint';
+      const { axiosCreate, VFApp } = createVFApp({ versionID, endpoint });
 
-    expect(axiosCreate.callCount).to.eql(1);
-    expect(axiosCreate.args[0]).to.eql([
-      {
-        baseURL: endpoint,
-      },
-    ]);
+      expect(axiosCreate.callCount).to.eql(1);
+      expect(axiosCreate.args[0]).to.eql([
+        {
+          baseURL: endpoint,
+        },
+      ]);
+      expect(VFApp.getVersionID()).to.eql(versionID);
+    });
 
-    expect(VFApp.getVersionID()).to.eql(versionID);
+    it('variables', async () => {
+      const { VFApp, axiosInstance } = createVFApp({
+        variables: VF_APP_CUSTOM_INITIAL_VARIABLES 
+      });
+
+      axiosInstance.get.resolves(asHttpResponse(VF_APP_INITIAL_STATE));
+      axiosInstance.post.resolves(asHttpResponse(START_RESPONSE_BODY));
+
+      await VFApp.start();
+
+      expect(axiosInstance.post.args[0]).to.eql([
+        INTERACT_ENDPOINT(VERSION_ID),
+        STATE_REQUEST_BODY_WITH_CUSTOM_VARIABLES
+      ]);
+    });
   });
 
   it('start', async () => {
@@ -86,10 +105,10 @@ describe('App', () => {
     const data = await VFApp.start();
 
     expect(axiosInstance.get.callCount).to.eql(1);
-    expect(axiosInstance.get.args[0]).to.eql([`/interact/${VERSION_ID}/state`]);
+    expect(axiosInstance.get.args[0]).to.eql([STATE_ENDPOINT(VERSION_ID)]);
 
     expect(axiosInstance.post.callCount).to.eql(1);
-    expect(axiosInstance.post.args[0]).to.eql([`/interact/${VERSION_ID}`, START_REQUEST_BODY]);
+    expect(axiosInstance.post.args[0]).to.eql([INTERACT_ENDPOINT(VERSION_ID), START_REQUEST_BODY]);
 
     expect(data.toJSON()).to.eql(START_RESPONSE_BODY);
     expect(VFApp.getContext()?.toJSON()).to.eql(START_RESPONSE_BODY);
@@ -108,11 +127,11 @@ describe('App', () => {
     const data2 = await VFApp.start();
 
     expect(axiosInstance.get.callCount).to.eql(1);
-    expect(axiosInstance.get.args[0]).to.eql([`/interact/${VERSION_ID}/state`]);
+    expect(axiosInstance.get.args[0]).to.eql([STATE_ENDPOINT(VERSION_ID)]);
 
     expect(axiosInstance.post.callCount).to.eql(2);
-    expect(axiosInstance.post.args[0]).to.eql([`/interact/${VERSION_ID}`, START_REQUEST_BODY]);
-    expect(axiosInstance.post.args[1]).to.eql([`/interact/${VERSION_ID}`, START_REQUEST_BODY]);
+    expect(axiosInstance.post.args[0]).to.eql([INTERACT_ENDPOINT(VERSION_ID), START_REQUEST_BODY]);
+    expect(axiosInstance.post.args[1]).to.eql([INTERACT_ENDPOINT(VERSION_ID), START_REQUEST_BODY]);
 
     expect(data1.toJSON()).to.eql(START_RESPONSE_BODY);
     expect(data2.toJSON()).to.eql(START_RESPONSE_BODY);
@@ -131,7 +150,7 @@ describe('App', () => {
     const data = await VFApp.sendText(USER_RESPONSE);
 
     expect(axiosInstance.post.callCount).to.eql(2);
-    expect(axiosInstance.post.args[1]).to.eql([`/interact/${VERSION_ID}`, SEND_TEXT_REQUEST_BODY]);
+    expect(axiosInstance.post.args[1]).to.eql([INTERACT_ENDPOINT(VERSION_ID), SEND_TEXT_REQUEST_BODY]);
 
     expect(data.toJSON()).to.eql(SEND_TEXT_RESPONSE_BODY);
   });
@@ -149,7 +168,7 @@ describe('App', () => {
     const data = await VFApp.sendText('');
 
     expect(axiosInstance.post.callCount).to.eql(2);
-    expect(axiosInstance.post.args[1]).to.eql([`/interact/${VERSION_ID}`, { ...SEND_TEXT_REQUEST_BODY, request: null }]);
+    expect(axiosInstance.post.args[1]).to.eql([INTERACT_ENDPOINT(VERSION_ID), { ...SEND_TEXT_REQUEST_BODY, request: null }]);
 
     expect(data.toJSON()).to.eql(SEND_TEXT_RESPONSE_BODY);
   });
@@ -167,7 +186,7 @@ describe('App', () => {
     await VFApp.sendText({} as any);
 
     expect(axiosInstance.post.callCount).to.eql(2);
-    expect(axiosInstance.post.args[1]).to.eql([`/interact/${VERSION_ID}`, { ...SEND_TEXT_REQUEST_BODY, request: null }]);
+    expect(axiosInstance.post.args[1]).to.eql([INTERACT_ENDPOINT(VERSION_ID), { ...SEND_TEXT_REQUEST_BODY, request: null }]);
   });
 
   it('sendText, falsy', async () => {
@@ -183,7 +202,7 @@ describe('App', () => {
     await VFApp.sendText(undefined as any);
 
     expect(axiosInstance.post.callCount).to.eql(2);
-    expect(axiosInstance.post.args[1]).to.eql([`/interact/${VERSION_ID}`, { ...SEND_TEXT_REQUEST_BODY, request: null }]);
+    expect(axiosInstance.post.args[1]).to.eql([INTERACT_ENDPOINT(VERSION_ID), { ...SEND_TEXT_REQUEST_BODY, request: null }]);
   });
 
   it('sendText, start was not previously called', async () => {
@@ -284,7 +303,7 @@ describe('App', () => {
     const response = context.getResponse();
 
     expect(axiosInstance.post.callCount).to.eql(2);
-    expect(axiosInstance.post.args[1]).to.eql([`/interact/${VERSION_ID}`, SEND_TEXT_REQUEST_BODY_TTS_ON]);
+    expect(axiosInstance.post.args[1]).to.eql([INTERACT_ENDPOINT(VERSION_ID), SEND_TEXT_REQUEST_BODY_TTS_ON]);
 
     expect((response[0] as any).payload.message).to.eql('<voice>Books ought to have to have good endings.</voice>');
     expect((response[0] as any).payload.src).to.eql('data:audio/mpeg;base64,SUQzBAAAAAAA');
@@ -312,7 +331,7 @@ describe('App', () => {
     const response = context.getResponse();
 
     expect(axiosInstance.post.callCount).to.eql(2);
-    expect(axiosInstance.post.args[1]).to.eql([`/interact/${VERSION_ID}`, SEND_TEXT_REQUEST_BODY_TTS_ON]);
+    expect(axiosInstance.post.args[1]).to.eql([INTERACT_ENDPOINT(VERSION_ID), SEND_TEXT_REQUEST_BODY_TTS_ON]);
 
     expect((response[0] as any).payload.message).to.eql('Books ought to have to have good endings.');
     expect((response[0] as any).payload.src).to.eql('data:audio/mpeg;base64,SUQzBAAAAAAA');

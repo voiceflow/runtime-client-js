@@ -2,6 +2,12 @@ import { VisualTrace, BlockTrace, ChoiceTrace, DebugTrace, ExitTrace, FlowTrace,
 import { TraceStreamAction } from "@voiceflow/general-types/build/nodes/stream";
 import { APLType, CanvasVisibility, VisualType } from "@voiceflow/general-types/build/nodes/visual";
 
+export type VFAppVariablesSchema = {
+  age: number | 0;
+  name: string | 0;
+  gender: 'M' | 'F' | 'Other' | 0;
+};
+
 export const SPEAK_TRACE: SpeakTrace = {
   type: TraceType.SPEAK,
   payload: {
@@ -100,3 +106,7 @@ export const FAKE_VISUAL_TRACE = {
     visualType: 'fake'
   }
 }
+
+export const INTERACT_ENDPOINT = (versionID: string) => `/interact/${versionID}`;
+
+export const STATE_ENDPOINT = (versionID: string) => `/interact/${versionID}/state`;

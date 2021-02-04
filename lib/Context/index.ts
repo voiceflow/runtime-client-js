@@ -3,8 +3,12 @@ import { TraceType } from '@voiceflow/general-types';
 import DataFilterer from '@/lib/DataFilterer';
 import { Choice, DataConfig, ResponseContext } from '@/lib/types';
 
-class Context {
+import VariableManager from '../Variables';
+
+class Context<S extends Record<string, any> = Record<string, any>> {
   private dataFilterer: DataFilterer;
+
+  public variables = new VariableManager<S>(this.toJSON.bind(this), this.setVariables.bind(this));
 
   constructor(private context: ResponseContext, dataConfig?: DataConfig) {
     this.dataFilterer = new DataFilterer(dataConfig);
@@ -31,6 +35,19 @@ class Context {
 
   isEnding(): boolean {
     return this.context.trace.some((trace) => trace.type === TraceType.END);
+  }
+
+  private setVariables(newValues: Partial<S>) {
+    this.context = {
+      ...this.context,
+      state: {
+        ...this.context.state,
+        variables: {
+          ...this.context.state.variables,
+          ...newValues,
+        },
+      },
+    };
   }
 }
 

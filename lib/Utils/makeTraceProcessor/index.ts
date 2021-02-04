@@ -1,5 +1,7 @@
 import { GeneralTrace, TraceType } from '@voiceflow/general-types';
 
+import { VFClientError } from '@/lib/Common';
+
 import { BlockTraceHandler, invokeBlockHandler } from './block';
 import { ChoiceTraceHandler, invokeChoiceHandler } from './choice';
 import { DebugTraceHandler, invokeDebugHandler } from './debug';
@@ -37,13 +39,13 @@ export const makeTraceProcessor = (handlers: TraceHandlerMap) => (trace: General
   const invokeHandler = invokeHandlerMap.get(trace.type);
 
   if (!invokeHandler) {
-    throw new Error(`VFError: invalid trace type "${trace.type}" was passed into makeTraceProcessor`);
+    throw new VFClientError(`invalid trace type "${trace.type}" was passed into makeTraceProcessor`);
   }
 
   const handler = handlers[trace.type];
 
   if (!handler) {
-    throw new Error(`VFError: handler for "${trace.type}" was not implemented`);
+    throw new VFClientError(`handler for "${trace.type}" was not implemented`);
   }
 
   return invokeHandler(trace, handlers[trace.type]);

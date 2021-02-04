@@ -2,6 +2,7 @@ import { GeneralTrace, TraceType } from '@voiceflow/general-types';
 
 import { DataConfig } from '@/lib/types';
 
+import { VFTypeError } from '../Common';
 import { isValidTraceType, stripSSMLFromSpeak } from './utils';
 
 class DataFilterer {
@@ -12,7 +13,7 @@ class DataFilterer {
   constructor(dataConfig?: DataConfig) {
     dataConfig?.includeTypes?.forEach((includeType) => {
       if (!isValidTraceType(includeType)) {
-        throw new TypeError(`includeType type '${includeType}' is not a valid trace type`);
+        throw new VFTypeError(`includeType type '${includeType}' is not a valid trace type`);
       }
       this.includeTypes.add(includeType);
     });
