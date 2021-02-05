@@ -1,4 +1,4 @@
-# @voiceflow/runtime-client-js
+# Voiceflow Runtime Client
 
 The Voiceflow Runtime Client is an SDK for running Voiceflow apps in JavaScript. 
 
