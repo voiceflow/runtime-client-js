@@ -20,6 +20,15 @@ The Runtime Client can be used with jQuery, React, and any other JavaScript libr
 
 
 
+## Examples
+
+- Hello World
+- Using makeTraceProcessor
+- Adding TTS
+- Using advanced trace types
+
+
+
 ## Install
 
 ```bash
@@ -74,7 +83,7 @@ To start a conversation **session** with our Voiceflow app, call the `.start()` 
 
 The `Context` is a snapshot of the conversation at the current stage and contains useful information such as the chatbot's responses, the state of all the variables in the Voiceflow project, and much more!
 
-We can access the responses by calling `context.getResponses()` to return a list of `Trace` objects. The `Trace` objects are pieces that make up the entire bot's response. We can log the entire response to console by iterating over the `traces` and logging the individual pieces found in `trace.payload.message`.
+We can access the responses by calling `context.getResponses()` to return a list of `Trace` objects. The `Trace` objects are pieces that make up the entire bot's response. We can log the entire response to console by iterating over the `traces` and logging the messages in the individual `trace`s.
 
 ```js
 // initalize the conversation, get the starting prompt
@@ -89,11 +98,13 @@ chatbot.start().then((context) => {
 });
 ```
 
-The `.start()` method is triggers the first **interaction**. For subsequent interactions, you should invoke `.sendText()` method and send your user's input to the chatbot and advance the conversation flow.
+The `.start()` method is triggers the first **interaction**. For subsequent interactions, you should invoke the `.sendText()` method and send your user's input to the chatbot to advance the conversation.
 
 Both `.start()` and `.sendText()` are "interaction methods" which return a `Context` object. Just like above, we can access the responses returned by `.sendText()` using `context.getResponses()`
 
-After interaction with the chatbot, we need to call `context.isEnding()` to check whether or not the conversation has ended. When the session has ended, any additional calls to interaction methods (except for `.start()`) will throw an exception. The only interaction that is valid, after the conversation has ended, is the `.start()` call, which will start the conversation flow from the beginning.
+After interacting with the chatbot, we need to call `context.isEnding()` to check if the conversation has ended. When the sesconversationion has ended, any additional calls to interaction methods (except for `.start()`) will throw an exception. 
+
+The only interaction that is valid, after the conversation has ended, is the `.start()` call, which will start the conversation flow from the beginning. 
 
 **NOTE:** Although we did not check `.isEnding()` after our call to `.start()` in the above example, it may be worthwhile to do so, depending on your application. For example, if your voice interface simply runs from start to finish without prompting for user input, then `.isEnding()` will return `true` after `.start()` is called, which makes all subsequent `.sendText()` calls throw an exception.
 
@@ -131,7 +142,9 @@ To summarize the above, to integrate a Voiceflow app into your JavaScript projec
 
 ### makeTraceProcessor
 
+```js
 
+```
 
 
 
@@ -164,6 +177,10 @@ To summarize the above, to integrate a Voiceflow app into your JavaScript projec
 ### Variables
 
 **WARNING:** Be careful when setting variable setters. It can be difficult to determine where you are in a Voiceflow diagram, so be wary not to set variables at the wrong time. 
+
+
+
+### Multiple Applications
 
 
 
