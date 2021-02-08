@@ -2,7 +2,7 @@
 
 The Voiceflow Runtime Client is an SDK for running Voiceflow apps in JavaScript. 
 
-Developers or designers can build a fully-functioning conversational app on [Voiceflow](https://creator.voiceflow.com). Then, using this SDK, you can integrate that app into your JavaScript project. This allows you to quickly add a chatbot, voice interface, or any other voice-based functionality to your project, without the hassle of implementing the conversation flow with only code.
+Developers or designers can build a fully-functioning conversational app on [Voiceflow](https://creator.voiceflow.com), and integrate that app into a JavaScript project using the SDK. This allows you to quickly add any kind of voice interface, such as a chatbot, to your project, without the hassle of implementing the conversation flow using code.
 
 The Runtime Client can be used with jQuery, React, and any other JavaScript library or framework. 
 
