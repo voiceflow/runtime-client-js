@@ -1,4 +1,4 @@
-Voiceflow Runtime Client
+# Voiceflow Runtime Client
 
 The Voiceflow Runtime Client is an SDK for running Voiceflow apps in JavaScript. 
 
@@ -27,6 +27,7 @@ The Runtime Client can be used with jQuery, React, and any other JavaScript libr
 - Hello World example on React.js
 - makeTraceProcessor example
 - TTS example
+- suggestion chips example
 
 
 
@@ -143,7 +144,96 @@ To summarize the above, to integrate a Voiceflow app into your JavaScript projec
 
 ## Advanced Usage
 
+### Statefulness of RuntimeClient
+
+It is useful note that a `RuntimeClient` instance is a **stateful** object and calling its methods will always produces side-effects and change its internal state. 
+
+For example, whenever an interaction method such as `.sendText()` is called, the `RuntimeClient` will send the current local copy of the Voiceflow application state to Voiceflow's General Runtime servers, which will perform calculate any state transitions based on the user's response and then respond with the next state. The `RuntimeClient` will then replace its local state copy with the next state from the HTTP response.
+
+To summarize the side-effects of the basic interaction methods:
+
+1. `.start()` - This methods runs the Voiceflow app from the beginning, until the app requests user input. If the `RuntimeClient` is currently in the middle of executing an app session, then we terminate that session and restart the app. Basically, this method is guaranteed to idempotent (assuming your Voiceflow app is also idempotent).
+2. `.sendText(userInput)` - Transitions the Voiceflow app to the next state, based the `userInput` that was given. This method is **not** idempotent.
+
+The side-effects of the advanced interaction methods are:
+
+1. `.sendIntent(...)` - Same side-effects as `.sendText()`
+2. `.send(data)` - This method calls one of the above methods based on the input it is given. Therefore, its exact side-effects depends the argument types, e.g, if no argument or `null` is passed, then it behaves like `.start()`
+
+
+
 ### Context
+
+Interaction methods such as `.start()`, `.sendText()`, and `.send()` all return a `Context` project. The `Context` is a snapshot of the Voiceflow application's state and includes data such as the current variable values.
+
+```js
+const context = await chatbot.start();
+const context = await chatbot.sendText(userInput);
+```
+
+Each time an interaction method is called, a new `Context` object is created to wrap around the next state. When a `RuntimeClient` instance makes a state transition, the `Context`'s wrapped state doesn't change. Hence, you can build a **history** of `Context` objects and implement time-travelling capabilities in your chatbot. 
+
+The `Context` object has a handful of methods to expose its internal data. We will describe a subset of them below, in order of most useful to least useful.
+
+
+
+#### `.getResponse()`
+
+The `.getResponse()` method returns the traces which make up the Voiceflow app's entire response. 
+
+We say that this method "returns the traces which make up...the entire response," but this isn't quite accurate. In fact, `.getResponse()` returns a **view** of the entire list of traces. By default, the `Context` will filter out any trace that isn't a `SpeakTrace`, in order to show a simplified model of the Voiceflow app response to you. 
+
+To see the other trace types in the return value of `.getResponse()`, see the `includeTypes` option in the "Configuration" section. Alternatively, you can view the unfiltered list of all traces using the `.getTrace()` method, which will be discussed later.
+
+```js
+const response = context.getResponse();
+response.forEach(({ payload }) => {
+  console.log(payload.message);
+});
+```
+
+
+
+#### `.isEnding()`
+
+The `.isEnding()` method returns `true` if the application state wrapped by the `Context` is the last state before the app session terminated, and returns `false` otherwise.
+
+This method is mainly used to detect when the current conversation with the Voiceflow General Runtime has ended, and thus, we need to call `.start()` to start a new conversation from the beginning.
+
+```js
+do {
+  const userInput = await frontend.getUserInput();			// listen for a user response
+  const context = await app.sendText(userInput);				// send the response to the Voiceflow app
+  frontend.display(context.trace);											// display the response, if any
+} while (!context.isEnding())														// check if we're done
+terminateApp();																					// perform any cleanup if conversation is over
+```
+
+
+
+#### `.getChips()`
+
+The `.getChips()` method returns a list of suggestion chips. If you are unfamiliar with this terminology, a **suggestion chip** is simply a suggested response that the user can send to a voice interface. 
+
+You can pass suggestion chips into buttons on your UI, which can be pressed by the user to automatically send the suggested response. An example illustrating this is shown below:
+
+```js
+const chips = context.getChips();			
+// => [{ name: "I would like a pizza", ... }, { name: "I would like a hamburger", ... }]
+
+const createOnClickSuggestion = (chosenSuggestion) => () => {
+  const context = await chatbot.sendText(chosenSuggestion);			// send the suggested response to VF app
+}
+
+chips.forEach(({ name }) => {												
+  frontend.addButton({
+    text: name,
+    callback: createOnClickSuggestion(name)
+  });
+});
+```
+
+You can also check out the "Samples" for a working implementation of suggestion chips on the browser.
 
 
 
@@ -181,6 +271,14 @@ const app = new RuntimeClient({
 
 
 #### SSML
+
+```js
+
+```
+
+
+
+#### includeTypes
 
 ```js
 
