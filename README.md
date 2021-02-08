@@ -338,15 +338,77 @@ const result1 = context.getResponse().map(traceProcessor);			// usage in an HOF
 
 ### Variables
 
+#### Getters
+
+```js
+const name = context.variables.get('name');
+
+const allVariables = context.variables.getAll();
+const name = allVariables.name;
+
+const keys = context.variables.getKeys();
+```
+
+
+
+#### Setters
+
+Because the `RuntimeClient` returns a reference to an internal `Context`, which is wrapping around the Voiceflow app's current state, setting variables in the current context
+
 **WARNING:** Be careful when setting variable setters. It can be difficult to determine where you are in a Voiceflow diagram, so be wary not to set variables at the wrong time. 
+
+```js
+context.variables.set('name', 'Jean-Luc Picard')
+context.variables.setMany({
+  name: 'Jean-Luc Picard',
+  age: 52
+});
+```
+
+
+
+#### Enabling Stricter Typing
+
+The `.variables` submodule supports stricter typing, if you provide a variable **schema** to the `RuntimeClient`.  Once you do, the `.variables` methods like `.get()` will be able to intelligently determine the variable type, based on the variable name you pass as an argument.
+
+```ts
+export type VFVariablesSchema = {
+    age: number;
+    name: string;
+};
+
+const app = new Runtime<VFVariablesSchema>({
+	versionID: 'some-version-id'
+});
+
+const context = await app.start();
+
+const name = context.variables.get('name');				// return value is inferred to be a "string"
+context.variables.set('name', 12);								// TypeError! 'name' is a "string" not a "number"
+```
 
 
 
 ### Multiple Applications
 
+You can integrate any number of Voiceflow applications to your project, simply by constructing multiple `VFApp` instances. You can even have multiple instances of the same Voiceflow project at once, our runtime servers are stateless, so two running Voiceflow programs will not interfere with each other.
 
+```js
+// Multiple integrations
+import { App as VFApp } from "@voiceflow/runtime-client-sdk";
 
-### Advanced Interaction Methods
+const supportBot1 = new VFApp({
+  versionID: 'support-bot-1-id',
+});
+
+const supportBot2 = new VFApp({
+  versionID: 'support-bot-2-id',
+});	// has a separate state than supportBot1
+
+const orderBot = new VFApp({
+  versionID: 'order-bot'
+});
+```
 
 
 
