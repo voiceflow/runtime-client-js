@@ -49,19 +49,19 @@ To start adding a voice interface to your JavaScript project, we need to first b
 
 Open [Voiceflow](https://creator.voiceflow.com) and setup a "General Assistant."  We have detailed tutorials on Voiceflow to help you **build** your first conversational app. 
 
-<img src="/Users/voiceflow/Library/Application Support/typora-user-images/Screen Shot 2021-02-05 at 10.43.33 AM.png" alt="Screen Shot 2021-02-05 at 10.43.33 AM" style="zoom:35%;" />
+![image](https://user-images.githubusercontent.com/32404412/107269001-f1979500-6a16-11eb-8303-10620ad44764.png)
 
 When you are satisfied with your design, make sure to **train** your assistant. Click the Test button at the top-right corner to open up the Prototyping view.
 
-<img src="/Users/voiceflow/Library/Application Support/typora-user-images/Screen Shot 2021-02-05 at 10.44.19 AM.png" alt="Screen Shot 2021-02-05 at 10.44.19 AM" style="zoom:50%;" />
+<img width="552" alt="Image of the Test Button on Voiceflow" src="https://user-images.githubusercontent.com/32404412/107269101-17bd3500-6a17-11eb-86b1-b0a817022aca.png">
 
 In the Prototyping view, the right sidebar will have a Training panel. Click Train Assistant to begin the training process. **NOTE:** If the "Train Assistant" button is greyed out, then your project need to be trained, so you can skip this step.
 
-<img src="/Users/voiceflow/Library/Application Support/typora-user-images/Screen Shot 2021-02-05 at 10.45.32 AM.png" alt="Screen Shot 2021-02-05 at 10.45.32 AM" style="zoom:50%;" />
+<img width="300" alt="Image of the Test Button on Voiceflow" src="https://user-images.githubusercontent.com/32404412/107269251-5521c280-6a17-11eb-9d82-5a0f62bff14d.png">
 
 After the above is done, you are ready to integrate the app onto your JavaScript project. On your address bar, you should see a URL of this form: `https://creator.voiceflow.com/project/{VERSION_ID}/...`. The `VERSION_ID` is a id identifying your particular project. **Copy** this version id, as we will need it later for the integration
 
-![Screen Shot 2021-02-05 at 10.48.40 AM](/Users/voiceflow/Library/Application Support/typora-user-images/Screen Shot 2021-02-05 at 10.48.40 AM.png)
+<img width="957" alt="Screen Shot 2021-02-08 at 2 11 09 PM" src="https://user-images.githubusercontent.com/32404412/107269370-813d4380-6a17-11eb-8bb5-d286c5db3664.png">
 
 
 
