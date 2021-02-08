@@ -20,12 +20,13 @@ The Runtime Client can be used with jQuery, React, and any other JavaScript libr
 
 
 
-## Examples
+## Samples
 
-- Hello World
-- Using makeTraceProcessor
-- Adding TTS
-- Using advanced trace types
+- Hello World example on Node
+- Hello World example with jQuery
+- Hello World example on React.js
+- makeTraceProcessor example
+- TTS example
 
 
 
@@ -47,15 +48,15 @@ To start adding a voice interface to your JavaScript project, we need to first b
 2. **Training** the chatbot if necessary
 3. **Copying** the version id for our integrations
 
-Open [Voiceflow](https://creator.voiceflow.com) and setup a "General Assistant."  We have detailed tutorials on Voiceflow to help you **build** your first conversational app. 
+Open [Voiceflow](https://creator.voiceflow.com) and setup a "General Assistant."  We have detailed tutorials on Voiceflow to help you build your first conversational app. 
 
 ![image](https://user-images.githubusercontent.com/32404412/107269001-f1979500-6a16-11eb-8303-10620ad44764.png)
 
-When you are satisfied with your design, make sure to **train** your assistant. Click the Test button at the top-right corner to open up the Prototyping view.
+When you are satisfied with your design, make sure to train your assistant. Click the Test button at the top-right corner to open up the Prototyping view.
 
 <img width="552" alt="Image of the Test Button on Voiceflow" src="https://user-images.githubusercontent.com/32404412/107269101-17bd3500-6a17-11eb-86b1-b0a817022aca.png">
 
-In the Prototyping view, the right sidebar will have a Training panel. Click Train Assistant to begin the training process. **NOTE:** If the "Train Assistant" button is greyed out, then your project need to be trained, so you can skip this step.
+In the Prototyping view, the right sidebar will have a Training panel. Click Train Assistant to begin the training process. **NOTE:** If the "Train Assistant" button is greyed out, then your project does not need to be trained, so you can skip this step.
 
 <img width="300" alt="Image of the Test Button on Voiceflow" src="https://user-images.githubusercontent.com/32404412/107269251-5521c280-6a17-11eb-9d82-5a0f62bff14d.png">
 
@@ -83,7 +84,9 @@ To start a conversation **session** with our Voiceflow app, call the `.start()` 
 
 The `Context` is a snapshot of the conversation at the current stage and contains useful information such as the chatbot's responses, the state of all the variables in the Voiceflow project, and much more!
 
-We can access the responses by calling `context.getResponses()` to return a list of `Trace` objects. The `Trace` objects are pieces that make up the entire bot's response. We can log the entire response to console by iterating over the `traces` and logging the messages in the individual `trace`s.
+We can access the responses by calling `context.getResponses()` to return a list of `GeneralTrace` objects. Actually, to be more specific, a list of `SpeakTrace`s is returned, which are small pieces of dialogue that make up the entire bot's response to the user. We can log the entire response to console by iterating over the `traces` and logging the messages in the individual `trace`s.
+
+There are other trace-types besides `SpeakTrace`s that are sub-types of a `GeneralTrace`, but for simplicity, you only need to know about `SpeakTrace`s to get started.
 
 ```js
 // initalize the conversation, get the starting prompt
@@ -140,15 +143,32 @@ To summarize the above, to integrate a Voiceflow app into your JavaScript projec
 
 ## Advanced Usage
 
-### makeTraceProcessor
-
-```js
-
-```
+### Context
 
 
 
 ### Configuration
+
+The `RuntimeClient` comes with additional `dataConfig` options for managing the data returned by `Context.getResponse()`. To summarize, there are four options currently available:
+
+1. `tts` - When set to `true`, any `SpeakTrace`s returned by an interaction will contain an additional`src` property with an `.mp3` string. The string is audio of a voice assistant speaking out the `SpeakTrace`'s `message`. You can play this audio, such as with an `HTMLAudioElement` on a web browser,  to implement voiced chatbots.
+2. `ssml` - When set to `true`, the `ssml` property disables the SDK's SSML sanitization and returns the full response with SSML included. This might be useful if you prefer to feed this data into your own TTS system.
+3. `includeTypes` - By default, we expose only `SpeakTrace`s, which contain the app's responses. This option accepts a list which specifies the additional trace types you want to receive from the `.getResponse()` method. For more detail on the available trace-types, see the "Advanced Trace Types" section.
+4. `traceProcessor` - Accepts a "trace processor" function and automatically calls the function on the `RuntimeClient`'s current traces, whenever an interaction method is invoked.
+
+See the following subsections for more detail on each configuration option.
+
+```js
+const app = new RuntimeClient({
+    versionID: '60216d2e3c43f738ddcca219',
+    dataConfig: {
+      	tts: true,
+      	ssml: true,
+        includeTypes: ['debug', 'stream', 'block']
+      	traceProcessor: myTraceProcessor
+    }
+});
+```
 
 
 
@@ -161,6 +181,48 @@ To summarize the above, to integrate a Voiceflow app into your JavaScript projec
 
 
 #### traceProcessor
+
+
+
+### `makeTraceProcessor`
+
+A typical pattern for handling a Voiceflow app's response is to use a higher-order function (e.g. `map`) to invoke a callback on each trace in `Context.trace`. 
+
+Unfortunately, there are many types of traces, each with their own unique attributes. If we wanted to process the entire list of traces, we would need boilerplate logic, such as `switch` statements, to distinguish between different traces and call the appropriate handler.
+
+The SDK exposes a utility called `makeTraceProcessor` which allows you to quickly define a **trace processor** function, which can be passed as a callback of a higher-order function (see below).
+
+**Arguments:**
+
+- `handlerMap` - `object` -  An object whose keys are `TraceType`s (e.g. speak` for `SpeakTraces), and whose values are handlers for that trace type. Some examples of `TraceType`s and their (simplified) expected handler signatures are listed below. For the full list of available trace types and complete handler signatures, see the API Reference. 
+  - `speak`- `(message) => any`  - A `SpeakTrace` handler receives the `message`, which is simply the Voiceflow app's response to any user interaction.
+  - `debug - (message) => any` - A `DebugTrace` handler receives a debug `message` that illustrates how the Voiceflow runtime is evaluating the input and executing its control flow.
+
+**Returns:**
+
+- `traceProcessor`  - `(trace: GeneralTrace) => any` - A function that accepts any trace type and returns the return value of that trace type's handler in `handlerMap`
+
+**Example:**
+
+```js
+const RuntimeClient = require("@voiceflow/runtime-client-js").default;
+const { makeTraceProcessor } = require("@voiceflow/runtime-client-js");
+
+// Defining a trace processor
+const i = 0;
+const traceProcessor = makeTraceProcessor({
+    speak: (message) => {
+        console.log(`speakHandler says: ${message}`);
+      	return `vf-speak-${++i}`;
+    },
+});
+
+// Usage
+const context = await app.start();
+
+const result1 = context.getResponse().map(traceProcessor);			// usage in an HOF
+// e.g. result = ['vf-speak-1', 'vf-speak-2', 'vf-speak-3']
+```
 
 
 
