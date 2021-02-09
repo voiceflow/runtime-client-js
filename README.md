@@ -19,15 +19,15 @@ The Runtime Client can be used with jQuery, React, and any other JavaScript libr
 <img src="https://user-images.githubusercontent.com/5643574/106966841-17b9ee00-6714-11eb-868a-26751b7d560e.png" alt="demo" style="zoom:50%;" />
 
 
-
 ## Samples
 
-- [Hello World with Node](https://github.com/voiceflow/rcjs-hello-world)
-- [First Kitchen app with Node](https://github.com/voiceflow/rcjs-cli)
-- makeTraceProcessor usage
-- TTS usage
-- Suggestion Chips Usage
+See the [rcjs-examples](https://github.com/voiceflow/rcjs-examples) repo for instructions on how to setup each Sample.
 
+- Hello World - [source](https://github.com/voiceflow/rcjs-examples/tree/master/hello-world)
+- Hamburger Order - [source](https://github.com/voiceflow/rcjs-examples/tree/master/hamburger-order)
+- Trace Processor - [source](https://github.com/voiceflow/rcjs-examples/tree/master/trace-processor)
+- Using TTS - [source](https://github.com/voiceflow/rcjs-examples/tree/master/text-to-speech)
+- Using Suggestion Chips [source](https://github.com/voiceflow/rcjs-examples/tree/master/suggestion-chips)
 
 
 ## Install
@@ -35,7 +35,6 @@ The Runtime Client can be used with jQuery, React, and any other JavaScript libr
 ```bash
 npm install --save @voiceflow/runtime-client-js
 ```
-
 
 
 ## Getting Started
