@@ -48,20 +48,21 @@ To start using the SDK, we should build a project on [Voiceflow](https://creator
 3. Open the imported project on Voiceflow
 
 <p align="center">
-	<img width="552"  alt="Image of the Test Button on Voiceflow" src="https://user-images.githubusercontent.com/32404412/107429772-4cea8580-6af2-11eb-87bd-a30f171b0ae3.png">
+	<img width="546" alt="Screen Shot 2021-02-09 at 6 23 17 PM" src="https://user-images.githubusercontent.com/32404412/107441822-eff7cb00-6b03-11eb-9bd6-5551c195669b.png">
 </p>	
+
 
 4. Click the Test button at the top-right corner to open up the Prototyping view.
 
 <p align="center">
 	<img width="552"  alt="Image of the Test Button on Voiceflow" src="https://user-images.githubusercontent.com/32404412/107269101-17bd3500-6a17-11eb-86b1-b0a817022aca.png">
 </p>	
-5. Click Train Assistant on the sidebar in the Prototyping view. This initiates the training process for the Voiceflow project. **NOTE:** For your own Voiceflow projects, if the "Train Assistant" button is unclickable, then your project does not need to be trained, so you can skip this step.
+5. Click Train Assistant on the sidebar in the Prototyping view.  **NOTE:** If the "Train Assistant" button is unclickable, then your project does not need to be trained, so you can skip this step.
 
 <p align="center">
 	<img width="300" alt="Image of the Training Panel on Voiceflow" src="https://user-images.githubusercontent.com/32404412/107269251-5521c280-6a17-11eb-9d82-5a0f62bff14d.png">
 </p>	
-6. Copy the `VERSION_ID` from the URL in your address bar. When you are inside a Voiceflow project, your address bar should have a URL of the form: `https://creator.voiceflow.com/project/{VERSION_ID}/...`, copy the first id after the `/project/` token.
+6. Copy the `VERSION_ID` from the URL in your address bar. When you are inside a Voiceflow project, your address bar should have a URL of the form: `https://creator.voiceflow.com/project/{VERSION_ID}/...`
 
 <p align="center">
 	<img width="957" align="center" alt="Screen Shot 2021-02-08 at 2 11 09 PM" src="https://user-images.githubusercontent.com/32404412/107269370-813d4380-6a17-11eb-8bb5-d286c5db3664.png">
@@ -85,17 +86,15 @@ import RuntimeClient from "@voiceflow/runtime-client-js"
 2. Construct a `RuntimeClient` object and pass in the `VERSION_ID`. 
 
 ```js
-const RuntimeClient = require('@voiceflow/runtime-client-js').default;
-
 const chatbot = new RuntimeClient({
   versionID: 'XXXXXXXXXXXXXXXXXXXXXXXX' // the VERSION_ID goes here
 });
 ```
 
 3. Call `.start()` to begin a conversation session with the Voiceflow app.
-4. Store the return of `.start()` into a variable named `context`. The `context` is a `Context` object, which is a snapshot of the conversation's current state and it contains useful information like variables in the Voiceflow app.
+4. Store the return of `.start()` into a variable named `context`. The `context` is a `Context` object, which is a snapshot of the conversation's current state and it contains useful information like Voiceflow variables.
 5. Call `context.getResponse()` to get a list of `SpeakTrace`s (*) and store it in `traces`. A **trace** is a piece of the entire app response. 
-6. Output the Voiceflow app's response by iterating over the `traces` and accessing the `trace.payload.message` for the response text.
+6. Output the response by iterating over `traces` and accessing the `trace.payload.message` for the response text.
 
 ```js
 (async () => {
@@ -108,9 +107,9 @@ const chatbot = new RuntimeClient({
 })();
 ```
 
-10. Call `.sendText()` and pass in any user input to continue the conversation. We should only call `.sendText()` after the call to `.start()`
-11. Store the return of `.sendText()` into a variable named `context2`. Both `.sendText()` and `.send()` are **interaction methods** which return a `Context`. 
-12. Output the response from `.sendText()` like we did before.
+10. For subsequent requests after `.start()`, call `.sendText()` and pass in any user input. We call `.sendText()` and `.start()` **interaction methods**.
+11. Store the return of `.sendText()` into a variable named `context2`. 
+12. Output the response from `.sendText()` like we did above.
 
 ```js
 async(() => {
@@ -126,7 +125,7 @@ async(() => {
 });
 ```
 
-13. After each interaction method call, call `context.isEnding()` to check if the conversation has ended. When an conversation has ended, any calls to interaction methods - except `.start()` - will throw an exception.
+13. After each interaction method call, invoke `context.isEnding()` to check if the conversation has ended. When a conversation has ended, any calls to interaction methods - except `.start()` - will throw an exception.
 14. Call `.start()` again if you want to restart the conversation from the beginning.
 
 ```js
@@ -168,7 +167,7 @@ const chatbot = new RuntimeClient({
   if (context.isEnding()) {
     cleanupMyApp();
     const context1 = await chatbot.sendText('hello world!')	// invalid - .isEnding() == true so throw except
-    const context2 = await chatbot.start();									// valid - start from the beginning
+    const context2 = await chatbot.start(); // valid - start from the beginning
   }
 })();
 ```
@@ -214,13 +213,13 @@ chatbot.start()
 
 ### Statefulness of RuntimeClient
 
-It is useful note that a `RuntimeClient` instance is a **stateful** object and calling its methods will always produces side-effects and change its internal state. 
+A `RuntimeClient` instance is a **stateful** object and calling its methods typically produces side-effects that change its internal state. 
 
-For example, whenever an interaction method such as `.sendText()` is called, the `RuntimeClient` will send the current local copy of the Voiceflow application state to Voiceflow's General Runtime servers, which will perform calculate any state transitions based on the user's response and then respond with the next state. The `RuntimeClient` will then replace its local state copy with the next state from the HTTP response.
+For example, whenever an interaction method such as `.sendText()` is called, the `RuntimeClient` will send its local copy of the Voiceflow application state to our servers, which will calculate any state transitions based on the user input and respond with the next state. The `RuntimeClient` will then replace its local state with this newer state.
 
 To summarize the side-effects of the basic interaction methods:
 
-1. `.start()` - This methods runs the Voiceflow app from the beginning, until the app requests user input. If the `RuntimeClient` is currently in the middle of executing an app session, then we terminate that session and restart the app. Basically, this method is guaranteed to idempotent (assuming your Voiceflow app is also idempotent).
+1. `.start()` - This methods runs the Voiceflow app from the beginning, until the app requests user input. If the `RuntimeClient` is currently in the middle of a conversation, then we terminate that session and restart the conversation. You can think of this method as being idempotent (assuming your Voiceflow app's startup logic is also idempotent).
 2. `.sendText(userInput)` - Transitions the Voiceflow app to the next state, based the `userInput` that was given. This method is **not** idempotent.
 
 The side-effects of the advanced interaction methods are:
@@ -410,7 +409,7 @@ context.variables.setMany({
 });
 ```
 
-**WARNING:** If you want to set variables to affect the result of the next interaction, then you should set the variables of the **most recent** `Context` returned by an interaction. Interaction methods will return a reference to the `RuntimeClient`'s current internal' `Context` object, which will be used for the next state transition.
+**WARNING:** If you want to set variables to affect the result of the next interaction, then you should set the variables of the **most recent** `Context` returned by an interaction. Interaction methods will return a reference to the `RuntimeClient`'s current internal `Context` object, which will be used for the next state transition.
 
 Recall that each `Context` returned by the `RuntimeClient` is a snapshot of the Voiceflow app state at some point in time. Setting the variables on `context1` will not affect variables values on `context2`. 
 
@@ -418,7 +417,7 @@ Recall that each `Context` returned by the `RuntimeClient` is a snapshot of the 
 
 #### Enabling Stricter Typing
 
-The `.variables` submodule supports stricter typing, as long as you provide a variable **schema** to the `RuntimeClient`.  Once you do, the `.variables` methods like `.get()` will be able to intelligently determine the variable type, based on the variable name you pass as an argument.
+The `.variables` submodule supports stricter typing, as long as you provide a variable **schema** to the `RuntimeClient`.  Once you do, the `.variables` methods like `.get()` will be able to intelligently determine the variable type, based on the variable name you pass as an argument (see below).
 
 Since Voiceflow apps are loaded in at runtime, it is impossible for the `RuntimeClient` to deduce the types of variables for you. So it is up to you to define what types you expect to receive from your Voiceflow app.
 
@@ -428,7 +427,7 @@ export type VFVariablesSchema = {
     name: string;
 };
 
-const app = new Runtime<VFVariablesSchema>({
+const app = new RuntimeClient<VFVariablesSchema>({
 	versionID: 'some-version-id'
 });
 
@@ -488,20 +487,6 @@ context.getResponse().forEach(({ type, payload }) => {
 ```
 
 There are other trace types, as well. For the complete, definitive list, see the API Reference.
-
-
-
-#### Displaying Traces
-
-By default, the `Context.getResponse()` method only returns `SpeakTrace`s for simplicity. However, using the `includeTypes` configuration option in `RuntimeClient`'s constructor, we can enable `.getResponse()` to return other trace types. 
-
-Naturally, we might not want to display something like a `DebugTrace` to our users. If you choose to use the `includeTypes` option, then you'll need to filter out the result of `.getResponse()` for the `SpeakTrace`s to get only the textual responses, as shown below.
-
-```js
-const context = await chatbot.sendText("I'd like to order a Pizza please and thank you");
-const onlySpeakTraces = context.getResponse().filter(({ type }) => type === 'speak');
-frontend.display(onlySpeakTraces);
-```
 
 
 
