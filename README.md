@@ -2,7 +2,7 @@
 
 The Voiceflow Runtime Client is an SDK for running Voiceflow apps in JavaScript. 
 
-Developers or designers can build a fully-functioning conversational app on [Voiceflow](https://creator.voiceflow.com), and integrate that app into a JavaScript project using the SDK. This allows you to quickly add any kind of voice interface, such as a chatbot, to your project, without the hassle of implementing the conversation flow using code.
+First, you build a fully-functioning conversational app on [Voiceflow](https://creator.voiceflow.com). Then, you integrate that app into a JavaScript project using the SDK. This allows you to quickly add any kind of voice interface, such as a chatbot, to your project, without the hassle of implementing the conversational flow using code.
 
 The Runtime Client can be used with jQuery, React, and any other JavaScript library or framework. 
 
@@ -21,7 +21,7 @@ The Runtime Client can be used with jQuery, React, and any other JavaScript libr
 
 ## Samples
 
-See the [rcjs-examples](https://github.com/voiceflow/rcjs-examples) repo for instructions on how to setup each Sample.
+See the parent [rcjs-examples](https://github.com/voiceflow/rcjs-examples) repo for instructions on how to setup each Sample.
 
 - Hello World - [source](https://github.com/voiceflow/rcjs-examples/tree/master/hello-world)
 - Hamburger Order - [source](https://github.com/voiceflow/rcjs-examples/tree/master/hamburger-order)
@@ -41,31 +41,27 @@ npm install --save @voiceflow/runtime-client-js
 
 ### Building a Voiceflow app
 
-To start adding a voice interface to your JavaScript project, we need to first build that interface. To summarize, there are three steps in building a voice interface.
+To start using the SDK, we should build a project on [Voiceflow](https://creator.voiceflow.com/). However, for simplicity, we will use a pre-built project.
 
-1. **Building** the project on Voiceflow
-2. **Training** the chatbot if necessary
-3. **Copying** the version id for our integrations
-
-Open [Voiceflow](https://creator.voiceflow.com) and setup a "General Assistant."  We have detailed tutorials on Voiceflow to help you build your first conversational app. 
+1. Download this `.vf` file found [here](https://docs.voiceflow.com/#/). The `.vf` file contains a pre-built Voiceflow project that can be imported.
+2. Upload the `.vf` file to Voiceflow to import the project. For instruction on how to do this, see [here](https://docs.voiceflow.com/#/platform/project-creation/project-creation?id=project-creation) and click the "Import a .vf file" tab.
+3. Open the imported project on Voiceflow
 
 <p align="center">
-	<img width="552"  alt="Image of the Test Button on Voiceflow" src="https://user-images.githubusercontent.com/32404412/107269001-f1979500-6a16-11eb-8303-10620ad44764.png">
-</p>
+	<img width="552"  alt="Image of the Test Button on Voiceflow" src="https://user-images.githubusercontent.com/32404412/107429772-4cea8580-6af2-11eb-87bd-a30f171b0ae3.png">
+</p>	
 
-When you are satisfied with your design, make sure to train your assistant. Click the Test button at the top-right corner to open up the Prototyping view.
+4. Click the Test button at the top-right corner to open up the Prototyping view.
 
 <p align="center">
 	<img width="552"  alt="Image of the Test Button on Voiceflow" src="https://user-images.githubusercontent.com/32404412/107269101-17bd3500-6a17-11eb-86b1-b0a817022aca.png">
 </p>	
-
-In the Prototyping view, the right sidebar will have a Training panel. Click Train Assistant to begin the training process. **NOTE:** If the "Train Assistant" button is greyed out, then your project does not need to be trained, so you can skip this step.
+5. Click Train Assistant on the sidebar in the Prototyping view. This initiates the training process for the Voiceflow project. **NOTE:** For your own Voiceflow projects, if the "Train Assistant" button is unclickable, then your project does not need to be trained, so you can skip this step.
 
 <p align="center">
 	<img width="300" alt="Image of the Training Panel on Voiceflow" src="https://user-images.githubusercontent.com/32404412/107269251-5521c280-6a17-11eb-9d82-5a0f62bff14d.png">
 </p>	
-
-After the above is done, you are ready to integrate the app onto your JavaScript project. On your address bar, you should see a URL of this form: `https://creator.voiceflow.com/project/{VERSION_ID}/...`. The `VERSION_ID` is a id identifying your particular project. **Copy** this version id, as we will need it later for the integration
+6. Copy the `VERSION_ID` from the URL in your address bar. When you are inside a Voiceflow project, your address bar should have a URL of the form: `https://creator.voiceflow.com/project/{VERSION_ID}/...`, copy the first id after the `/project/` token.
 
 <p align="center">
 	<img width="957" align="center" alt="Screen Shot 2021-02-08 at 2 11 09 PM" src="https://user-images.githubusercontent.com/32404412/107269370-813d4380-6a17-11eb-8bb5-d286c5db3664.png">
@@ -74,76 +70,143 @@ After the above is done, you are ready to integrate the app onto your JavaScript
 
 ### Integrating the app
 
-Now that we have built a voice interface and copied its `VERSION_ID`, we can integrate it with our JavaScript project.
+Now we can start integrating the Voiceflow app in your codebase. 
 
-To begin, import `@voiceflow/runtime-client-js` and construct a new `RuntimeClient` object using the `VERSION_ID` that you copy-pasted. This object represents our Voiceflow application.
+1. Import `@voiceflow/runtime-client-js`
 
 ```js
-const RuntimeClient = require('@voiceflow/runtime-client-js');
+// Node CommonJS
+const RuntimeClient = require('@voiceflow/runtime-client-js').default;
+
+// ES6 modules
+import RuntimeClient from "@voiceflow/runtime-client-js"
+```
+
+2. Construct a `RuntimeClient` object and pass in the `VERSION_ID`. 
+
+```js
+const RuntimeClient = require('@voiceflow/runtime-client-js').default;
 
 const chatbot = new RuntimeClient({
   versionID: 'XXXXXXXXXXXXXXXXXXXXXXXX' // the VERSION_ID goes here
 });
 ```
 
-To start a conversation **session** with our Voiceflow app, call the `.start()` method as shown below. This method returns a promise that eventually resolves into a `Context` object. 
-
-The `Context` is a snapshot of the conversation at the current stage and contains useful information such as the chatbot's responses, the state of all the variables in the Voiceflow project, and much more!
-
-We can access the responses by calling `context.getResponse()` to return a list of `GeneralTrace` objects. Actually, to be more specific, a list of `SpeakTrace`s is returned, which are small pieces of dialogue that make up the entire bot's response to the user. We can log the entire response to console by iterating over the `traces` and logging the messages in the individual `trace`s.
-
-There are other trace-types besides `SpeakTrace`s that are sub-types of a `GeneralTrace`, but for simplicity, you only need to know about `SpeakTrace`s to get started.
+3. Call `.start()` to begin a conversation session with the Voiceflow app.
+4. Store the return of `.start()` into a variable named `context`. The `context` is a `Context` object, which is a snapshot of the conversation's current state and it contains useful information like variables in the Voiceflow app.
+5. Call `context.getResponse()` to get a list of `SpeakTrace`s (*) and store it in `traces`. A **trace** is a piece of the entire app response. 
+6. Output the Voiceflow app's response by iterating over the `traces` and accessing the `trace.payload.message` for the response text.
 
 ```js
-// initalize the conversation, get the starting prompt
-chatbot.start().then((context) => {
-  // get the chatbot response from the context
+(async () => {
+  const context = await chatbot.start();
   const traces = context.getResponse();
-  
-  // print out what the bot says back
+
   traces.forEach(trace => {
+    console.log(trace.payload.message);
+  });
+})();
+```
+
+10. Call `.sendText()` and pass in any user input to continue the conversation. We should only call `.sendText()` after the call to `.start()`
+11. Store the return of `.sendText()` into a variable named `context2`. Both `.sendText()` and `.send()` are **interaction methods** which return a `Context`. 
+12. Output the response from `.sendText()` like we did before.
+
+```js
+async(() => {
+  const context = await chatbot.start();
+  // ... etc etc
+  
+  const context2 = await chatbot.sendText("I would like a large cheeseburger");
+  const traces2 = context.getResponse();
+
+  traces2.forEach(trace => {
     console.log(trace.payload.message);
   });
 });
 ```
 
-The `.start()` method is triggers the first **interaction**. For subsequent interactions, you should invoke the `.sendText()` method and send your user's input to the chatbot to advance the conversation.
-
-Both `.start()` and `.sendText()` are "interaction methods" which return a `Context` object. Just like above, we can access the responses returned by `.sendText()` using `context.getResponse()`
-
-After interacting with the chatbot, we need to call `context.isEnding()` to check if the conversation has ended. When the sesconversationion has ended, any additional calls to interaction methods (except for `.start()`) will throw an exception. 
-
-The only interaction that is valid, after the conversation has ended, is the `.start()` call, which will start the conversation flow from the beginning. 
-
-**NOTE:** Although we did not check `.isEnding()` after our call to `.start()` in the above example, it may be worthwhile to do so, depending on your application. For example, if your voice interface simply runs from start to finish without prompting for user input, then `.isEnding()` will return `true` after `.start()` is called, which makes all subsequent `.sendText()` calls throw an exception.
+13. After each interaction method call, call `context.isEnding()` to check if the conversation has ended. When an conversation has ended, any calls to interaction methods - except `.start()` - will throw an exception.
+14. Call `.start()` again if you want to restart the conversation from the beginning.
 
 ```js
-// call this function from any input source
-// e.g. interaction('can I have fries with that');
-async function interaction(userInput) {
-  // get a context for every user interaction
-  const context = await chatbot.sendText(userInput);
-
-  // print out what the bot says back
-  context.getResponse().forEach(trace => {
-    console.log(trace.payload.message);
-  });
-
-  // again check if the conversation has ended
+async(() => {
+  // ... as before
+  
   if (context.isEnding()) {
-    cleanup();			 					// perform any cleanup logic
-    await chatbot.start();		// call `.start()` to restart the conversation if necessary
+    cleanupMyApp();
+    const context1 = await chatbot.sendText('hello world!')	// invalid - .isEnding() == true so throw except
+    const context2 = await chatbot.start();									// valid - start from the beginning
   }
-}
+});
 ```
 
-To summarize the above, to integrate a Voiceflow app into your JavaScript project, you should:
+To summarize, this is what a minimal working integration looks like.
 
-1. Construct a `RuntimeClient` object
-2. Invoke `.start()` to begin the conversation session.
-3. Retrieve the traces with `.getResponse() `and display the responses
-4. Check if the conversation `.isEnding()` and perform any necessary logic if `true`.
-5. If the conversation is ending, then invoke `.sendText()` and repeat from step 3.
+```js
+const RuntimeClient = require('@voiceflow/runtime-client-js').default;
+
+const chatbot = new RuntimeClient({
+  versionID: 'your-version-id-here',
+});
+
+(async () => {
+  const context = await chatbot.start();
+  const traces = context.getResponse();
+
+  traces.forEach(trace => {
+    console.log(trace.payload.message);
+  });
+  
+  const context2 = await chatbot.sendText("I would like a large cheeseburger");
+  const traces2 = context.getResponse();
+
+  traces2.forEach(trace => {
+    console.log(trace.payload.message);
+  });
+  
+  if (context.isEnding()) {
+    cleanupMyApp();
+    const context1 = await chatbot.sendText('hello world!')	// invalid - .isEnding() == true so throw except
+    const context2 = await chatbot.start();									// valid - start from the beginning
+  }
+})();
+```
+
+
+
+(*) - Technically, you are retrieving a list of `GeneralTrace`s and a `SpeakTrace` is a sub-type of a `GeneralTrace`. There are other trace types besides `SpeakTrace`, but a `SpeakTrace` is all that you'll need for most applications.
+
+
+
+### Integrating the app, with Promises
+
+Alternatively, using only Promises.
+
+```js
+const RuntimeClient = require('@voiceflow/runtime-client-js').default;
+
+const chatbot = new RuntimeClient({
+  versionID: 'your-version-id-here',
+});
+
+const outputTraces = context => {
+    const traces = context.getResponse();
+    traces.forEach(trace => {
+      console.log(trace.payload.message);
+    });
+}
+
+chatbot.start()
+  .then(context => {
+  	outputTraces(context);
+    return chatbot.sendText("I would like a large cheese burger")
+  })
+	.then(context => {
+  	outputTraces(context);
+  	if (context.isEnding()) cleanupMyApp();
+	});
+```
 
 
 
@@ -246,12 +309,12 @@ You can also check out the "Samples" for a working implementation of suggestion 
 
 The `RuntimeClient` comes with additional `dataConfig` options for managing the data returned by `Context.getResponse()`. To summarize, there are four options currently available:
 
-1. `tts` - When set to `true`, any `SpeakTrace`s returned by an interaction will contain an additional`src` property with an `.mp3` string. The string is audio of a voice assistant speaking out the `SpeakTrace`'s `message`. You can play this audio, such as with an `HTMLAudioElement` on a web browser,  to implement voiced chatbots.
-2. `ssml` - When set to `true`, the `ssml` property disables the SDK's SSML sanitization and returns the full response with SSML included. This might be useful if you prefer to feed this data into your own TTS system.
-3. `includeTypes` - By default, we expose only `SpeakTrace`s, which contain the app's responses. This option accepts a list which specifies the additional trace types you want to receive from the `.getResponse()` method. For more detail on the available trace-types, see the "Advanced Trace Types" section.
-4. `traceProcessor` - Accepts a "trace processor" function and automatically calls the function on the `RuntimeClient`'s current traces, whenever an interaction method is invoked.
+1. `tts` - Set to `true` to enable text-to-speech functionality. Any speak traces returned by an interaction method will contain an additional`src` property with an `.mp3` string, which is an audiofile that will speak out the trace text.
+2. `ssml` - Set to `true` to disable the `RuntimeClient`'s SSML sanitization and return the full text string with the SSML included. This may be useful if you want to use your own TTS system. 
+3. `includeTypes` - Set to a list of trace types to specify the additional trace types you want to receive from `.getResponse()`. A speak-type trace is always returned.
+4. `traceProcessor` - Set to a "trace processor" function which is automatically called whenever an interaction method like `.sendText()` has returned and received new traces.
 
-See the following subsections for more detail on each configuration option.
+The Samples section has some working code demonstrating some of the configuration options. 
 
 ```js
 const app = new RuntimeClient({
@@ -263,38 +326,6 @@ const app = new RuntimeClient({
       	traceProcessor: myTraceProcessor
     }
 });
-```
-
-
-
-#### TTS
-
-```js
-
-```
-
-
-
-#### SSML
-
-```js
-
-```
-
-
-
-#### includeTypes
-
-```js
-
-```
-
-
-
-#### traceProcessor
-
-```js
-
 ```
 
 
@@ -345,7 +376,15 @@ const result1 = context.getResponse().map(traceProcessor);			// usage in an HOF
 
 #### Getters
 
+Voiceflow projects have variables that are modified as the app is executing. You can access the variable state at the particular point in time associated with a `Context` instance, through `context.variables`. 
+
+- `.get(variableName)` - Used to retrieve a single variable value
+- `.getAll()` - Returns an object containing all variables
+- `.getKeys()` - Returns a list of variable names
+
 ```js
+const context = await app.sendText("I would like a large cheeseburger");
+
 const name = context.variables.get('name');
 
 const allVariables = context.variables.getAll();
@@ -358,9 +397,10 @@ const keys = context.variables.getKeys();
 
 #### Setters
 
-Because the `RuntimeClient` returns a reference to an internal `Context`, which is wrapping around the Voiceflow app's current state, setting variables in the current context
+You can also set variables through a `Context`
 
-**WARNING:** Be careful when setting variable setters. It can be difficult to determine where you are in a Voiceflow diagram, so be wary not to set variables at the wrong time. 
+- `.set(variableName, value)` - Sets `variableName` to have the given `value`
+- `.setMany(map)` - Sets all variables which appear as keys in `map `to the corresponding value in `map`.
 
 ```js
 context.variables.set('name', 'Jean-Luc Picard')
@@ -370,11 +410,17 @@ context.variables.setMany({
 });
 ```
 
+**WARNING:** If you want to set variables to affect the result of the next interaction, then you should set the variables of the **most recent** `Context` returned by an interaction. Interaction methods will return a reference to the `RuntimeClient`'s current internal' `Context` object, which will be used for the next state transition.
+
+Recall that each `Context` returned by the `RuntimeClient` is a snapshot of the Voiceflow app state at some point in time. Setting the variables on `context1` will not affect variables values on `context2`. 
+
 
 
 #### Enabling Stricter Typing
 
-The `.variables` submodule supports stricter typing, if you provide a variable **schema** to the `RuntimeClient`.  Once you do, the `.variables` methods like `.get()` will be able to intelligently determine the variable type, based on the variable name you pass as an argument.
+The `.variables` submodule supports stricter typing, as long as you provide a variable **schema** to the `RuntimeClient`.  Once you do, the `.variables` methods like `.get()` will be able to intelligently determine the variable type, based on the variable name you pass as an argument.
+
+Since Voiceflow apps are loaded in at runtime, it is impossible for the `RuntimeClient` to deduce the types of variables for you. So it is up to you to define what types you expect to receive from your Voiceflow app.
 
 ```ts
 export type VFVariablesSchema = {
@@ -389,7 +435,7 @@ const app = new Runtime<VFVariablesSchema>({
 const context = await app.start();
 
 const name = context.variables.get('name');				// return value is inferred to be a "string"
-context.variables.set('name', 12);								// TypeError! 'name' is a "string" not a "number"
+context.variables.set('name', 12);								// TypeError! expected a "number" not a "string"
 ```
 
 
