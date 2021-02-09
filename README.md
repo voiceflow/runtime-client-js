@@ -50,20 +50,27 @@ To start adding a voice interface to your JavaScript project, we need to first b
 
 Open [Voiceflow](https://creator.voiceflow.com) and setup a "General Assistant."  We have detailed tutorials on Voiceflow to help you build your first conversational app. 
 
-![image](https://user-images.githubusercontent.com/32404412/107269001-f1979500-6a16-11eb-8303-10620ad44764.png)
+<p align="center">
+	<img width="552"  alt="Image of the Test Button on Voiceflow" src="https://user-images.githubusercontent.com/32404412/107269001-f1979500-6a16-11eb-8303-10620ad44764.png">
+</p>
 
 When you are satisfied with your design, make sure to train your assistant. Click the Test button at the top-right corner to open up the Prototyping view.
 
-<img width="552" alt="Image of the Test Button on Voiceflow" src="https://user-images.githubusercontent.com/32404412/107269101-17bd3500-6a17-11eb-86b1-b0a817022aca.png">
+<p align="center">
+	<img width="552"  alt="Image of the Test Button on Voiceflow" src="https://user-images.githubusercontent.com/32404412/107269101-17bd3500-6a17-11eb-86b1-b0a817022aca.png">
+</p>	
 
 In the Prototyping view, the right sidebar will have a Training panel. Click Train Assistant to begin the training process. **NOTE:** If the "Train Assistant" button is greyed out, then your project does not need to be trained, so you can skip this step.
 
-<img width="300" alt="Image of the Test Button on Voiceflow" src="https://user-images.githubusercontent.com/32404412/107269251-5521c280-6a17-11eb-9d82-5a0f62bff14d.png">
+<p align="center">
+	<img width="300" alt="Image of the Training Panel on Voiceflow" src="https://user-images.githubusercontent.com/32404412/107269251-5521c280-6a17-11eb-9d82-5a0f62bff14d.png">
+</p>	
 
 After the above is done, you are ready to integrate the app onto your JavaScript project. On your address bar, you should see a URL of this form: `https://creator.voiceflow.com/project/{VERSION_ID}/...`. The `VERSION_ID` is a id identifying your particular project. **Copy** this version id, as we will need it later for the integration
 
-<img width="957" alt="Screen Shot 2021-02-08 at 2 11 09 PM" src="https://user-images.githubusercontent.com/32404412/107269370-813d4380-6a17-11eb-8bb5-d286c5db3664.png">
-
+<p align="center">
+	<img width="957" align="center" alt="Screen Shot 2021-02-08 at 2 11 09 PM" src="https://user-images.githubusercontent.com/32404412/107269370-813d4380-6a17-11eb-8bb5-d286c5db3664.png">
+</p>	
 
 
 ### Integrating the app
