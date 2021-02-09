@@ -22,12 +22,11 @@ The Runtime Client can be used with jQuery, React, and any other JavaScript libr
 
 ## Samples
 
-- Hello World example on Node
-- Hello World example with jQuery
-- Hello World example on React.js
-- makeTraceProcessor example
-- TTS example
-- suggestion chips example
+- Hello World with Node
+- [First Kitchen app with Node](https://github.com/voiceflow/rcjs-cli)
+- makeTraceProcessor usage
+- TTS usage
+- Suggestion Chips Usage
 
 
 
