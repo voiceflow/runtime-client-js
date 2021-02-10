@@ -73,28 +73,19 @@ To start using the SDK, we should build a project on [Voiceflow](https://creator
 
 Now we can start integrating the Voiceflow app in your codebase. 
 
-1. Import `@voiceflow/runtime-client-js`
+1. Set up the `RuntimeClient` as shown below. Paste the `VERSION_ID` you copied earlier into the `versionID` configuration option.
 
 ```js
-// Node CommonJS
-const RuntimeClient = require('@voiceflow/runtime-client-js').default;
-
-// ES6 modules
 import RuntimeClient from "@voiceflow/runtime-client-js"
-```
 
-2. Construct a `RuntimeClient` object and pass in the `VERSION_ID`. 
-
-```js
 const chatbot = new RuntimeClient({
   versionID: 'XXXXXXXXXXXXXXXXXXXXXXXX' // the VERSION_ID goes here
 });
 ```
 
-3. Call `.start()` to begin a conversation session with the Voiceflow app.
-4. Store the return of `.start()` into a variable named `context`. The `context` is a `Context` object, which is a snapshot of the conversation's current state and it contains useful information like Voiceflow variables.
-5. Call `context.getResponse()` to get a list of `SpeakTrace`s (*) and store it in `traces`. A **trace** is a piece of the entire app response. 
-6. Output the response by iterating over `traces` and accessing the `trace.payload.message` for the response text.
+1. Call `.start()` to begin a conversation session with the Voiceflow app.
+2. Store the result of `.start()` into `context`. The `context` is a `Context` object, which is a snapshot of the conversation's current state and it contains useful information like Voiceflow variables.
+3. Output the response by iterating over `context.getResponse()` and logging `trace.payload.message`. A **trace** is a piece of the entire response.
 
 ```js
 (async () => {
@@ -107,9 +98,8 @@ const chatbot = new RuntimeClient({
 })();
 ```
 
-10. For subsequent requests after `.start()`, call `.sendText()` and pass in any user input. We call `.sendText()` and `.start()` **interaction methods**.
-11. Store the return of `.sendText()` into a variable named `context2`. 
-12. Output the response from `.sendText()` like we did above.
+4. For subsequent requests after `.start()`, call `.sendText()` and pass in any user input. We call `.sendText()` and `.start()` **interaction methods**.
+5. Output the response from `.sendText()` like we did above.
 
 ```js
 async(() => {
@@ -125,8 +115,8 @@ async(() => {
 });
 ```
 
-13. After each interaction method call, invoke `context.isEnding()` to check if the conversation has ended. When a conversation has ended, any calls to interaction methods - except `.start()` - will throw an exception.
-14. Call `.start()` again if you want to restart the conversation from the beginning.
+6. Call `context.isEnding()` to check if the conversation has ended after each interaction method call. When a conversation ends, any calls to interaction methods - except `.start()` - will throw an exception.
+7. Call `.start()` again to restart the conversation.
 
 ```js
 async(() => {
@@ -134,8 +124,8 @@ async(() => {
   
   if (context.isEnding()) {
     cleanupMyApp();
-    const context1 = await chatbot.sendText('hello world!')	// invalid - .isEnding() == true so throw except
-    const context2 = await chatbot.start();									// valid - start from the beginning
+    const context1 = await chatbot.sendText('hello world!')	// exception!
+    const context2 = await chatbot.start();									// valid
   }
 });
 ```
@@ -178,54 +168,18 @@ const chatbot = new RuntimeClient({
 
 
 
-### Integrating the app, with Promises
-
-Alternatively, using only Promises.
-
-```js
-const RuntimeClient = require('@voiceflow/runtime-client-js').default;
-
-const chatbot = new RuntimeClient({
-  versionID: 'your-version-id-here',
-});
-
-const outputTraces = context => {
-    const traces = context.getResponse();
-    traces.forEach(trace => {
-      console.log(trace.payload.message);
-    });
-}
-
-chatbot.start()
-  .then(context => {
-  	outputTraces(context);
-    return chatbot.sendText("I would like a large cheese burger")
-  })
-	.then(context => {
-  	outputTraces(context);
-  	if (context.isEnding()) cleanupMyApp();
-	});
-```
-
-
-
 ## Advanced Usage
 
 ### Statefulness of RuntimeClient
 
-A `RuntimeClient` instance is a **stateful** object and calling its methods typically produces side-effects that change its internal state. 
+A `RuntimeClient` instance is a **stateful** object and its methods produce side-effects that change its internal state.
 
-For example, whenever an interaction method such as `.sendText()` is called, the `RuntimeClient` will send its local copy of the Voiceflow application state to our servers, which will calculate any state transitions based on the user input and respond with the next state. The `RuntimeClient` will then replace its local state with this newer state.
+Whenever an interaction method such as `.sendText()` is called, the `RuntimeClient` pings our servers to get the next execution state. The local copy of the execution state stored in `RuntimeClient` is updated and the previous state is discarded.
 
-To summarize the side-effects of the basic interaction methods:
+Different methods produce different side-effects. To summarize for the basic interaction methods:
 
-1. `.start()` - This methods runs the Voiceflow app from the beginning, until the app requests user input. If the `RuntimeClient` is currently in the middle of a conversation, then we terminate that session and restart the conversation. You can think of this method as being idempotent (assuming your Voiceflow app's startup logic is also idempotent).
-2. `.sendText(userInput)` - Transitions the Voiceflow app to the next state, based the `userInput` that was given. This method is **not** idempotent.
-
-The side-effects of the advanced interaction methods are:
-
-1. `.sendIntent(...)` - Same side-effects as `.sendText()`
-2. `.send(data)` - This method calls one of the above methods based on the input it is given. Therefore, its exact side-effects depends the argument types, e.g, if no argument or `null` is passed, then it behaves like `.start()`
+1. `.start()` - Starts or restarts the Voiceflow app and runs the app until user input is reqested. Terminates any ongoing conversation session in the `RuntimeClient`. 
+2. `.sendText(userInput)` - Transitions the Voiceflow app to the next state, based the `userInput` that was given.
 
 
 
@@ -238,19 +192,19 @@ const context = await chatbot.start();
 const context = await chatbot.sendText(userInput);
 ```
 
-Each time an interaction method is called, a new `Context` object is created to wrap around the next state. When a `RuntimeClient` instance makes a state transition, the `Context`'s wrapped state doesn't change. Hence, you can build a **history** of `Context` objects and implement time-travelling capabilities in your chatbot. 
+Each time an interaction method is called, a new `Context` object is created to wrap around the returned state. When a `RuntimeClient` instance makes a state transition, the `Context`'s wrapped state doesn't change. Hence, you can build a **history** of `Context` objects and implement time-travelling capabilities in your chatbot. 
 
-The `Context` object has a handful of methods to expose its internal data. We will describe a subset of them below, in order of most useful to least useful.
+The `Context` object has a handful of methods to expose its internal data. We will describe a subset of them below.
 
 
 
 #### `.getResponse()`
 
-The `.getResponse()` method returns the traces which make up the Voiceflow app's entire response. 
+Returns the traces which make up the Voiceflow app's entire response. 
 
-We say that this method "returns the traces which make up...the entire response," but this isn't quite accurate. In fact, `.getResponse()` returns a **view** of the entire list of traces. By default, the `Context` will filter out any trace that isn't a `SpeakTrace`, in order to show a simplified model of the Voiceflow app response to you. 
+We say that this method "returns the traces which make up...the entire response," but this isn't quite accurate. In fact, `.getResponse()` returns a **view** of the entire list of traces. By default, the `Context` will filter out any trace that isn't a `SpeakTrace`, in order to present a simplified model of the Voiceflow app response. 
 
-To see the other trace types in the return value of `.getResponse()`, see the `includeTypes` option in the "Configuration" section. Alternatively, you can view the unfiltered list of all traces using the `.getTrace()` method, which will be discussed later.
+To see the other trace types in the return value of `.getResponse()`, see the `includeTypes` option in the "Configuration" section. Alternatively, you can view the unfiltered list of all traces using `context.getTrace()`.
 
 ```js
 const response = context.getResponse();
@@ -263,17 +217,17 @@ response.forEach(({ payload }) => {
 
 #### `.isEnding()`
 
-The `.isEnding()` method returns `true` if the application state wrapped by the `Context` is the last state before the app session terminated, and returns `false` otherwise.
+The `.isEnding()` method returns `true` if the application state wrapped by the `Context` is the last state before the conversatione ended, and returns `false` otherwise.
 
 This method is mainly used to detect when the current conversation with the Voiceflow General Runtime has ended, and thus, we need to call `.start()` to start a new conversation from the beginning.
 
 ```js
 do {
   const userInput = await frontend.getUserInput();			// listen for a user response
-  const context = await app.sendText(userInput);				// send the response to the Voiceflow app
+  const context = await app.sendText(userInput);				// send the response to the app
   frontend.display(context.trace);											// display the response, if any
 } while (!context.isEnding())														// check if we're done
-terminateApp();																					// perform any cleanup if conversation is over
+terminateApp();																					// perform any cleanup
 ```
 
 
@@ -289,7 +243,7 @@ const chips = context.getChips();
 // => [{ name: "I would like a pizza", ... }, { name: "I would like a hamburger", ... }]
 
 const createOnClickSuggestion = (chosenSuggestion) => () => {
-  const context = await chatbot.sendText(chosenSuggestion);			// send the suggested response to VF app
+  const context = await chatbot.sendText(chosenSuggestion);
 }
 
 chips.forEach(({ name }) => {												
@@ -308,10 +262,10 @@ You can also check out the "Samples" for a working implementation of suggestion 
 
 The `RuntimeClient` comes with additional `dataConfig` options for managing the data returned by `Context.getResponse()`. To summarize, there are four options currently available:
 
-1. `tts` - Set to `true` to enable text-to-speech functionality. Any speak traces returned by an interaction method will contain an additional`src` property with an `.mp3` string, which is an audiofile that will speak out the trace text.
+1. `tts` - Set to `true` to enable text-to-speech functionality. Any returned speak traces will contain an additional`src` property with an `.mp3` string, which is an audiofile that will speak out the trace text.
 2. `ssml` - Set to `true` to disable the `RuntimeClient`'s SSML sanitization and return the full text string with the SSML included. This may be useful if you want to use your own TTS system. 
-3. `includeTypes` - Set to a list of trace types to specify the additional trace types you want to receive from `.getResponse()`. A speak-type trace is always returned.
-4. `traceProcessor` - Set to a "trace processor" function which is automatically called whenever an interaction method like `.sendText()` has returned and received new traces.
+3. `includeTypes` - Set to a list of trace types to specify the additional trace types you want to receive from `.getResponse()`. A speak-type trace is always returned by `.getResponse()`. For the full list of available trace types, see the API reference.
+4. `traceProcessor` - Set to a "trace processor" function which will be automatically called whenever an interaction method like `.sendText()` receives new traces.
 
 The Samples section has some working code demonstrating some of the configuration options. 
 
@@ -333,15 +287,15 @@ const app = new RuntimeClient({
 
 A typical pattern for handling a Voiceflow app's response is to use a higher-order function (e.g. `map`) to invoke a callback on each trace in `Context.trace`. 
 
-Unfortunately, there are many types of traces, each with their own unique attributes. If we wanted to process the entire list of traces, we would need boilerplate logic, such as `switch` statements, to distinguish between different traces and call the appropriate handler.
+Unfortunately, there are many types of traces, each with their own unique attributes. If we wanted to process the entire list of traces, we would need boilerplate checking logic to call the appropriate handler for a given trace type.
 
 The SDK exposes a utility called `makeTraceProcessor` which allows you to quickly define a **trace processor** function, which can be passed as a callback of a higher-order function (see below).
 
 **Arguments:**
 
 - `handlerMap` - `object` -  An object whose keys are `TraceType`s (e.g. speak` for `SpeakTraces), and whose values are handlers for that trace type. Some examples of `TraceType`s and their (simplified) expected handler signatures are listed below. For the full list of available trace types and complete handler signatures, see the API Reference. 
-  - `speak`- `(message) => any`  - A `SpeakTrace` handler receives the `message`, which is simply the Voiceflow app's response to any user interaction.
-  - `debug - (message) => any` - A `DebugTrace` handler receives a debug `message` that illustrates how the Voiceflow runtime is evaluating the input and executing its control flow.
+  - `speak`- `(message) => any`  - A `SpeakTrace` handler receives a `message`, which is simply the Voiceflow app's "actual" response to the user interaction.
+  - `debug - (message) => any` - A `DebugTrace` handler receives a debug `message` that illustrates control flow of the Voiceflow app.
 
 **Returns:**
 
@@ -365,7 +319,7 @@ const traceProcessor = makeTraceProcessor({
 // Usage
 const context = await chatbot.start();
 
-const result1 = context.getResponse().map(traceProcessor);			// usage in an HOF
+const result1 = context.getResponse().map(traceProcessor);
 // e.g. result = ['vf-speak-1', 'vf-speak-2', 'vf-speak-3']
 ```
 
@@ -375,7 +329,7 @@ const result1 = context.getResponse().map(traceProcessor);			// usage in an HOF
 
 #### Getters
 
-Voiceflow projects have variables that are modified as the app is executing. You can access the variable state at the particular point in time associated with a `Context` instance, through `context.variables`. 
+Voiceflow projects have variables that are modified as the app is executing. You can access the variable state at a particular point in time through `context.variables`. Recall that a `Context` is a snapshot of app state, so the values of `.variables` between different `Context`s will be different.
 
 - `.get(variableName)` - Used to retrieve a single variable value
 - `.getAll()` - Returns an object containing all variables
@@ -417,9 +371,11 @@ Recall that each `Context` returned by the `RuntimeClient` is a snapshot of the 
 
 #### Enabling Stricter Typing
 
-The `.variables` submodule supports stricter typing, as long as you provide a variable **schema** to the `RuntimeClient`.  Once you do, the `.variables` methods like `.get()` will be able to intelligently determine the variable type, based on the variable name you pass as an argument (see below).
+The Runtime Client is implemented in TypeScript and has strict types on all of its methods. The `.variables` submodule can also be configured to support stricter types.
 
-Since Voiceflow apps are loaded in at runtime, it is impossible for the `RuntimeClient` to deduce the types of variables for you. So it is up to you to define what types you expect to receive from your Voiceflow app.
+To do this, you must supply a variable **schema** to the `RuntimeClient`. Once you do, variable methods like `.get()` will deduce the variable type based on the variable name you pass in as an argument (see below).
+
+Since Voiceflow apps are loaded in at runtime, it is impossible for the `RuntimeClient` to deduce the types of variables for you. It is up to you to define what types you expect to receive and to ensure your Voiceflow app will only send back what you expect.
 
 ```ts
 export type VFVariablesSchema = {
@@ -433,15 +389,15 @@ const app = new RuntimeClient<VFVariablesSchema>({
 
 const context = await app.start();
 
-const name = context.variables.get('name');				// return value is inferred to be a "string"
-context.variables.set('name', 12);								// TypeError! expected a "number" not a "string"
+const name = context.variables.get('name'); // return value is inferred to be a "string"
+context.variables.set('name', 12); // TypeError! expected a "number" not a "string"
 ```
 
 
 
 ### Multiple Applications
 
-You can integrate any number of Voiceflow applications to your project, simply by constructing multiple `VFApp` instances. You can even have multiple instances of the same Voiceflow project at once, our runtime servers are stateless, so two running Voiceflow programs will not interfere with each other.
+You can integrate any number of Voiceflow applications to your project, simply by constructing multiple `VFApp` instances. You can even have multiple instances of the same Voiceflow project at once. Our runtime servers are stateless, so two running Voiceflow programs will not interfere with each other.
 
 ```js
 // Multiple integrations
@@ -459,34 +415,6 @@ const orderBot = new VFApp({
   versionID: 'order-bot'
 });
 ```
-
-
-
-### Advanced Trace Types
-
-The `Context.getResponse()` method returns a list of `GeneralTrace`s which are objects containing a part of the overall response from the Voiceflow app. 
-
-These `GeneralTrace`s include `SpeakTrace`s, which contain the "actual" textual response of the Voiceflow app and is intended to be seen by your own app's users. There are other traces such as `DebugTrace`, which contain messages that illustrates the Voiceflow app's control flow and why it produces the response that it did. 
-
-The `DebugTrace`, in particular, might be useful if you want to log an application's state to understand what happened before an error with your Voiceflow app occurred.
-
-```js
-const app = new RuntimeClient({
-    versionID: '60216d2e3c43f738ddcca219',
-    dataConfig: {
-        includeTypes: ['debug']
-    }
-});
-
-const context = await chatbot.start();
-context.getResponse().forEach(({ type, payload }) => {
-  if (type === "debug") {
-    myErrorLogger.log(payload.message);
-  }
-});
-```
-
-There are other trace types, as well. For the complete, definitive list, see the API Reference.
 
 
 
