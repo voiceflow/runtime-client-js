@@ -1,4 +1,4 @@
-import { DebugTrace } from '@voiceflow/general-types';
+import { DebugTrace } from '../../../node_modules/@voiceflow/general-types';
 
 export type DebugTraceHandler = (message: DebugTrace['payload']['message']) => any;
 

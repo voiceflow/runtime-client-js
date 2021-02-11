@@ -1,6 +1,6 @@
-import { GeneralTrace, TraceType } from '@voiceflow/general-types';
+import { GeneralTrace, TraceType } from '../../../node_modules/@voiceflow/general-types';
 
-import { VFClientError } from '@/lib/Common';
+import { VFClientError } from '../../Common';
 
 import { BlockTraceHandler, invokeBlockHandler } from './block';
 import { ChoiceTraceHandler, invokeChoiceHandler } from './choice';

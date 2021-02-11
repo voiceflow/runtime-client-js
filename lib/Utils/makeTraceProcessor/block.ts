@@ -1,4 +1,4 @@
-import { BlockTrace } from '@voiceflow/general-types';
+import { BlockTrace } from '../../../node_modules/@voiceflow/general-types';
 
 export type BlockTraceHandler = (blockID: BlockTrace['payload']['blockID']) => any;
 

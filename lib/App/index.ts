@@ -1,12 +1,12 @@
-import { GeneralRequest, RequestType } from '@voiceflow/general-types';
-import { State } from '@voiceflow/runtime';
+import { GeneralRequest, RequestType } from '../../node_modules/@voiceflow/general-types';
+import { State } from '../../node_modules/@voiceflow/runtime';
 import axios from 'axios';
 import _ from 'lodash';
 
-import Client from '@/lib/Client';
-import { VFClientError } from '@/lib/Common';
-import Context from '@/lib/Context';
-import { DataConfig, ResponseContext } from '@/lib/types';
+import Client from '../Client';
+import { VFClientError } from '../Common';
+import Context from '../Context';
+import { DataConfig, ResponseContext } from '../types';
 
 import { validateVarMerge } from '../Variables/utils';
 import { DEFAULT_ENDPOINT } from './constants';

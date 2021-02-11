@@ -1,4 +1,4 @@
-import { StreamTrace } from '@voiceflow/general-types';
+import { StreamTrace } from '../../../node_modules/@voiceflow/general-types';
 
 export type StreamTraceHandler = (
   src: StreamTrace['payload']['src'],

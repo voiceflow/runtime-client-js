@@ -1,4 +1,4 @@
-import { ExitTrace } from '@voiceflow/general-types';
+import { ExitTrace } from '../../../node_modules/@voiceflow/general-types';
 
 export type EndTraceHandler = () => any;
 

@@ -1,4 +1,4 @@
-import { FlowTrace } from '@voiceflow/general-types';
+import { FlowTrace } from '../../../node_modules/@voiceflow/general-types';
 
 export type FlowTraceHandler = (diagramID: FlowTrace['payload']['diagramID']) => any;
 
