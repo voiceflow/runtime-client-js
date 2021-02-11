@@ -5,7 +5,7 @@ module.exports = {
     lib: './index',
   },
   output: {
-    library: 'lib',
+    library: 'vfrc',
     libraryTarget: 'umd',
     filename: 'rc.js',
   },

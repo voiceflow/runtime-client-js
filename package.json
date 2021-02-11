@@ -91,7 +91,7 @@
     "url": "git+https://github.com/voiceflow/runtime-client-js.git"
   },
   "scripts": {
-    "build": "npm run clean && ttsc --project ./tsconfig.build.json",
+    "build": "webpack",
     "clean": "rimraf build",
     "lint": "eslint \"lib/**/*.{js,ts}\"",
     "lint:fix": "yarn lint --fix",

@@ -22,6 +22,7 @@ package-lock.json
 
 # build folder
 build
+dist
 
 # Sonar
 sonar/
