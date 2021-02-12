@@ -20,6 +20,7 @@ The Runtime Client can be used with jQuery, React, and any other JavaScript libr
 4. [Getting Started](https://github.com/voiceflow/runtime-client-js/tree/master#getting-started)
 5. [Advanced Usage](https://github.com/voiceflow/runtime-client-js/tree/master#advanced-usage)
 6. [API Reference](https://github.com/voiceflow/runtime-client-js/tree/master#api-reference)
+7. [Development](https://github.com/voiceflow/runtime-client-js/tree/master#api-reference)
 
 
 
@@ -155,6 +156,12 @@ See the documentation [here]() for the available advanced features of the SDK.
 
 ## Development
 
+### Important Scripts
+
+### `yarn install`
+
+Run `yarn install` to install any necessary dependencies to get started with working on the SDK.
+
 #### `yarn build`
 
 Use this to build the `runtime-client-js` locally. The build will be stored in the `/build` folder
@@ -175,3 +182,8 @@ Use `yarn test:unit` to run all of the unit tests
 
 Use `yarn test:integration` to run all of the integration tests.
 
+
+
+### Submitting a PR
+
+We're always open to improving our Runtime Client SDK. Consider opening a PR if there is some improvement that you think should be added. 

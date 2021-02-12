@@ -272,7 +272,17 @@ const orderBot = new VFApp({
 
 ### Runtime
 
-As the name suggests, `runtime-client-js` interfaces with a Voiceflow "runtime" server. You can check out [https://github.com/voiceflow/general-runtime](https://github.com/voiceflow/general-runtime) and host your own runtime server. Modifying the runtime allows for extensive customization of bot behavior and integrations.
+As the name suggests, `runtime-client-js` interfaces with a Voiceflow "runtime" server. You can check out our [runtime SDK](https://github.com/voiceflow/general-runtime) for building runtime servers. Modifying the runtime allows for extensive customization of bot behavior and integrations.
 
-By default, the client will use the Voiceflow hosted runtime at `https://general-runtime.voiceflow.com`
+By default, the client will use the Voiceflow hosted runtime at `https://general-runtime.voiceflow.com`. To configure the client to consume your custom runtime, you should use the `endpoint` configuration option shown below. This option will change the target URL of runtime server that the `RuntimeClient` sends its request to.
+
+```js
+this.chatbot = new RuntimeClient({
+  versionID: '5fa2c62c71d4fa0007f7881b',
+  endpoint: 'https://localhost:4000',			// change to a local endpoint or your company's production servers
+  dataConfig: {
+    includeTypes: ['visual']
+  }
+});
+```
 
