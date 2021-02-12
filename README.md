@@ -14,12 +14,13 @@ The Runtime Client can be used with jQuery, React, and any other JavaScript libr
 
 ## Table of Contents
 
-1. [Demos](https://github.com/voiceflow/runtime-client-js/tree/master#demos)
-2. [Samples](https://github.com/voiceflow/runtime-client-js/tree/master#samples)
-3. [Install](https://github.com/voiceflow/runtime-client-js/tree/master#install)
-4. [Getting Started](https://github.com/voiceflow/runtime-client-js/tree/master#getting-started)
-5. [Advanced Usage](https://github.com/voiceflow/runtime-client-js/tree/master#advanced-usage)
-6. [API Reference](https://github.com/voiceflow/runtime-client-js/tree/master#api-reference)
+1. [Demos](#demos)
+2. [Samples](#samples)
+3. [Install](#install)
+4. [Getting Started](#getting-started)
+5. [Advanced Usage](#advanced-usage)
+6. [API Reference](#api-reference)
+7. [Development](#api-reference)
 
 
 
@@ -135,22 +136,26 @@ chatbot.start()
 
 ### Setting up a Voiceflow app
 
-See [here]() for instructions on how to quickly setup a Voiceflow app to try out your project.
+See [here](docs/setting-up-vf-app.md) for instructions on how to quickly setup a Voiceflow app to try out your project.
 
 ### Integration step-by-step
 
-See [here]() for a step-by-step breakdown of the Minimal Working Integration
+See [here](docs/step-by-step.md) for a step-by-step breakdown of the Minimal Working Integration
 
 
 
 ## Advanced Usage
 
-See the documentation [here]() for the available advanced features of the SDK.
+See the documentation [here](docs/advanced-usage.md) for the available advanced features of the SDK.
+
+
 
 
 ## API Reference
 
-In progress
+See the API reference [here](docs/api-reference.md).
+
+
 
 ## Development
 
