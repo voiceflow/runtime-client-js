@@ -4,6 +4,7 @@ import { State } from '@voiceflow/runtime';
 import _ from 'lodash';
 
 import { RequestContext, ResponseContext } from '@/lib/types';
+import { SpeakType } from "@voiceflow/general-types/build/nodes/speak";
 
 export { CHOICE_TRACE } from "../fixtures";
 
@@ -122,6 +123,7 @@ export const SEND_TEXT_RESPONSE_BODY_WITH_SSML_AND_TTS: ResponseContext = {
     {
       ...SPEAK_TRACE,
       payload: {
+        type: SpeakType.MESSAGE,
         message: '<voice>Books ought to have to have good endings.</voice>',
         src: 'data:audio/mpeg;base64,SUQzBAAAAAAA',
       },
