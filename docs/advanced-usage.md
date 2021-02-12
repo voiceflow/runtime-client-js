@@ -9,7 +9,7 @@
    1. [`.getResponse`](###)
    2. [`.isEnding`](###isEnding)
    3. [`.getChips()`](###)
-3. [Configuration](##Configuration)
+3. [Configuration](#Configuration)
 4. [`makeTraceProcessor`](##)
 5. [Variables](##Variables)
    1. [Getters](###Getters)
