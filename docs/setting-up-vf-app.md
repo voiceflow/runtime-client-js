@@ -30,6 +30,3 @@ To start using the SDK, we should build a project on [Voiceflow](https://creator
 	<img width="957" align="center" alt="Screen Shot 2021-02-08 at 2 11 09 PM" src="https://user-images.githubusercontent.com/32404412/107269370-813d4380-6a17-11eb-8bb5-d286c5db3664.png">
 </p>	
 
-
-
-### 
