@@ -4,19 +4,22 @@
 
 ## Table of Contents
 
-1. [Statefulness of RuntimeClient](#statefulness-of-runtimeclient)
-2. [Context](#context)
-   1. [`.getResponse`](#get-response)
-   2. [`.isEnding`](#isending)
-   3. [`.getChips()`](#getchips)
-3. [Configuration](#configuration)
-4. [`makeTraceProcessor`](#maketraceprocessor)
-5. [Variables](#variables)
-   1. [Getters](#getters)
-   2. [Setters](#setters)
-   3. [Enabling Stricter Typing](#enabling-stricter-typing)
-6. [Multiple Applications](#multiple-applications)
-7. [Runtime](#runtime)
+- [Advanced Usage](#advanced-usage)
+  - [Table of Contents](#table-of-contents)
+  - [Features](#features)
+    - [Statefulness of RuntimeClient](#statefulness-of-runtimeclient)
+    - [Context](#context)
+      - [`.getResponse()`](#getresponse)
+      - [`.isEnding()`](#isending)
+      - [`.getChips()`](#getchips)
+    - [Configuration](#configuration)
+    - [`makeTraceProcessor`](#maketraceprocessor)
+    - [Variables](#variables)
+      - [Getters](#getters)
+      - [Setters](#setters)
+      - [Enabling Stricter Typing](#enabling-stricter-typing)
+    - [Multiple Applications](#multiple-applications)
+    - [Runtime](#runtime)
 
 
 
