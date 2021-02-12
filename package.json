@@ -50,6 +50,7 @@
     "tsconfig-paths": "^3.9.0",
     "ttypescript": "^1.5.8",
     "typedoc": "^0.20.12",
+    "typedoc-plugin-external-module-name": "^4.0.6",
     "typescript": "^3.9"
   },
   "files": [
@@ -90,6 +91,9 @@
   "scripts": {
     "build": "npm run clean && ttsc --project ./tsconfig.build.json",
     "clean": "rimraf build",
+    "docs:gen": "npm run clean && typedoc",
+    "docs:open": "open docs/api-ref/index.html",
+    "docs:watch": "npm run clean && typedoc --watch",
     "lint": "eslint \"lib/**/*.{js,ts}\"",
     "lint:fix": "yarn lint --fix",
     "lint:quiet": "yarn lint --quiet",
