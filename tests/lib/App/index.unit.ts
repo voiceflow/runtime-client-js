@@ -4,7 +4,7 @@ import chaiAsPromise from 'chai-as-promised';
 import _ from 'lodash';
 import sinon from 'sinon';
 
-import App, { AppConfig } from '@/lib/App';
+import RuntimeClient, { AppConfig } from '@/lib/App';
 import { DEFAULT_ENDPOINT } from '@/lib/App/constants';
 
 import {
@@ -46,7 +46,7 @@ const createVFApp = <T = any>(appConfig?: Partial<AppConfig<T>>) => {
 
   const axiosCreate = sinon.stub(baseAxios, 'create').returns(axiosInstance as any);
 
-  const VFApp = new App({ versionID: VERSION_ID, ...appConfig });
+  const VFApp = new RuntimeClient({ versionID: VERSION_ID, ...appConfig });
 
   return { VFApp, axiosCreate, axiosInstance };
 };

@@ -1,0 +1,7 @@
+{
+    "entryPoints": ["index.ts"],
+    "out": "docs/api-ref",
+    "name": "Voiceflow Runtime Client JS",
+    "includeVersion": "true",
+    "hideGenerator" : "true"
+}
