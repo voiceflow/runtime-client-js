@@ -1,4 +1,5 @@
 import { VisualTrace, BlockTrace, ChoiceTrace, DebugTrace, ExitTrace, FlowTrace, SpeakTrace, StreamTrace, TraceType, DeviceType } from "@voiceflow/general-types";
+import { SpeakType } from "@voiceflow/general-types/build/nodes/speak";
 import { TraceStreamAction } from "@voiceflow/general-types/build/nodes/stream";
 import { APLType, CanvasVisibility, VisualType } from "@voiceflow/general-types/build/nodes/visual";
 
@@ -11,7 +12,7 @@ export type VFAppVariablesSchema = {
 export const SPEAK_TRACE: SpeakTrace = {
   type: TraceType.SPEAK,
   payload: {
-    type: 'message',
+    type: SpeakType.MESSAGE,
     message: 'Books ought to have to have good endings.',
     src: 'data:audio/mpeg:some-large-tts-audio-file',
   },
@@ -28,7 +29,7 @@ export const MAKE_SPEAK_TRACE = (payload: SpeakTrace['payload']): SpeakTrace => 
 export const SPEAK_TRACE_AUDIO: SpeakTrace = {
   type: TraceType.SPEAK,
   payload: {
-    type: 'audio',
+    type: SpeakType.AUDIO,
     message: '<audio src=\"http://localhost:8000/audio.local/1612307079557-mixaund-tech-corporate.mp3\"/>',
     src: 'http://localhost:8000/audio.local/1612307079557-mixaund-tech-corporate.mp3'
   },
