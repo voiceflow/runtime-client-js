@@ -103,32 +103,32 @@ const chatbot = new RuntimeClient({
 // Begin a conversation session
 chatbot.start()
 	.then(context => {
-  	// Show the voice app's initial response
-  	const traces = context.getResponse();
-  	traces.forEach(trace => {
-      console.log(trace.payload.message);
-    });
-  
-  	// Continue the conversation session
-  	const userInput = "I would like a large cheeseburger";
-  	const context2 = chatbot.sendText(userInput);
-  
-  	return context2;
+  		// Show the voice app's initial response
+  		const traces = context.getResponse();
+  		traces.forEach(trace => {
+		  console.log(trace.payload.message);
+		});
+
+		// Continue the conversation session
+		const userInput = "I would like a large cheeseburger";
+		const context2 = chatbot.sendText(userInput);
+
+		return context2;
 	})
 	.then(context => {
-  	// Show the voice app's subsequent response
-    const traces2 = context.getResponse();
-    traces2.forEach(trace => {
-      console.log(trace.payload.message);
-    });
-  
-  	// Check if conversation has ended after .sendText() and .start() calls
-  	if (context.isEnding()) {
-      cleanupMyApp();
-      return chatbot.start();
-    }
-  	return context;
-  });
+		// Show the voice app's subsequent response
+		const traces2 = context.getResponse();
+		traces2.forEach(trace => {
+		  console.log(trace.payload.message);
+		});
+
+		// Check if conversation has ended after .sendText() and .start() calls
+		if (context.isEnding()) {
+		  cleanupMyApp();
+		  return chatbot.start();
+		}
+		return context;
+	});
 ```
 
 
@@ -148,24 +148,29 @@ See [here]() for a step-by-step breakdown of the Minimal Working Integration
 See the documentation [here]() for the available advanced features of the SDK.
 
 
-
 ## API Reference
 
-
+In progress
 
 ## Development
+
+### Important Scripts
+
+#### `yarn install`
+
+Run `yarn install` to install any necessary dependencies to get started with working on the SDK.
 
 #### `yarn build`
 
 Use this to build the `runtime-client-js` locally. The build will be stored in the `/build` folder
 
-### `yarn lint`
+#### `yarn lint`
 
 Use this command to find any issues that fails our linter. It is important to have proper linting, otherwise your PR will not pass our automation.
 
 Use `yarn lint:fix` to check and automatically fix linting issues where possible.
 
-**`yarn test`**
+#### `yarn test`
 
 Use this command to run all of the integration and unit tests. Make sure that your PR achieves 100% coverage and tests for potential edge-cases. 
 
@@ -175,3 +180,8 @@ Use `yarn test:unit` to run all of the unit tests
 
 Use `yarn test:integration` to run all of the integration tests.
 
+
+
+### Submitting a PR
+
+We're always open to improving our Runtime Client SDK. Consider opening a PR if there is some improvement that you think should be added. Make sure to achieve 100% coverage for unit tests and provide documentation if applicable.
