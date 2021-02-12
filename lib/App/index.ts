@@ -27,7 +27,7 @@ class RuntimeClient<S extends Record<string, any> = Record<string, any>> {
   /**
    * Version ID of the VF project that the SDK communicates with
    */
-  private versionID: string; 
+  private versionID: string;
 
   /**
    * Module that handles constructing and sending HTTP requests, as well as receiving and unpackaging HTTP responses
@@ -56,9 +56,9 @@ class RuntimeClient<S extends Record<string, any> = Record<string, any>> {
 
   /**
    * Constructs a `RuntimeClient` instance
-   * 
+   *
    * @param appConfig Configuration options for the `RuntimeClient` (see [[`AppConfig<S>`]]).
-   * 
+   *
    * @category Constructor
    */
   constructor({ versionID, endpoint = DEFAULT_ENDPOINT, dataConfig, variables }: AppConfig<S>) {
@@ -82,9 +82,9 @@ class RuntimeClient<S extends Record<string, any> = Record<string, any>> {
 
   /**
    * Begins a conversation session with the Voiceflow app
-   * 
+   *
    * @returns a [[Context]] object representing the current app state
-   * 
+   *
    * @category Interaction
    */
   async start(): Promise<Context<S>> {
@@ -94,11 +94,11 @@ class RuntimeClient<S extends Record<string, any> = Record<string, any>> {
 
   /**
    * Sends the `userInput` to the runtime server and advance the conversation state
-   * 
+   *
    * @param userInput The user's response to the voice app
-   * 
+   *
    * @returns a [[Context]] object representing the current app state
-   * 
+   *
    * @category Interaction
    */
   async sendText(userInput: string): Promise<Context<S>> {
@@ -110,11 +110,11 @@ class RuntimeClient<S extends Record<string, any> = Record<string, any>> {
 
   /**
    * Sends the `request` to the runtime server and advanced the conversation state.
-   * 
+   *
    * @param request The request object that must be sent to the runtime server
-   * 
+   *
    * @returns a [[Context]] object representing the current app state
-   * 
+   *
    * @category Interaction
    */
   async sendRequest(request: GeneralRequest) {
@@ -134,7 +134,7 @@ class RuntimeClient<S extends Record<string, any> = Record<string, any>> {
 
   /**
    * Initializes the `RuntimeClient`'s initial Voiceflow app state for the first request to the runtime servers.
-   * 
+   *
    * @category Internal Helper
    */
   private async getAppInitialState() {
@@ -153,9 +153,9 @@ class RuntimeClient<S extends Record<string, any> = Record<string, any>> {
 
   /**
    * Updates the internal Voiceflow app state to be `contextJSON`
-   * 
+   *
    * @param contextJSON The new app state
-   * 
+   *
    * @category Getter & Setter
    */
   setContext(contextJSON: ResponseContext) {
@@ -164,7 +164,7 @@ class RuntimeClient<S extends Record<string, any> = Record<string, any>> {
 
   /**
    * @returns a [[Context]] object representing the current app state
-   * 
+   *
    * @category Getter & Setter
    */
   getContext() {
@@ -173,7 +173,7 @@ class RuntimeClient<S extends Record<string, any> = Record<string, any>> {
 
   /**
    * @returns The versionID of the Voiceflow app that is being executed.
-   * 
+   *
    * @category Getter & Setter
    */
   getVersionID() {
