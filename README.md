@@ -14,12 +14,12 @@ The Runtime Client can be used with jQuery, React, and any other JavaScript libr
 
 ## Table of Contents
 
-1. [Demos](##Demos)
-2. [Samples](##Samples)
-3. [Install](##Install)
-4. [Getting Started](##Getting Started)
-5. [Advanced Usage](##Advanced Usage)
-6. [API Reference](##API Reference)
+1. [Demos](https://github.com/voiceflow/runtime-client-js/tree/master#demos)
+2. [Samples](https://github.com/voiceflow/runtime-client-js/tree/master#samples)
+3. [Install](https://github.com/voiceflow/runtime-client-js/tree/master#install)
+4. [Getting Started](https://github.com/voiceflow/runtime-client-js/tree/master#getting-started)
+5. [Advanced Usage](https://github.com/voiceflow/runtime-client-js/tree/master#advanced-usage)
+6. [API Reference](https://github.com/voiceflow/runtime-client-js/tree/master#api-reference)
 
 
 
@@ -28,7 +28,6 @@ The Runtime Client can be used with jQuery, React, and any other JavaScript libr
 - Voiceflow Burgers (Web) - [source](https://voiceflow-burger.webflow.io/)
 
 <img src="https://user-images.githubusercontent.com/5643574/106966841-17b9ee00-6714-11eb-868a-26751b7d560e.png" alt="demo" style="zoom:50%;" />
-
 
 ## Samples
 
@@ -49,16 +48,16 @@ npm install --save @voiceflow/runtime-client-js
 
 ## Getting Started
 
-### Minimal Working Integration
+### Minimal Working Integration, ES6 and Async/Await
 
 The minimum code to start using the SDK is shown below:
 
 ```js
-const RuntimeClient = require('@voiceflow/runtime-client-js').default;
+import RuntimeClient from "@voiceflow/runtime-client-js";
 
 // Construct an object 
 const chatbot = new RuntimeClient({
-  versionID: 'your-version-id-here',								// ADD YOUR VERSION ID HERE
+  versionID: 'your-version-id-here', // ADD YOUR VERSION ID HERE
 });
 
 (async () => {
@@ -72,21 +71,64 @@ const chatbot = new RuntimeClient({
   });
   
   // Continue the conversation session
-  const userInput = "I would like a large cheeseburger";
+  const userInput = "I would like a large cheeseburger"; // change this string to what your app expects
   const context2 = await chatbot.sendText(userInput);
   
   // Show the voice app's subsequent response
-  const traces2 = context.getResponse();
+  const traces2 = context2.getResponse();
   traces2.forEach(trace => {
     console.log(trace.payload.message);
   });
   
   // Check if conversation has ended after .sendText() and .start() calls
-  if (context.isEnding()) {
+  if (context2.isEnding()) {
     cleanupMyApp();
-    const context2 = await chatbot.start();					// Maybe restart the chatbot application with .start()
+    const context2 = await chatbot.start(); // Maybe restart the chatbot application with .start()
   }
 })();
+```
+
+
+
+### Minimal Working Integration, CommonJS and Promises
+
+```js
+const RuntimeClient = require('@voiceflow/runtime-client-js').default;
+
+// Construct an object 
+const chatbot = new RuntimeClient({
+  versionID: 'your-version-id-here', // ADD YOUR VERSION ID HERE
+});
+
+// Begin a conversation session
+chatbot.start()
+	.then(context => {
+  	// Show the voice app's initial response
+  	const traces = context.getResponse();
+  	traces.forEach(trace => {
+      console.log(trace.payload.message);
+    });
+  
+  	// Continue the conversation session
+  	const userInput = "I would like a large cheeseburger";
+  	const context2 = chatbot.sendText(userInput);
+  
+  	return context2;
+	})
+	.then(context => {
+  	// Show the voice app's subsequent response
+    const traces2 = context.getResponse();
+    traces2.forEach(trace => {
+      console.log(trace.payload.message);
+    });
+  
+  	// Check if conversation has ended after .sendText() and .start() calls
+  	if (context.isEnding()) {
+      cleanupMyApp();
+      return chatbot.start();
+    }
+  	return context;
+  });
 ```
 
 
@@ -108,3 +150,28 @@ See the documentation [here]() for the available advanced features of the SDK.
 
 
 ## API Reference
+
+
+
+## Development
+
+#### `yarn build`
+
+Use this to build the `runtime-client-js` locally. The build will be stored in the `/build` folder
+
+### `yarn lint`
+
+Use this command to find any issues that fails our linter. It is important to have proper linting, otherwise your PR will not pass our automation.
+
+Use `yarn lint:fix` to check and automatically fix linting issues where possible.
+
+**`yarn test`**
+
+Use this command to run all of the integration and unit tests. Make sure that your PR achieves 100% coverage and tests for potential edge-cases. 
+
+Use `yarn test:single` to execute a single unit or integration test.
+
+Use `yarn test:unit` to run all of the unit tests
+
+Use `yarn test:integration` to run all of the integration tests.
+
