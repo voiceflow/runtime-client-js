@@ -19,7 +19,6 @@ The Runtime Client can be used with jQuery, React, and any other JavaScript libr
 3. [Install](#install)
 4. [Getting Started](#getting-started)
 5. [Advanced Usage](#advanced-usage)
-6. [API Reference](#api-reference)
 7. [Development](#api-reference)
 
 
@@ -149,13 +148,6 @@ See [here](docs/step-by-step.md) for a step-by-step breakdown of the Minimal Wor
 ## Advanced Usage
 
 See the documentation [here](docs/advanced-usage.md) for the available advanced features of the SDK.
-
-
-
-
-## API Reference
-
-See the API reference [here](docs/api-reference.md).
 
 
 
