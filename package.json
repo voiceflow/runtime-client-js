@@ -56,7 +56,8 @@
     "typescript": "^3.9"
   },
   "files": [
-    "build"
+    "build",
+    "umd"
   ],
   "homepage": "https://github.com/voiceflow/runtime-client-sdk#readme",
   "husky": {
