@@ -2,3 +2,4 @@ coverage
 .idea
 .nyc_output
 /node_modules
+webpack.config.js

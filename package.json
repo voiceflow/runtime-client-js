@@ -11,7 +11,10 @@
     "@voiceflow/general-types": "^1.19.0",
     "@voiceflow/runtime": "^1.20.1",
     "axios": "^0.21.1",
-    "lodash": "^4.17.20"
+    "lodash": "^4.17.20",
+    "ts-loader": "^8.0.17",
+    "webpack": "^5.22.0",
+    "webpack-cli": "^4.5.0"
   },
   "devDependencies": {
     "@commitlint/cli": "^11.0.0",
@@ -88,8 +91,11 @@
     "url": "git+https://github.com/voiceflow/runtime-client-js.git"
   },
   "scripts": {
-    "build": "npm run clean && ttsc --project ./tsconfig.build.json",
-    "clean": "rimraf build",
+    "build": "npm run build:common && npm run build:umd",
+    "build:common": "npm run clean:common && ttsc --project ./tsconfig.build.json",
+    "build:umd": "npm run clean:umd && webpack",
+    "clean:common": "rimraf build",
+    "clean:umd": "rimraf umd",
     "lint": "eslint \"lib/**/*.{js,ts}\"",
     "lint:fix": "yarn lint --fix",
     "lint:quiet": "yarn lint --quiet",
