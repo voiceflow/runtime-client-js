@@ -35,6 +35,8 @@ The Runtime Client can be used with jQuery, React, and any other JavaScript libr
 See the parent [rcjs-examples](https://github.com/voiceflow/rcjs-examples) repo for instructions on how to setup each Sample.
 
 - Hello World (Node.js) - [source](https://github.com/voiceflow/rcjs-examples/tree/master/hello-world)
+- Hamburger Order App (jQuery) - [source](https://github.com/voiceflow/rcjs-examples/tree/master/hamburger-order-jQuery)
+- Hamburger Order App (React) - [source](https://github.com/voiceflow/rcjs-examples/tree/master/hamburger-order-react)
 - Hamburger Order App (Node.js) - [source](https://github.com/voiceflow/rcjs-examples/tree/master/hamburger-order)
 - Using Trace Processor (Node.js) - [source](https://github.com/voiceflow/rcjs-examples/tree/master/trace-processor)
 - Using TTS (React) - [source](https://github.com/voiceflow/rcjs-examples/tree/master/text-to-speech)
