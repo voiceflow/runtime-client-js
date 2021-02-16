@@ -4,22 +4,20 @@
 
 ## Table of Contents
 
-- [Advanced Usage](#advanced-usage)
-  - [Table of Contents](#table-of-contents)
-  - [Features](#features)
-    - [Statefulness of RuntimeClient](#statefulness-of-runtimeclient)
-    - [Context](#context)
-      - [`.getResponse()`](#getresponse)
-      - [`.isEnding()`](#isending)
-      - [`.getChips()`](#getchips)
-    - [Configuration](#configuration)
-    - [`makeTraceProcessor`](#maketraceprocessor)
-    - [Variables](#variables)
-      - [Getters](#getters)
-      - [Setters](#setters)
-      - [Enabling Stricter Typing](#enabling-stricter-typing)
-    - [Multiple Applications](#multiple-applications)
-    - [Runtime](#runtime)
+- [Statefulness of RuntimeClient](#statefulness-of-runtimeclient)
+- [Context](#context)
+  - [`.getResponse()`](#getresponse)
+  - [`.isEnding()`](#isending)
+  - [`.getChips()`](#getchips)
+- [Configuration](#configuration)
+- [`makeTraceProcessor`](#maketraceprocessor)
+- [Variables](#variables)
+  - [Getters](#getters)
+  - [Setters](#setters)
+  - [Enabling Stricter Typing](#enabling-stricter-typing)
+- [Multiple Applications](#multiple-applications)
+- [Runtime](#runtime)
+- [Advanced Trace Types](#advanced-trace-types)
 
 
 
@@ -119,7 +117,7 @@ The `RuntimeClient` comes with additional `dataConfig` options for managing the 
 
 1. `tts` - Set to `true` to enable text-to-speech functionality. Any returned speak traces will contain an additional`src` property with an `.mp3` string, which is an audiofile that will speak out the trace text.
 2. `ssml` - Set to `true` to disable the `RuntimeClient`'s SSML sanitization and return the full text string with the SSML included. This may be useful if you want to use your own TTS system. 
-3. `includeTypes` - Set to a list of trace types to specify the additional trace types you want to receive from `.getResponse()`. A speak-type trace is always returned by `.getResponse()`. For the full list of available trace types, see the API reference.
+3. `includeTypes` - Set to a list of trace types to specify the additional trace types you want to receive from `.getResponse()`. A speak-type trace is always returned by `.getResponse()`. For the full list of available trace types, see  [Advanced Trace Types](#advanced-trace-types).
 4. `traceProcessor` - Set to a "trace processor" function which will be automatically called whenever an interaction method like `.sendText()` receives new traces.
 
 The Samples section has some working code demonstrating some of the configuration options. 
@@ -148,7 +146,7 @@ The SDK exposes a utility called `makeTraceProcessor` which allows you to quickl
 
 **Arguments:**
 
-- `handlerMap` - `object` -  An object whose keys are `TraceType`s (e.g. speak` for `SpeakTraces), and whose values are handlers for that trace type. Some examples of `TraceType`s and their (simplified) expected handler signatures are listed below. For the full list of available trace types and complete handler signatures, see the API Reference. 
+- `handlerMap` - `object` -  An object whose keys are `TraceType`s (e.g. speak` for `SpeakTraces), and whose values are handlers for that trace type. Some examples of `TraceType`s and their (simplified) expected handler signatures are listed below. For the full list of available trace types and complete handler signatures, see the [Advanced Trace Types](#advanced-trace-types). 
   - `speak`- `(message) => any`  - A `SpeakTrace` handler receives a `message`, which is simply the Voiceflow app's "actual" response to the user interaction.
   - `debug - (message) => any` - A `DebugTrace` handler receives a debug `message` that illustrates control flow of the Voiceflow app.
 
@@ -278,4 +276,172 @@ const orderBot = new VFApp({
 As the name suggests, `runtime-client-js` interfaces with a Voiceflow "runtime" server. You can check out [https://github.com/voiceflow/general-runtime](https://github.com/voiceflow/general-runtime) and host your own runtime server. Modifying the runtime allows for extensive customization of bot behavior and integrations.
 
 By default, the client will use the Voiceflow hosted runtime at `https://general-runtime.voiceflow.com`
+
+
+
+### Advanced Trace Types
+
+Specialized traces like `SpeakTrace` are a sub-type of the more abstract `GeneralTrace` super-type, as shown below.
+
+```ts
+export type GeneralTrace = ExitTrace | SpeakTrace | ChoiceTrace | FlowTrace | StreamTrace | BlockTrace | DebugTrace | VisualTrace;
+```
+
+All traces have a `type` and `payload` property at their top-level, but differ in what the value of `type` and `payload` is. Shown below is a type that describes the common structure of trace objects. **NOTE**: the `Trace` type isn't actually declared in the package and is only shown for illustration.
+
+```ts
+const Trace<T extends TraceType, P> = {
+  trace: T;
+  payload: P;
+};
+// e.g. type SpeakTrace = Trace<TraceType.SPEAK, { message: string, src: string, type?: string }>
+```
+
+In TypeScript, the `string enum` called `TraceType` is exported by this package and you can use it to quickly access the trace type string. A partial list of the available trace types is shown below. s
+
+```js
+export declare enum TraceType {
+    END = "end",
+    FLOW = "flow",
+    SPEAK = "speak",
+    BLOCK = "block",
+    DEBUG = "debug",
+    CHOICE = "choice",
+    STREAM = "stream",
+    VISUAL = "visual"
+}
+```
+
+For each of the specialized trace types, we will describe each trace's purpose, payload structure, and handler signature.
+
+
+
+#### SpeakTrace
+
+- **PURPOSE:** Contains the "real" response of the voice interface.
+- **PAYLOAD:**
+
+```ts
+enum SpeakType {
+    AUDIO = "audio",
+    MESSAGE = "message"
+}
+type Payload = {
+    message: string;
+    type: SpeakType;
+    voice?: string;
+    src?: string | null;
+}
+```
+
+- **HANDLER:** The `SpeakTrace` accepts two types of handlers.
+
+```ts
+
+```
+
+
+#### DebugTrace
+- **PURPOSE:**
+- **PAYLOAD:**
+
+```ts
+
+```
+
+- **HANDLER:**
+
+```ts
+
+```
+
+
+#### VisualTrace
+- **PURPOSE:**
+- **PAYLOAD:**
+
+```ts
+
+```
+
+- **HANDLER:**
+
+```ts
+
+```
+
+
+#### StreamTrace
+- **PURPOSE:**
+- **PAYLOAD:**
+
+```ts
+
+```
+
+- **HANDLER:**
+
+```ts
+
+```
+
+
+#### ChoiceTrace 
+- **PURPOSE:**
+- **PAYLOAD:**
+
+```ts
+
+```
+
+- **HANDLER:**
+
+```ts
+
+```
+
+
+#### ExitTrace
+- **PURPOSE:**
+- **PAYLOAD:**
+
+```ts
+
+```
+
+- **HANDLER:**
+
+```ts
+
+```
+
+
+#### FlowTrace
+- **PURPOSE:**
+- **PAYLOAD:**
+
+```ts
+
+```
+
+- **HANDLER:**
+
+```ts
+
+```
+
+
+#### BlockTrace
+- **PURPOSE:**
+- **PAYLOAD:**
+
+```ts
+
+```
+
+- **HANDLER:**
+
+```ts
+
+```
 
