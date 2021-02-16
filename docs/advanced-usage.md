@@ -291,13 +291,13 @@ this.chatbot = new RuntimeClient({
 
 ### Advanced Trace Types
 
-Specialized traces like `SpeakTrace` are a sub-type of the more abstract `GeneralTrace` super-type, as shown below.
+A `GeneralTrace` is an object which represents one piece of the overall response from a Voiceflow app. Specialized traces like `SpeakTrace` are a sub-type of the more abstract `GeneralTrace` super-type, as shown below.
 
 ```ts
 export type GeneralTrace = ExitTrace | SpeakTrace | ChoiceTrace | FlowTrace | StreamTrace | BlockTrace | DebugTrace | VisualTrace;
 ```
 
-All traces have a `type` and `payload` property at their top-level, but differ in what the value of `type` and `payload` is. Shown below is a type that describes the common structure of trace objects. **NOTE**: the `Trace` type isn't actually declared in the package and is only shown for illustration.
+All trace obejcts have a `type` and `payload` property, but differ in what the value of `type` and `payload` is. Shown below is a type that describes the common structure of trace objects. **NOTE**: the `Trace` type isn't actually declared in the package and is only shown for illustration.
 
 ```ts
 const Trace<T extends TraceType, P> = {
@@ -307,7 +307,7 @@ const Trace<T extends TraceType, P> = {
 // e.g. type SpeakTrace = Trace<TraceType.SPEAK, { message: string, src: string, type?: string }>
 ```
 
-In TypeScript, the `string enum` called `TraceType` is exported by this package and you can use it to quickly access the trace type string. A partial list of the available trace types is shown below. s
+In TypeScript, the `string enum` called `TraceType` is exported by this package and you can use it to quickly access the trace type string. A partial list of the available trace types is shown below. 
 
 ```js
 export declare enum TraceType {
@@ -322,136 +322,113 @@ export declare enum TraceType {
 }
 ```
 
-For each of the specialized trace types, we will describe each trace's purpose, payload structure, and handler signature.
+For each of the specialized trace types, we will describe each trace's purpose and their payload structure below.
 
 
 
 #### SpeakTrace
 
-- **PURPOSE:** Contains the "real" response of the voice interface.
+- **PURPOSE:** Contains the "real" response of the voice interface. Corresponds to a Speak Step or Audio Step on Voiceflow.
 - **PAYLOAD:**
+  - **`message`** - The text representation of the response from the voice interface. We strip any SSML that you may have added to the response on Voiceflow. To see the SSML, see the `ssml` option for the `RuntimeClient` constructor.
+  - **`type`** - If `"audio"`, then this `SpeakTrace` corresponds to an Audio Step on the Voiceflow diagram. If `"message"`, then this corresponds to a Speak Step on the Voiceflow diagram.
+  - **`src`** - If `type` is `"audio"`, then this property always appears and contains a URL to the audio-file associated with the Audio Step. If `type` is `"message"`, then this property only appears if the `tts` option in `RuntimeClient` constructor is set to `true`. 
+  - **`voice`** - Only appears if `type` is `"message"` and `tts` is enabled. This property is the name of the voice assistant you chose to read out the Speak Step text.
 
 ```ts
 enum SpeakType {
     AUDIO = "audio",
     MESSAGE = "message"
 }
-type Payload = {
+type P = {
     message: string;
     type: SpeakType;
-    voice?: string;
     src?: string | null;
+    voice?: string;
 }
 ```
 
-- **HANDLER:** The `SpeakTrace` accepts two types of handlers.
-
-```ts
-
-```
 
 
 #### DebugTrace
-- **PURPOSE:**
+
+- **PURPOSE:** Contains a message that describes the control flow of the Voiceflow, e.g, matched intents, which blocks to move to.
 - **PAYLOAD:**
+  - **`message`** - A message illustrating the Voiceflow App's control flow. Intended only to be seen by the developers.
 
 ```ts
-
+type P = {
+    message: string;
+}
 ```
 
-- **HANDLER:**
-
-```ts
-
-```
 
 
 #### VisualTrace
-- **PURPOSE:**
-- **PAYLOAD:**
+
+- **PURPOSE:** Contains the data used by the Visual Step to display images.
+- **PAYLOAD:** 
+  - **`image`** - URL to the image asset being displayed.
+  - **`device`** - What device the Visual Step is meant to be displayed on.
+  - **`dimensions`** - Your custom dimensions, if any.
+  - **`canvasVisibility`** - If you've toggled "Actual Size" on the Voiceflow Creator this attribute will have the value `"full"`. Otherwise, if you toggled "Small", then this attribute will have the value `"cropped"`.
+  - **`visualType`** - Our internal code supports other visuals systems like APL. However, this is not relevant to a General Project, so you should ignore this property.
 
 ```ts
-
+type P = {
+  image: string | null;
+  device: DeviceType | null;
+  dimensions: null | { width: number; height: number; }
+  canvasVisibility: CanvasVisibility;
+  visualType: 'image';
+};
 ```
 
-- **HANDLER:**
-
-```ts
-
-```
-
-
-#### StreamTrace
-- **PURPOSE:**
-- **PAYLOAD:**
-
-```ts
-
-```
-
-- **HANDLER:**
-
-```ts
-
-```
 
 
 #### ChoiceTrace 
-- **PURPOSE:**
+
+- **PURPOSE:** Contains suggested response that the user can make. Only appears at the end of a list of traces returned by the app. We recommend using `.getChips()` to access the suggested responses, rather than processing this trace manually.
 - **PAYLOAD:**
 
 ```ts
-
+type P = { 
+  choices: { intent?: string; name: string }[] 
+}
 ```
 
-- **HANDLER:**
-
-```ts
-
-```
 
 
 #### ExitTrace
-- **PURPOSE:**
-- **PAYLOAD:**
 
-```ts
+- **PURPOSE:** Indicates if the Voiceflow app has terminated or not. Only appears at the end of a list of traces returned by the app. We recommend using `.isEnding()` to determine if the conversation is over, rather than processing this trace manually.
+- **PAYLOAD:** The payload is `undefined`
 
-```
-
-- **HANDLER:**
-
-```ts
-
-```
 
 
 #### FlowTrace
-- **PURPOSE:**
+
+- **PURPOSE:** Indicates that the Voiceflow app has switched into a flow. This might be useful for debugging.
 - **PAYLOAD:**
+  - **`diagramID`** - The ID of the Flow the app is stepping into.
 
 ```ts
-
+type P = {
+  diagramID: string;
+}
 ```
 
-- **HANDLER:**
-
-```ts
-
-```
 
 
 #### BlockTrace
-- **PURPOSE:**
+
+- **PURPOSE:** Indicates that the Voiceflow app has entered a block. 
 - **PAYLOAD:**
+  - **`blockID`** - The ID of the block that the app is stepping into.
 
 ```ts
-
-```
-
-- **HANDLER:**
-
-```ts
-
+type P = {
+  blockID: string;
+}
 ```
 
