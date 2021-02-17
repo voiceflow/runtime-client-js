@@ -380,7 +380,7 @@ const traceProcessor = makeTraceProcessor({
 
 ```ts
 type VisualTraceHandler = (
-		image: string | null,
+    image: string | null,
     device: string | null,
     dimensions: { width: string; height: string; } | null,
     canvasVisibility: 'full' | 'cropped'
