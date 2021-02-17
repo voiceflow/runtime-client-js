@@ -1,7 +1,8 @@
-import { GeneralTrace, SpeakTrace, TraceType } from "@voiceflow/general-types";
-import { SpeakType } from "@voiceflow/general-types/build/nodes/speak";
-import { parse } from "html-parse-stringify";
-import { ResponseContext } from "../../types";
+import { GeneralTrace, SpeakTrace, TraceType } from '@voiceflow/general-types';
+import { SpeakType } from '@voiceflow/general-types/build/nodes/speak';
+import { parse } from 'html-parse-stringify';
+
+import { ResponseContext } from '../../types';
 
 /**
  * WORK-AROUND function to deal with bug where enabling `tts` will cause the Audio Step's audio
@@ -9,38 +10,38 @@ import { ResponseContext } from "../../types";
  * backend and remove `parseAudioStepSrc` and `adaptResponseContext`
  */
 export const parseAudioStepSrc = (trace: GeneralTrace): GeneralTrace => {
-    if (trace.type !== TraceType.SPEAK) {
-        return trace;
-    }
+  if (trace.type !== TraceType.SPEAK) {
+    return trace;
+  }
 
-    const node = parse(trace.payload.message)[0];
+  const node = parse(trace.payload.message)[0];
 
-    if (!node || node.name !== 'audio') {
-        return {
-            ...trace,
-            payload: {
-                ...trace.payload,
-                type: SpeakType.MESSAGE,
-            },
-        } as SpeakTrace;
-    }
-
-    const audioSrc = node.attrs.src;
-
+  if (!node || node.name !== 'audio') {
     return {
-        ...trace,
-        payload: {
-            ...trace.payload,
-            type: SpeakType.AUDIO,
-            src: audioSrc,
-        },
-    };
+      ...trace,
+      payload: {
+        ...trace.payload,
+        type: SpeakType.MESSAGE,
+      },
+    } as SpeakTrace;
+  }
+
+  const audioSrc = node.attrs.src;
+
+  return {
+    ...trace,
+    payload: {
+      ...trace.payload,
+      type: SpeakType.AUDIO,
+      src: audioSrc,
+    },
+  };
 };
 
 /**
  * WORK-AROUND function, see `parseAudioStepSrc` above
  */
 export const adaptResponseContext = (context: ResponseContext) => ({
-    ...context,
-    trace: context.trace.map(parseAudioStepSrc)
+  ...context,
+  trace: context.trace.map(parseAudioStepSrc),
 });

@@ -2,7 +2,8 @@ import { State } from '@voiceflow/runtime';
 import { AxiosInstance } from 'axios';
 
 import { RequestContext, ResponseContext } from '@/lib/types';
-import { adaptResponseContext } from "./adapters";
+
+import { adaptResponseContext } from './adapters';
 
 class Client {
   private axios: AxiosInstance;
@@ -16,7 +17,8 @@ class Client {
   }
 
   async interact(body: RequestContext, versionID: string): Promise<ResponseContext> {
-    return this.axios.post(`/interact/${versionID}`, body)
+    return this.axios
+      .post(`/interact/${versionID}`, body)
       .then((response) => response.data)
       .then((context) => adaptResponseContext(context));
   }
