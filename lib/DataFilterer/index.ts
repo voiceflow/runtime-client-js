@@ -3,7 +3,7 @@ import { GeneralTrace, TraceType } from '@voiceflow/general-types';
 import { DataConfig } from '@/lib/types';
 
 import { VFTypeError } from '../Common';
-import { isValidTraceType, stripSSMLFromSpeak } from './utils';
+import { isValidTraceType, parseAudioStepSrc, stripSSMLFromSpeak } from './utils';
 
 class DataFilterer {
   private includeTypes = new Set<TraceType>([TraceType.SPEAK]);
@@ -17,6 +17,10 @@ class DataFilterer {
       }
       this.includeTypes.add(includeType);
     });
+
+    // WORK-AROUND - Disabling TTS causes Audio Step src property not to be generated. Better, 
+    // long-term solution is to decouple Audio Step and TTS handlers.
+    this.traceFilters.push(parseAudioStepSrc);
 
     // strip ssml tags from speak steps by default
     if (!dataConfig?.ssml) {
