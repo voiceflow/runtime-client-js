@@ -2,7 +2,9 @@
 
 ---
 
-To start using the SDK, we should build a project on [Voiceflow](https://creator.voiceflow.com/). We have [documentation](https://docs.voiceflow.com/#/) for Voiceflow available. However, for simplicity, we will use a pre-built project.
+To start using the SDK, we should build a General Project on [Voiceflow](https://creator.voiceflow.com/). We have [documentation](https://docs.voiceflow.com/#/) for Voiceflow available. However, for simplicity, we will use a pre-built project.
+
+**IMPORTANT:** If you choose to build your own project, make sure you are building a **General Project** and not an Alexa Project nor a Google Project. The SDK only supports integration with Voiceflow General Projects.
 
 1. Download this `.vf` file found [here](https://github.com/voiceflow/rcjs-examples/blob/master/hamburger-order/VoiceflowBurger.vf). The `.vf` file contains a pre-built Voiceflow project that can be imported.
 2. Upload the `.vf` file to Voiceflow to import the project. For instruction on how to do this, see [here](https://docs.voiceflow.com/#/platform/project-creation/project-creation?id=project-creation) and click the "Import a .vf file" tab.
