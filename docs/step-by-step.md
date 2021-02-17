@@ -42,7 +42,7 @@ async(() => {
   const userInput = "I would like a large cheeseburger";
   const context2 = await chatbot.sendText(userInput);
  
-  const traces2 = context.getResponse();
+  const traces2 = context2.getResponse();
   traces2.forEach(trace => {
     console.log(trace.payload.message);
   });
