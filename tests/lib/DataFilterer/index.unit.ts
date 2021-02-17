@@ -1,11 +1,10 @@
-import { SpeakTrace, TraceType } from '@voiceflow/general-types';
+import { TraceType } from '@voiceflow/general-types';
 import { expect } from 'chai';
 import sinon from 'sinon';
 
 import DataFilterer from '@/lib/DataFilterer';
 
 import { BLOCK_TRACE, CHOICE_TRACE, DEBUG_TRACE, END_TRACE, SPEAK_TRACE } from '../fixtures';
-import { SpeakType } from '@voiceflow/general-types/build/nodes/speak';
 
 const allTraces = [BLOCK_TRACE, CHOICE_TRACE, DEBUG_TRACE, SPEAK_TRACE, END_TRACE];
 
@@ -57,43 +56,5 @@ describe('DataFilterer', () => {
         },
       ])
     ).to.eql([SPEAK_TRACE]);
-  });
-
-  describe('adapts malformed data', () => {
-    it('adapts audio src', () => {
-      const dataFilterer = new DataFilterer();
-      const audioUrl = "http://localhost:8000/audio.local/1613583846532-mixaund-tech-corporate.mp3";
-      const audioMsg = `<audio src="${audioUrl}"/>`;
-      const malformedTrace1 = {
-        type: TraceType.SPEAK,
-        payload: {
-          message: audioMsg,
-        },
-      } as SpeakTrace;
-      const malformedTrace2 = {
-        type: TraceType.SPEAK,
-        payload: {
-          message: ''
-        }
-      } as SpeakTrace;
-      
-      expect(dataFilterer.filterTraces([malformedTrace1, malformedTrace2])).to.eql([
-        {
-          ...malformedTrace1,
-          payload: {
-            ...malformedTrace1.payload,
-            src: audioUrl,
-            type: SpeakType.AUDIO
-          }
-        },
-        {
-          ...malformedTrace2,
-          payload: {
-            ...malformedTrace2.payload,
-            type: SpeakType.MESSAGE
-          }
-        }
-      ]);
-    });
   });
 });
