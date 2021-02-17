@@ -53,13 +53,13 @@ Typically, a conversation session begins when you call **`.start()`** and it is 
 
 ```js
 const context1 = await app.start();		// start a new conversation session
-console.log(context1.isEnding());			// prints 'false' so conversation session hasn't ended
+console.log(context1.isEnding());		// prints 'false' so conversation session hasn't ended
 
 const context2 = await app.sendText(userInput);	// advance the conversation
-console.log(context2.isEnding());								// prints "false" so conversation session hasn't ended
+console.log(context2.isEnding());		// prints "false" so conversation session hasn't ended
 
 const context3 = await app.sendText(userInput); // advance the conversation
-console.log(context3.isEnding());								// prints "true" so conversation session has ended!
+console.log(context3.isEnding());		// prints "true" so conversation session has ended!
 ```
 
 Alternatively, the current conversation session can end if we call `.start()` to start a new session from the beginning.
@@ -129,10 +129,10 @@ This method is mainly used to detect when `RuntimeClient`'s current conversation
 
 ```js
 do {
-  const userInput = await frontend.getUserInput();			// listen for a user response
-  const context = await app.sendText(userInput);				// send the response to the app
-  frontend.display(context.trace);											// display the response, if any
-} while (!context.isEnding())														// check if the current conversation is over.
+  const userInput = await frontend.getUserInput();	// listen for a user response
+  const context = await app.sendText(userInput);	// send the response to the app
+  frontend.display(context.trace);			// display the response, if any
+} while (!context.isEnding())				// check if the current conversation is over.
 terminateApp();																					// perform any cleanup
 ```
 
@@ -195,7 +195,7 @@ Once you have this to `true`, you can access the TTS audio-file through `payload
 
 ```js
 const speakTrace = context.getResponse()[0];
-const audio = new Audio(speakTrace.payload.src);		// HTMLAudioElement
+const audio = new Audio(speakTrace.payload.src);	// HTMLAudioElement
 audio.play();
 ```
 
@@ -713,7 +713,7 @@ By default, the client will use the Voiceflow hosted runtime at `https://general
 ```js
 this.chatbot = new RuntimeClient({
   versionID: '5fa2c62c71d4fa0007f7881b',
-  endpoint: 'https://localhost:4000',			// change to a local endpoint or your company's production servers
+  endpoint: 'https://localhost:4000',	// change to a local endpoint or your company's production servers
   dataConfig: {
     includeTypes: ['visual']
   }
