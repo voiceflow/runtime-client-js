@@ -24,7 +24,7 @@ To start using the SDK, we should build a project on [Voiceflow](https://creator
 	<img width="300" alt="Image of the Training Panel on Voiceflow" src="https://user-images.githubusercontent.com/32404412/107269251-5521c280-6a17-11eb-9d82-5a0f62bff14d.png">
 </p>	
 
-6. Copy the `VERSION_ID` from the URL in your address bar. When you are inside a Voiceflow project on , your address bar should have a URL of the form: `https://creator.voiceflow.com/project/{VERSION_ID}/...`
+6. Copy the `VERSION_ID` from the URL in your address bar. When you are inside a Voiceflow project on , your address bar should have a URL of the form: `https://creator.voiceflow.com/project/{VERSION_ID}/...`. You technically finished setting up the Voiceflow app in step 5, but you will need this `VERSION_ID` later in [Integration, Step-by-Step](https://github.com/voiceflow/runtime-client-js/blob/master/docs/step-by-step.md)
 
 <p align="center">
 	<img width="957" align="center" alt="Screen Shot 2021-02-08 at 2 11 09 PM" src="https://user-images.githubusercontent.com/32404412/107269370-813d4380-6a17-11eb-8bb5-d286c5db3664.png">
