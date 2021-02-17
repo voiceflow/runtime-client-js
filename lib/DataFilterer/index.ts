@@ -18,7 +18,7 @@ class DataFilterer {
       this.includeTypes.add(includeType);
     });
 
-    // WORK-AROUND - Disabling TTS causes Audio Step src property not to be generated. Better, 
+    // WORK-AROUND - Disabling TTS causes Audio Step src property not to be generated. Better,
     // long-term solution is to decouple Audio Step and TTS handlers.
     this.traceFilters.push(parseAudioStepSrc);
 

@@ -12,12 +12,12 @@ export const stripSSMLFromSpeak = (trace: GeneralTrace): GeneralTrace => {
   return trace.type !== TraceType.SPEAK || trace.payload.type !== SpeakType.MESSAGE
     ? trace
     : {
-      ...trace,
-      payload: {
-        ...trace.payload,
-        message: trace.payload.message.replace(SSML_TAG_REGEX, ''),
-      },
-    };
+        ...trace,
+        payload: {
+          ...trace.payload,
+          message: trace.payload.message.replace(SSML_TAG_REGEX, ''),
+        },
+      };
 };
 
 /**
@@ -36,8 +36,8 @@ export const parseAudioStepSrc = (trace: GeneralTrace): GeneralTrace => {
       ...trace,
       payload: {
         ...trace.payload,
-        type: SpeakType.MESSAGE
-      }
+        type: SpeakType.MESSAGE,
+      },
     } as SpeakTrace;
   }
 
@@ -49,6 +49,6 @@ export const parseAudioStepSrc = (trace: GeneralTrace): GeneralTrace => {
       ...trace.payload,
       type: SpeakType.AUDIO,
       src: audioSrc,
-    }
+    },
   };
-}
+};
