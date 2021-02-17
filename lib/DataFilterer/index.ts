@@ -1,8 +1,8 @@
 import { GeneralTrace, TraceType } from '@voiceflow/general-types';
 
+import { VFTypeError } from '@/lib/Common';
 import { DataConfig } from '@/lib/types';
 
-import { VFTypeError } from '../Common';
 import { isValidTraceType, stripSSMLFromSpeak } from './utils';
 
 class DataFilterer {

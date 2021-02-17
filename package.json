@@ -10,7 +10,9 @@
     "@types/lodash": "^4.14.168",
     "@voiceflow/general-types": "^1.19.0",
     "@voiceflow/runtime": "^1.20.1",
+    "@voiceflow/runtime-client-js": "^1.6.0",
     "axios": "^0.21.1",
+    "html-parse-stringify": "^2.0.0",
     "lodash": "^4.17.20"
   },
   "devDependencies": {
