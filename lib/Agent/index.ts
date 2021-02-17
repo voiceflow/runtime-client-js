@@ -25,6 +25,9 @@ export class Agent<S extends Record<string, any> = Record<string, any>> {
   }
 
   async start(): Promise<Context<S>> {
+    if (this.context) {
+      this.context.toJSON().state.stack = [];
+    }
     return this.sendRequest(null);
   }
 

@@ -1,4 +1,4 @@
-import App from '@/lib/Agent';
+import App from '@/lib/App';
 
 export * from '@/lib/Agent';
 export * from '@/lib/types';
