@@ -45,7 +45,11 @@ See the parent [rcjs-examples](https://github.com/voiceflow/rcjs-examples) repo 
 ## Install
 
 ```bash
+# with NPM
 npm install --save @voiceflow/runtime-client-js
+
+# with yarn
+yarn add @voiceflow/runtime-client-js
 ```
 
 ## Getting Started
