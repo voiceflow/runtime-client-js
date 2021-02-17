@@ -135,13 +135,15 @@ chatbot.start()
 
 
 
-### Setting up a Voiceflow app
+### Setting up a Voiceflow App
 
 See [here](docs/setting-up-vf-app.md) for instructions on how to quickly setup a Voiceflow app to try out your project.
 
-### Integration step-by-step
 
-See [here](docs/step-by-step.md) for a step-by-step breakdown of the Minimal Working Integration
+
+### Integration Step-by-Step
+
+See [here](docs/step-by-step.md) for a step-by-step breakdown of the Minimal Working Integration. Make sure to read "Setting up a Voiceflow App" first.
 
 
 

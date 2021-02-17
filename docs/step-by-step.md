@@ -2,9 +2,11 @@
 
 ---
 
+**NOTE:** You should read "Setting up a Voiceflow App" for the necessary setup for this article.
+
 To start integrating the Voiceflow app in your codebase, we do the following:
 
-1. Set up the `RuntimeClient` as shown below. Paste the `VERSION_ID` you copied earlier into the `versionID` configuration option.
+1. Set up the `RuntimeClient` as shown below. Paste the `VERSION_ID` of your Voiceflow project into the `versionID` configuration option.
 
 ```js
 import RuntimeClient from "@voiceflow/runtime-client-js"
