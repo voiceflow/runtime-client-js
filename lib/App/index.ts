@@ -34,11 +34,8 @@ export class App<S extends Record<string, any> = Record<string, any>> {
     };
   }
 
-  async createAgent(state?: State) {
-    if (!state) {
-      state = await this.client.getInitialState();
-    }
-    return new Agent(state, { client: this.client, dataConfig: this.dataConfig });
+  createAgent(state?: State) {
+    return new Agent({ client: this.client, dataConfig: this.dataConfig }, state);
   }
 }
 

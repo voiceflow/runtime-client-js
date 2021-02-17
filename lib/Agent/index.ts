@@ -15,11 +15,13 @@ export class Agent<S extends Record<string, any> = Record<string, any>> {
 
   private context: Context<S> | null = null;
 
-  constructor(state: State, { client, dataConfig }: { client: Client<S>; dataConfig: DataConfig }) {
+  constructor({ client, dataConfig }: { client: Client<S>; dataConfig: DataConfig }, state?: State) {
     this.client = client;
     this.dataConfig = dataConfig;
 
-    this.context = new Context({ request: null, state, trace: [] }, this.dataConfig);
+    if (state) {
+      this.context = new Context({ request: null, state, trace: [] }, this.dataConfig);
+    }
   }
 
   async start(): Promise<Context<S>> {
