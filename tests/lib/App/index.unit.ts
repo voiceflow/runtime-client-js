@@ -1,11 +1,13 @@
+import { TraceType } from '@voiceflow/general-types';
 import baseAxios from 'axios';
 import chai, { expect } from 'chai';
 import chaiAsPromise from 'chai-as-promised';
 import _ from 'lodash';
 import sinon from 'sinon';
 
-import App, { AppConfig } from '@/lib/App';
+import App, { AppConfig } from '@/lib/Agent';
 import { DEFAULT_ENDPOINT } from '@/lib/App/constants';
+import { makeTraceProcessor } from '@/lib/Utils';
 
 import {
   CHOICE_TRACE,
@@ -24,11 +26,8 @@ import {
   VERSION_ID,
   VF_APP_INITIAL_STATE,
 } from '../Context/fixtures';
+import { DEBUG_TRACE, INTERACT_ENDPOINT, SPEAK_TRACE, STATE_ENDPOINT } from '../fixtures';
 import { STATE_REQUEST_BODY_WITH_CUSTOM_VARIABLES, VF_APP_CUSTOM_INITIAL_VARIABLES } from './fixtures';
-import { INTERACT_ENDPOINT, STATE_ENDPOINT } from '../fixtures';
-import { makeTraceProcessor } from '@/lib/Utils';
-import { TraceType } from '@voiceflow/general-types';
-import { DEBUG_TRACE, SPEAK_TRACE } from '../fixtures';
 
 chai.use(chaiAsPromise);
 
@@ -84,7 +83,7 @@ describe('App', () => {
 
     it('variables', async () => {
       const { VFApp, axiosInstance } = createVFApp({
-        variables: VF_APP_CUSTOM_INITIAL_VARIABLES 
+        variables: VF_APP_CUSTOM_INITIAL_VARIABLES,
       });
 
       axiosInstance.get.resolves(asHttpResponse(VF_APP_INITIAL_STATE));
@@ -92,10 +91,7 @@ describe('App', () => {
 
       await VFApp.start();
 
-      expect(axiosInstance.post.args[0]).to.eql([
-        INTERACT_ENDPOINT(VERSION_ID),
-        STATE_REQUEST_BODY_WITH_CUSTOM_VARIABLES
-      ]);
+      expect(axiosInstance.post.args[0]).to.eql([INTERACT_ENDPOINT(VERSION_ID), STATE_REQUEST_BODY_WITH_CUSTOM_VARIABLES]);
     });
   });
 
@@ -104,18 +100,18 @@ describe('App', () => {
 
     const traceProcessor = makeTraceProcessor({
       [TraceType.SPEAK]: (message) => {
-        result.push(message)
+        result.push(message);
       },
       [TraceType.DEBUG]: (message) => {
         result.push(message);
-      }
+      },
     });
 
     const { VFApp, axiosInstance } = createVFApp({
       dataConfig: {
         traceProcessor,
-        includeTypes: ['debug']
-      }
+        includeTypes: ['debug'],
+      },
     });
 
     axiosInstance.get.resolves(asHttpResponse(VF_APP_INITIAL_STATE));
@@ -123,10 +119,7 @@ describe('App', () => {
 
     await VFApp.start();
 
-    expect(result).to.eql([
-      DEBUG_TRACE.payload.message,
-      SPEAK_TRACE.payload.message
-    ]);
+    expect(result).to.eql([DEBUG_TRACE.payload.message, SPEAK_TRACE.payload.message]);
   });
 
   it('start', async () => {

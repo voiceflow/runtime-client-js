@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import sinon from 'sinon';
 
-import { makeRequestBody } from '@/lib/App/utils';
+import { makeRequestBody } from '@/lib/Client/utils';
 import Context from '@/lib/Context';
 
 import { START_RESPONSE_BODY } from '../Context/fixtures';

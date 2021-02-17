@@ -1,6 +1,6 @@
-import App from '@/lib/App';
+import App from '@/lib/Agent';
 
-export * from '@/lib/App';
+export * from '@/lib/Agent';
 export * from '@/lib/types';
 export * from '@/lib/Utils';
 
