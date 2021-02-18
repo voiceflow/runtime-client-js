@@ -41,10 +41,6 @@ See the parent [rcjs-examples](https://github.com/voiceflow/rcjs-examples) repo 
 - Using TTS (React) - [source](https://github.com/voiceflow/rcjs-examples/tree/master/text-to-speech)
 - Using Suggestion Chips (React) - [source](https://github.com/voiceflow/rcjs-examples/tree/master/suggestion-chips)
 
-Aside from the samples above, we also have integrations of the Runtime Client to other services:
-
-- Telegram Integration (thanks to @xavidop) - [source](https://github.com/xavidop/telegram-voiceflow-bot) 
-
 
 ## Install
 
