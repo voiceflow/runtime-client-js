@@ -5,6 +5,7 @@ import sinon from 'sinon';
 
 import { adaptResponseContext } from '@/lib/Client/adapters';
 import { ResponseContext } from '@/lib/types';
+import { VISUAL_TRACE_IMAGE } from '../../fixtures';
 
 describe('adapters', () => {
   afterEach(() => {
@@ -37,7 +38,7 @@ describe('adapters', () => {
         type: RequestType.TEXT,
         payload: 'some user input',
       },
-      trace: [malformedTrace1, malformedTrace2],
+      trace: [malformedTrace1, malformedTrace2, VISUAL_TRACE_IMAGE],
     };
 
     const result = adaptResponseContext(malformedResponse);
@@ -61,6 +62,7 @@ describe('adapters', () => {
             type: SpeakType.MESSAGE,
           },
         },
+        VISUAL_TRACE_IMAGE
       ],
     });
   });
