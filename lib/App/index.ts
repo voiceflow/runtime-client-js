@@ -19,12 +19,15 @@ export class App<S extends Record<string, any> = Record<string, any>> {
 
   private dataConfig: DataConfig;
 
+  private defaultState: State;
+
   constructor({ versionID, endpoint = DEFAULT_ENDPOINT, dataConfig, variables }: AppConfig<S>) {
     if (variables) {
       validateVarMerge(variables);
     }
 
     this.client = new Client<S>({ variables, endpoint, versionID });
+    this.defaultState = { stack: [], storage: {}, variables: { ...variables } };
 
     this.dataConfig = {
       tts: false,
@@ -34,8 +37,8 @@ export class App<S extends Record<string, any> = Record<string, any>> {
     };
   }
 
-  createAgent(state?: State) {
-    return new Agent({ client: this.client, dataConfig: this.dataConfig }, state);
+  createAgent(state: State = this.defaultState) {
+    return new Agent(state, { client: this.client, dataConfig: this.dataConfig });
   }
 }
 

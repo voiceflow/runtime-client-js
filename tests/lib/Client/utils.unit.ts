@@ -6,7 +6,7 @@ import Context from '@/lib/Context';
 
 import { START_RESPONSE_BODY } from '../Context/fixtures';
 
-describe('App utils', () => {
+describe('Client utils', () => {
   afterEach(() => {
     sinon.restore();
   });

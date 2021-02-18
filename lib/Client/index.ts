@@ -1,10 +1,12 @@
 import { State } from '@voiceflow/runtime';
-import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
+import axios, { AxiosInstance } from 'axios';
 import _cloneDeep from 'lodash/cloneDeep';
 
 import { RequestContext, ResponseContext } from '@/lib/types';
 
 import { adaptResponseContext } from './adapters';
+
+export type ClientConfig<S> = { variables?: Partial<S>; endpoint: string; versionID: string };
 
 class Client<S extends Record<string, any> = Record<string, any>> {
   private axios: AxiosInstance;
@@ -15,7 +17,7 @@ class Client<S extends Record<string, any> = Record<string, any>> {
 
   private initVariables: Partial<S> | undefined;
 
-  constructor({ variables, endpoint, versionID }: { variables?: Partial<S>; endpoint: string; versionID: string }) {
+  constructor({ variables, endpoint, versionID }: ClientConfig<S>) {
     this.axios = axios.create({ baseURL: endpoint });
 
     this.initVariables = variables;
@@ -41,6 +43,10 @@ class Client<S extends Record<string, any> = Record<string, any>> {
       .post(`/interact/${this.versionID}`, body)
       .then((response) => response.data)
       .then((context) => adaptResponseContext(context));
+  }
+
+  getVersionID() {
+    return this.versionID;
   }
 }
 
