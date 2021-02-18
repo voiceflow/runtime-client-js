@@ -4,6 +4,8 @@ import _cloneDeep from 'lodash/cloneDeep';
 
 import { RequestContext, ResponseContext } from '@/lib/types';
 
+import { adaptResponseContext } from './adapters';
+
 export type ClientConfig<S> = { variables?: Partial<S>; endpoint: string; versionID: string };
 
 class Client<S extends Record<string, any> = Record<string, any>> {
@@ -37,7 +39,10 @@ class Client<S extends Record<string, any> = Record<string, any>> {
   }
 
   async interact(body: RequestContext): Promise<ResponseContext> {
-    return this.axios.post(`/interact/${this.versionID}`, body).then((response) => response.data);
+    return this.axios
+      .post(`/interact/${this.versionID}`, body)
+      .then((response) => response.data)
+      .then((context) => adaptResponseContext(context));
   }
 
   getVersionID() {
