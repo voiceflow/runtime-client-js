@@ -59,12 +59,13 @@ yarn add @voiceflow/runtime-client-js
 The minimum code to start using the SDK is shown below:
 
 ```js
-import RuntimeClient from "@voiceflow/runtime-client-js";
+import RuntimeClientFactory from "@voiceflow/runtime-client-js";
 
 // Construct an object 
-const chatbot = new RuntimeClient({
+const factory = new RuntimeClientFactory({
   versionID: 'your-version-id-here', // ADD YOUR VERSION ID HERE
 });
+const chatbot = factory.createClient();
 
 (async () => {
   // Begin a conversation session
@@ -99,12 +100,13 @@ const chatbot = new RuntimeClient({
 ### Minimal Working Integration, CommonJS and Promises
 
 ```js
-const RuntimeClient = require('@voiceflow/runtime-client-js').default;
+const RuntimeClientFactory = require('@voiceflow/runtime-client-js').default;
 
 // Construct an object 
-const chatbot = new RuntimeClient({
+const factory = new RuntimeClientFactory({
   versionID: 'your-version-id-here', // ADD YOUR VERSION ID HERE
 });
+const chatbot = factory.createClient();
 
 // Begin a conversation session
 chatbot.start()
