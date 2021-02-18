@@ -3,6 +3,7 @@ import axios, { AxiosInstance } from 'axios';
 import _cloneDeep from 'lodash/cloneDeep';
 
 import { RequestContext, ResponseContext } from '@/lib/types';
+
 import { adaptResponseContext } from './adapters';
 
 export type ClientConfig<S> = { variables?: Partial<S>; endpoint: string; versionID: string };
