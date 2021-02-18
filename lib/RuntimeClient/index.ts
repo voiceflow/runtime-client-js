@@ -6,7 +6,7 @@ import { VFClientError } from '@/lib/Common';
 import Context from '@/lib/Context';
 import { DataConfig, ResponseContext } from '@/lib/types';
 
-import { makeRequestBody } from '../Client/utils';
+import { makeRequestBody, resetContext } from './utils';
 
 export class RuntimeClient<S extends Record<string, any> = Record<string, any>> {
   private client: Client;
@@ -23,8 +23,7 @@ export class RuntimeClient<S extends Record<string, any> = Record<string, any>> 
   }
 
   async start(): Promise<Context<S>> {
-    this.context.toJSON().state.stack = [];
-    this.context.toJSON().trace = [];
+    this.context = new Context(resetContext(this.context.toJSON()));
     return this.sendRequest(null);
   }
 

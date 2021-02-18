@@ -4,8 +4,8 @@ import chaiAsPromise from 'chai-as-promised';
 import _ from 'lodash';
 import sinon from 'sinon';
 
-import { DEFAULT_ENDPOINT } from '@/lib/RuntimeClientFactory/constants';
 import Client, { ClientConfig } from '@/lib/Client';
+import { DEFAULT_ENDPOINT } from '@/lib/RuntimeClientFactory/constants';
 
 import { SEND_TEXT_REQUEST_BODY, SEND_TEXT_RESPONSE_BODY, VERSION_ID, VF_APP_INITIAL_STATE } from '../Context/fixtures';
 import { INTERACT_ENDPOINT, STATE_ENDPOINT } from '../fixtures';

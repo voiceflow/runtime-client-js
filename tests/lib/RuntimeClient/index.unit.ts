@@ -85,7 +85,7 @@ describe('RuntimeClient', () => {
     const data = await agent.start();
 
     expect(client.interact.callCount).to.eql(1);
-    expect(client.interact.args).to.eql([[START_REQUEST_BODY]]);
+    expect(client.interact.args).to.eql([[{ ...START_REQUEST_BODY, state: { ...START_REQUEST_BODY.state, stack: [] } }]]);
 
     expect(data.toJSON()).to.eql(START_RESPONSE_BODY);
     expect(agent.getContext()?.toJSON()).to.eql(START_RESPONSE_BODY);

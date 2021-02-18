@@ -2,70 +2,70 @@ import chai, { expect } from 'chai';
 import chaiAsPromise from 'chai-as-promised';
 import sinon from 'sinon';
 
-import * as Agent from '@/lib/RuntimeClient';
-import App, { FactoryConfig } from '@/lib/RuntimeClientFactory';
-import { DEFAULT_ENDPOINT } from '@/lib/RuntimeClientFactory/constants';
 import * as Client from '@/lib/Client';
+import * as RuntimeClient from '@/lib/RuntimeClient';
+import RuntimeClientFactory, { FactoryConfig } from '@/lib/RuntimeClientFactory';
+import { DEFAULT_ENDPOINT } from '@/lib/RuntimeClientFactory/constants';
 
 import { VERSION_ID } from '../Context/fixtures';
 
 chai.use(chaiAsPromise);
 
 const CLIENT = { interact: 'foo' };
-const AGENT = { sendRequest: 'bar' };
+const RUNTIME_CLIENT = { sendRequest: 'bar' };
 
-const createApp = (factoryConfig?: Partial<FactoryConfig<any>>) => {
+const createRuntimeClientFactory = (factoryConfig?: Partial<FactoryConfig<any>>) => {
   const client = sinon.stub(Client, 'default').returns(CLIENT);
-  const agent = sinon.stub(Agent, 'default').returns(AGENT);
+  const agent = sinon.stub(RuntimeClient, 'default').returns(RUNTIME_CLIENT);
 
-  const app = new App({ versionID: VERSION_ID, ...factoryConfig });
+  const app = new RuntimeClientFactory({ versionID: VERSION_ID, ...factoryConfig });
 
   return { client, agent, app };
 };
 
-describe('App', () => {
+describe('RuntimeClientFactory', () => {
   afterEach(() => {
     sinon.restore();
   });
 
   describe('constructor', () => {
     it('constructor', () => {
-      const { client } = createApp();
+      const { client } = createRuntimeClientFactory();
 
       expect(client.args).to.eql([[{ versionID: VERSION_ID, endpoint: DEFAULT_ENDPOINT, variables: undefined }]]);
     });
 
     it('variables', () => {
-      const { client } = createApp({ variables: 'foo' as any });
+      const { client } = createRuntimeClientFactory({ variables: 'foo' as any });
 
       expect(client.args).to.eql([[{ versionID: VERSION_ID, endpoint: DEFAULT_ENDPOINT, variables: 'foo' }]]);
     });
 
     it('optional', () => {
-      const { client } = createApp({ variables: 'foo' as any, versionID: 'bar', endpoint: 'x', dataConfig: 'y' as any });
+      const { client } = createRuntimeClientFactory({ variables: 'foo' as any, versionID: 'bar', endpoint: 'x', dataConfig: 'y' as any });
 
       expect(client.args).to.eql([[{ versionID: 'bar', endpoint: 'x', variables: 'foo' }]]);
     });
 
     it('does not accept invalid variables', () => {
-      expect(() => createApp({ variables: { invalid: () => null } })).to.throw();
+      expect(() => createRuntimeClientFactory({ variables: { invalid: () => null } })).to.throw();
     });
   });
 
-  describe('createAgent', () => {
+  describe('createRuntimeClient', () => {
     it('works', () => {
-      const { agent, app } = createApp({ variables: 'foo' as any });
+      const { agent, app } = createRuntimeClientFactory({ variables: 'foo' as any });
 
-      expect(app.createClient('state' as any)).to.eql(AGENT);
+      expect(app.createClient('state' as any)).to.eql(RUNTIME_CLIENT);
 
       expect(agent.args).to.eql([['state', { client: CLIENT, dataConfig: { includeTypes: [], ssml: false, tts: false } }]]);
     });
 
     it('default state', () => {
       const VARIABLES = { x: 'y' };
-      const { agent, app } = createApp({ variables: VARIABLES });
+      const { agent, app } = createRuntimeClientFactory({ variables: VARIABLES });
 
-      expect(app.createClient()).to.eql(AGENT);
+      expect(app.createClient()).to.eql(RUNTIME_CLIENT);
 
       expect(agent.args).to.eql([
         [
