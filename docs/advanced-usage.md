@@ -33,6 +33,10 @@
   - [Setters](#setters)
   - [Enabling Stricter Typing](#enabling-stricter-typing)
 - [Multiple Applications](#multiple-applications)
+- [Backend Usage](#backend-usage)
+  - [Problem](#problem)
+  - [Solution](#solution)
+- [Best Practices](#best-practices)
 - [Advanced Trace Types](#advanced-trace-types)
 - [Runtime](#runtime)
 
@@ -182,7 +186,7 @@ You can also check our [samples](https://github.com/voiceflow/rcjs-examples) for
 
 ### Configuration
 
-The `RuntimeClientFactory` accepts configurations which it will apply to `RuntimeClient` instance. In particular, there is a `dataConfig` option for managing the data returned by `Context.getResponse()` for all `Context`s produced by a `RuntimeClient`. To summarize, there are four options currently available:
+The `RuntimeClientFactory` accepts configurations which it will apply to `RuntimeClient` instance it constructs. In particular, there is a `dataConfig` option for managing the data returned by `Context.getResponse()` for all `Context`s produced by a `RuntimeClient`. To summarize, there are four options currently available:
 
 1. `tts` - Set to `true` to enable text-to-speech functionality. Any returned `SpeakTrace`s corresponding to Speak Steps on Voiceflow will contain an additional`src` property containing an `.mp3` string, which is an audio-file that will speak out the trace text. This option does not affect `SpeakTrace`s corresponding to Audio Steps in any way and a `src` property is always generated.
 2. `ssml` - Set to `true` to disable the `Context`'s SSML sanitization and return the full text string with the SSML included. This may be useful if you want to use your own TTS system. 
@@ -249,12 +253,13 @@ Once you have specified additional trace types, you will need some conditional l
 
 ```js
 // Configure `includeTypes` to show debug traces
-const app = new RuntimeClient({
+const factory = new RuntimeClientFactory({
     versionID: 'XXXXXXXXXXXXXXXXX',
     dataConfig: {
         includeTypes: ['debug']
     }
 });
+const app = factory.createClient();
 
 // Get the response and check if we have a speak or debug trace.
 const traces = context.getResponse();
@@ -281,10 +286,11 @@ const traceProcessor = makeTraceProcessor({
   speak: (message) => console.log(message)
 });
 
-const app = new RuntimeClient({
+const factory = new RuntimeClientFactory({
     versionID: 'XXXXXXXXXXXXXXXXX',
   	traceProcessor
 });
+const app = factory.createClient();
 
 const context = await app.start();
 context.getResponse().forEach(traceProcessor); // this line is implicitly called
@@ -515,7 +521,7 @@ Additionally, if you want to implement time-travelling and keep a record of past
 
 The Runtime Client is implemented in TypeScript and has strict types on all of its methods. The `.variables` submodule can also be configured to support stricter types.
 
-To do this, you must supply a variable **schema** to the `RuntimeClient`. Once you do, variable methods like `.get()` will deduce the variable type based on the variable name you pass in as an argument (see below).
+To do this, you must supply a variable **schema** to the `RuntimeClientFactory`. Once you do, variable methods like `.get()` will deduce the variable type based on the variable name you pass in as an argument (see below).
 
 Since Voiceflow apps are loaded in at runtime, it is impossible for the `RuntimeClient` to deduce the types of variables for you. It is up to you to define what types you expect to receive and to ensure your Voiceflow app will only send back what you expect.
 
@@ -525,9 +531,10 @@ export type VFVariablesSchema = {
     name: string;
 };
 
-const app = new RuntimeClient<VFVariablesSchema>({
+const factory = new RuntimeClientFactory<VFVariablesSchema>({
 	versionID: 'some-version-id'
 });
+const app = factory.createClient();
 
 const context = await app.start();
 
@@ -539,28 +546,118 @@ context.variables.set('name', 12); // TypeError! expected a "number" not a "stri
 
 ### Multiple Applications
 
-You can integrate any number of Voiceflow applications to your project, simply by constructing multiple `VFApp` instances. You can even have multiple instances of the same Voiceflow project at once. Our runtime servers are stateless, so two running Voiceflow programs will not interfere with each other.
+You can integrate any number of different Voiceflow applications to your project, simply by constructing multiple `RuntimeClientFactory` instances, then constructing the `RuntimeClient` with `.createClient()`. 
+
+**NOTE:** If you are integrating the Voiceflow app on the backend, we do **not** recommend creating a disposable chatbot with `.createClient()` to serve each request. This approach **will not persist the conversation session** between requests and trying to overcome this by persisting the chatbot object is **not scalable**. To integrate `runtime-client-js` on your backend, see [Backend Usage](#backend-usage)
 
 ```js
-// Multiple integrations
-import { App as VFApp } from "@voiceflow/runtime-client-sdk";
+import RuntimeClientFactory from "@voiceflow/runtime-client-factory";
 
-const supportBot1 = new VFApp({
-  versionID: 'support-bot-1-id',
+const customerSupportBotFactory = new RuntimeClientFactory({
+ versionID: 'support-bot-1-id',
 });
+const supportBot1 = customerSupportBotFactory.createClient();
+const supportBot2 = customerSupportBotFactory.createClient(); // independent from supportBot1
 
-const supportBot2 = new VFApp({
-  versionID: 'support-bot-2-id',
-});	// has a separate state than supportBot1
-
-const orderBot = new VFApp({
-  versionID: 'order-bot'
+const orderBotFactory = new RuntimeClientFactory({
+ versionID: 'order-bot-id'
 });
+const orderBot = orderBotFactory.createClient();
 ```
 
 
 
 ### Backend Usage
+
+#### Problem
+
+In the backend, we may want to create a `RuntimeClient` to service a request from our clients. Previously in this document, we mainly described how to use `RuntimeClient` on the frontend by initializing it as a stateful global object. However, in the backend this approach does not work.
+
+Ideally, we don't want to persist a `RuntimeClient` for every client that sends requests to our backend. This approach would not be scalable, because each `RuntimeClient` instance consumes memory. Thus, 1,000,000 active users on our backend means 1,000,000 active `RuntimeClient` objects running in our backend program.
+
+```js
+// Our factory
+const factory = new RuntimeClientFactory({
+  versionID: 'fdsafsdafsdfsdf'
+});
+
+// Our collection of RuntimeClients
+const runtimeClients = {};
+
+// An endpoint in Express
+app.get('/', async (req, res) => {
+  if (!runtimeClients[req.userID]) {
+    // BAD PRACTICE - Will consume a significant amount of memory if # of users grows
+ 		runtimeClients[req.userID] = factory.createClient();
+  }
+  
+  const context = await runtimeClients[req.userID].sendText(req.userInput);
+  
+  return context.getResponse();
+});
+```
+
+However, we can't just deallocate the `RuntimeClient` for the current request, then construct a new `RuntimeClient` during the next request. Each `RuntimeClient` contains the conversation session and deallocating it would lose that information. So any input the user provided, such as their name, would be lost. Moreover, when we create a new `RuntimeClient` for the next session, it will start the conversation again from the beginning! 
+
+```js
+// An endpoint in Express
+app.get('/', async (req, res) => {
+  // WRONG - This will start the app from the beginning at every request
+  const client = factory.createClient();
+ 
+  const context = await client.sendText(req.userInput);
+  
+  return context.getResponse();
+});
+```
+
+
+
+#### Solution
+
+The `.createClient()` can accept an additional `state` object, which solves the problem of using the `RuntimeClient` on the backend. The `.createClient()` method has different behaviour depending on the value of `state`
+
+1. If `state` is `undefined`, then `createClient()` behaves as before and creates an entirely new `RuntimeClient`
+2. If `state` is a valid Voiceflow application `State`, then `createClient()` creates a `RuntimeClient` with the provided `state`, thus, regenerating the same chatbot from a previous request.
+
+After each request, you can extract the current `RuntimeClient` state by calling `context.toJSON().state`. Then, you can store this state in a database such as MongoDB. When the next request comes in, read the conversation state for that particular user from DB, then wrap the state with a `RuntimeClient` by calling `.createClient(state)`. This approach allows you to persist a client's conversation session between requests.
+
+```js
+app.post("/:userID", async (req, res) => {
+    const { userID } = req.params;
+    const { userInput } = req.body;
+
+    // pull the current conversation session of the user from our DB
+    const state = await db.read(userID);
+    const firstInteraction = !state;
+
+    // if `state` is `undefined` then allocate a new client
+    const client = runtimeClientFactory.createClient(state); 
+
+    // send the next user request
+    const context = firstInteraction ? await client.start() : await client.sendText(userInput)
+
+    // check if we need to cleanup the conversation session
+    if (context.isEnding()) {
+        db.delete(userID);
+    } else {
+        await db.insert(userID, context.toJSON().state);
+    }
+
+    // send the traces
+    res.send(context.getResponse());
+});
+```
+
+Conceptually, the `RuntimeClient` can be used on the frontend as a stateful global object. In the backend, you should think of the `RuntimeClient` as a disposable wrapper around independent `state` object, which you can use to perform operations on the `state`.
+
+For a full-working sample demonstrating this technique, see [here](https://github.com/voiceflow/rcjs-examples/tree/master/server).
+
+
+
+### Best Practices
+
+Keep in mind that the `State` object in a Voiceflow application state will contains the value of any Voiceflow variables. We strongly recommend not embedding any sensitive information in Voiceflow variables or in any of your Voiceflow app responses. The `State` is transmitted over HTTP requests to our runtime servers. 
 
 
 
@@ -728,10 +825,10 @@ type P = {
 
 As the name suggests, `runtime-client-js` interfaces with a Voiceflow "runtime" server. You can check out our [runtime SDK](https://github.com/voiceflow/general-runtime) for building runtime servers. Modifying the runtime allows for extensive customization of bot behavior and integrations.
 
-By default, the client will use the Voiceflow hosted runtime at `https://general-runtime.voiceflow.com`. To configure the client to consume your custom runtime, you should use the `endpoint` configuration option shown below. This option will change the target URL of runtime server that the `RuntimeClient` sends its request to.
+By default, the client will use the Voiceflow hosted runtime at `https://general-runtime.voiceflow.com`. To configure the client to consume your custom runtime, you should use the `endpoint` configuration option shown below. This option will change the target URL of runtime server that `RuntimeClient` instances sends its request to.
 
 ```js
-this.chatbot = new RuntimeClient({
+const factory = new RuntimeClientFactory({
   versionID: '5fa2c62c71d4fa0007f7881b',
   endpoint: 'https://localhost:4000',	// change to a local endpoint or your company's production servers
   dataConfig: {
