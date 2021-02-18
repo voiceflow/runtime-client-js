@@ -8,7 +8,7 @@ import { DataConfig, ResponseContext } from '@/lib/types';
 
 import { makeRequestBody } from '../Client/utils';
 
-export class Agent<S extends Record<string, any> = Record<string, any>> {
+export class RuntimeClient<S extends Record<string, any> = Record<string, any>> {
   private client: Client;
 
   private dataConfig: DataConfig;
@@ -24,6 +24,7 @@ export class Agent<S extends Record<string, any> = Record<string, any>> {
 
   async start(): Promise<Context<S>> {
     this.context.toJSON().state.stack = [];
+    this.context.toJSON().trace = [];
     return this.sendRequest(null);
   }
 
@@ -36,7 +37,7 @@ export class Agent<S extends Record<string, any> = Record<string, any>> {
 
   async sendRequest(request: GeneralRequest) {
     if (this.context.isEnding()) {
-      throw new VFClientError('Agent.sendText() was called but the conversation has ended');
+      throw new VFClientError('RuntimeClient.sendText() was called but the conversation has ended');
     }
     this.setContext(await this.client.interact(makeRequestBody(this.context!, request, this.dataConfig)));
 
@@ -56,4 +57,4 @@ export class Agent<S extends Record<string, any> = Record<string, any>> {
   }
 }
 
-export default Agent;
+export default RuntimeClient;

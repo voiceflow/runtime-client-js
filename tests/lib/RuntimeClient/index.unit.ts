@@ -4,7 +4,7 @@ import chaiAsPromise from 'chai-as-promised';
 import _ from 'lodash';
 import sinon from 'sinon';
 
-import Agent from '@/lib/Agent';
+import RuntimeClient from '@/lib/RuntimeClient';
 import { DataConfig } from '@/lib/types';
 import { makeTraceProcessor } from '@/lib/Utils';
 
@@ -28,26 +28,26 @@ import { DEBUG_TRACE, SPEAK_TRACE } from '../fixtures';
 
 chai.use(chaiAsPromise);
 
-const createAgent = (dataConfig?: DataConfig) => {
+const createRuntimeClient = (dataConfig?: DataConfig) => {
   const state = VF_APP_INITIAL_STATE;
   const client = {
     getInitialState: sinon.stub(state),
     interact: sinon.stub(),
   };
 
-  const agent = new Agent(state, { client: client as any, dataConfig });
+  const agent = new RuntimeClient(state, { client: client as any, dataConfig });
 
   return { agent, client };
 };
 
-describe('Agent', () => {
+describe('RuntimeClient', () => {
   afterEach(() => {
     sinon.restore();
   });
 
   describe('constructor', () => {
     it('constructor', () => {
-      const { agent } = createAgent();
+      const { agent } = createRuntimeClient();
 
       expect(agent.getContext().toJSON()).to.eql({ state: VF_APP_INITIAL_STATE, request: null, trace: [] });
     });
@@ -65,7 +65,7 @@ describe('Agent', () => {
       },
     });
 
-    const { agent, client } = createAgent({
+    const { agent, client } = createRuntimeClient({
       traceProcessor,
       includeTypes: ['debug'],
     });
@@ -78,7 +78,7 @@ describe('Agent', () => {
   });
 
   it('start', async () => {
-    const { agent, client } = createAgent();
+    const { agent, client } = createRuntimeClient();
 
     client.interact.resolves(START_RESPONSE_BODY);
 
@@ -92,7 +92,7 @@ describe('Agent', () => {
   });
 
   it('sendText', async () => {
-    const { agent, client } = createAgent();
+    const { agent, client } = createRuntimeClient();
 
     client.interact.resolves(START_RESPONSE_BODY);
 
@@ -109,7 +109,7 @@ describe('Agent', () => {
   });
 
   it('sendText, empty', async () => {
-    const { agent, client } = createAgent();
+    const { agent, client } = createRuntimeClient();
 
     client.interact.resolves(START_RESPONSE_BODY);
 
@@ -126,7 +126,7 @@ describe('Agent', () => {
   });
 
   it('sendText, invalid object', async () => {
-    const { agent, client } = createAgent();
+    const { agent, client } = createRuntimeClient();
 
     client.interact.resolves(START_RESPONSE_BODY);
 
@@ -141,7 +141,7 @@ describe('Agent', () => {
   });
 
   it('sendText, falsy', async () => {
-    const { agent, client } = createAgent();
+    const { agent, client } = createRuntimeClient();
 
     client.interact.resolves(START_RESPONSE_BODY);
 
@@ -156,7 +156,7 @@ describe('Agent', () => {
   });
 
   it('sendText, called when conversation has ended', async () => {
-    const { agent, client } = createAgent();
+    const { agent, client } = createRuntimeClient();
 
     client.interact.resolves(START_RESPONSE_BODY);
 
@@ -167,12 +167,12 @@ describe('Agent', () => {
     await agent.sendText(USER_RESPONSE);
 
     return expect(agent.sendText('call sendText after conversation had ended'))
-      .to.be.eventually.be.rejectedWith('Agent.sendText() was called but the conversation has ended')
+      .to.be.eventually.be.rejectedWith('VFError: RuntimeClient.sendText() was called but the conversation has ended')
       .and.be.an.instanceOf(Error);
   });
 
   it('get chips', async () => {
-    const { agent, client } = createAgent();
+    const { agent, client } = createRuntimeClient();
 
     client.interact.resolves(START_RESPONSE_BODY);
 
@@ -183,7 +183,7 @@ describe('Agent', () => {
   });
 
   it("get chips, returns empty arr if trace doesn't end with ChoiceTrace", async () => {
-    const { agent, client } = createAgent();
+    const { agent, client } = createRuntimeClient();
 
     client.interact.resolves(START_RESPONSE_BODY);
 
@@ -198,7 +198,7 @@ describe('Agent', () => {
   });
 
   it('get chips, return empty arr if choice trace has no choices', async () => {
-    const { agent, client } = createAgent();
+    const { agent, client } = createRuntimeClient();
 
     client.interact.resolves(START_RESPONSE_BODY_WITH_NO_CHOICES);
 
@@ -209,7 +209,7 @@ describe('Agent', () => {
   });
 
   it('get chips, handles data with multiple choice blocks', async () => {
-    const { agent, client } = createAgent();
+    const { agent, client } = createRuntimeClient();
 
     client.interact.resolves(START_RESPONSE_BODY_WITH_MULTIPLE_CHOICES);
 
@@ -220,7 +220,7 @@ describe('Agent', () => {
   });
 
   it('advanced config, SSML set to true', async () => {
-    const { agent, client } = createAgent({
+    const { agent, client } = createRuntimeClient({
       tts: true,
       ssml: true,
       includeTypes: ['debug', 'choice'],
@@ -244,7 +244,7 @@ describe('Agent', () => {
   });
 
   it('advanced config, SSML set to false', async () => {
-    const { agent, client } = createAgent({
+    const { agent, client } = createRuntimeClient({
       tts: true,
       ssml: false,
       includeTypes: ['speak', 'debug', 'choice'],

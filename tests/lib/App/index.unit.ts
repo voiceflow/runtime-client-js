@@ -2,9 +2,9 @@ import chai, { expect } from 'chai';
 import chaiAsPromise from 'chai-as-promised';
 import sinon from 'sinon';
 
-import * as Agent from '@/lib/Agent';
-import App, { AppConfig } from '@/lib/App';
-import { DEFAULT_ENDPOINT } from '@/lib/App/constants';
+import * as Agent from '@/lib/RuntimeClient';
+import App, { FactoryConfig } from '@/lib/RuntimeClientFactory';
+import { DEFAULT_ENDPOINT } from '@/lib/RuntimeClientFactory/constants';
 import * as Client from '@/lib/Client';
 
 import { VERSION_ID } from '../Context/fixtures';
@@ -14,11 +14,11 @@ chai.use(chaiAsPromise);
 const CLIENT = { interact: 'foo' };
 const AGENT = { sendRequest: 'bar' };
 
-const createApp = (appConfig?: Partial<AppConfig<any>>) => {
+const createApp = (factoryConfig?: Partial<FactoryConfig<any>>) => {
   const client = sinon.stub(Client, 'default').returns(CLIENT);
   const agent = sinon.stub(Agent, 'default').returns(AGENT);
 
-  const app = new App({ versionID: VERSION_ID, ...appConfig });
+  const app = new App({ versionID: VERSION_ID, ...factoryConfig });
 
   return { client, agent, app };
 };
@@ -56,7 +56,7 @@ describe('App', () => {
     it('works', () => {
       const { agent, app } = createApp({ variables: 'foo' as any });
 
-      expect(app.createAgent('state' as any)).to.eql(AGENT);
+      expect(app.createClient('state' as any)).to.eql(AGENT);
 
       expect(agent.args).to.eql([['state', { client: CLIENT, dataConfig: { includeTypes: [], ssml: false, tts: false } }]]);
     });
@@ -65,7 +65,7 @@ describe('App', () => {
       const VARIABLES = { x: 'y' };
       const { agent, app } = createApp({ variables: VARIABLES });
 
-      expect(app.createAgent()).to.eql(AGENT);
+      expect(app.createClient()).to.eql(AGENT);
 
       expect(agent.args).to.eql([
         [
