@@ -15,7 +15,7 @@ export type FactoryConfig<S extends State['variables']> = {
 };
 
 export class RuntimeClientFactory<S extends Record<string, any> = Record<string, any>> {
-  public client: Client;
+  public client: Client<S>;
 
   private dataConfig: DataConfig;
 
@@ -26,7 +26,7 @@ export class RuntimeClientFactory<S extends Record<string, any> = Record<string,
       validateVarMerge(variables);
     }
 
-    this.client = new Client<S>({ variables, endpoint, versionID });
+    this.client = new Client({ variables, endpoint, versionID });
     this.defaultState = { stack: [], storage: {}, variables: { ...variables } };
 
     this.dataConfig = {
@@ -38,7 +38,7 @@ export class RuntimeClientFactory<S extends Record<string, any> = Record<string,
   }
 
   createClient(state: State = this.defaultState) {
-    return new RuntimeClient(state, { client: this.client, dataConfig: this.dataConfig });
+    return new RuntimeClient<S>(state, { client: this.client, dataConfig: this.dataConfig });
   }
 }
 

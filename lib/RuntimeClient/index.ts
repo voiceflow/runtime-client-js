@@ -9,7 +9,7 @@ import { DataConfig, ResponseContext } from '@/lib/types';
 import { makeRequestBody, resetContext } from './utils';
 
 export class RuntimeClient<S extends Record<string, any> = Record<string, any>> {
-  private client: Client;
+  private client: Client<S>;
 
   private dataConfig: DataConfig;
 

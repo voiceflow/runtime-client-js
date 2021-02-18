@@ -14,11 +14,11 @@ chai.use(chaiAsPromise);
 const CLIENT = { interact: 'foo' };
 const RUNTIME_CLIENT = { sendRequest: 'bar' };
 
-const createRuntimeClientFactory = (factoryConfig?: Partial<FactoryConfig<any>>) => {
+const createRuntimeClientFactory = <S>(factoryConfig?: Partial<FactoryConfig<any>>) => {
   const client = sinon.stub(Client, 'default').returns(CLIENT);
   const agent = sinon.stub(RuntimeClient, 'default').returns(RUNTIME_CLIENT);
 
-  const app = new RuntimeClientFactory({ versionID: VERSION_ID, ...factoryConfig });
+  const app = new RuntimeClientFactory<S>({ versionID: VERSION_ID, ...factoryConfig });
 
   return { client, agent, app };
 };
