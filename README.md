@@ -73,9 +73,7 @@ const chatbot = factory.createClient();
   
   // Show the voice app's initial response
   const traces = context.getResponse();
-  traces.forEach(trace => {
-    console.log(trace.payload.message);
-  });
+  traces.forEach(trace => console.log(trace.payload.message));
   
   // Continue the conversation session
   const userInput = "I would like a large cheeseburger"; // change this string to what your app expects
@@ -83,14 +81,12 @@ const chatbot = factory.createClient();
   
   // Show the voice app's subsequent response
   const traces2 = context2.getResponse();
-  traces2.forEach(trace => {
-    console.log(trace.payload.message);
-  });
+  traces2.forEach(trace => console.log(trace.payload.message));
   
   // Check if conversation has ended after .sendText() and .start() calls
   if (context2.isEnding()) {
     cleanupMyApp();
-    const context2 = await chatbot.start(); // Maybe restart the chatbot application with .start()
+    const context3 = await chatbot.start(); // Maybe restart the chatbot application with .start()
   }
 })();
 ```
@@ -111,24 +107,20 @@ const chatbot = factory.createClient();
 // Begin a conversation session
 chatbot.start()
 	.then(context => {
-  		// Show the voice app's initial response
-  		const traces = context.getResponse();
-  		traces.forEach(trace => {
-		  console.log(trace.payload.message);
-		});
+    // Show the voice app's initial response
+    const traces = context.getResponse();
+    traces.forEach(trace => console.log(trace.payload.message));
 
-		// Continue the conversation session
-		const userInput = "I would like a large cheeseburger";
-		const context2 = chatbot.sendText(userInput);
+    // Continue the conversation session
+    const userInput = "I would like a large cheeseburger";
+    const context2 = chatbot.sendText(userInput);
 
-		return context2;
+    return context2;
 	})
 	.then(context => {
 		// Show the voice app's subsequent response
 		const traces2 = context.getResponse();
-		traces2.forEach(trace => {
-		  console.log(trace.payload.message);
-		});
+		traces2.forEach(trace => console.log(trace.payload.message));
 
 		// Check if conversation has ended after .sendText() and .start() calls
 		if (context.isEnding()) {

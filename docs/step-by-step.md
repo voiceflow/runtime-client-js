@@ -6,14 +6,15 @@
 
 To start integrating the Voiceflow app in your codebase, we do the following:
 
-1. Set up the `RuntimeClient` as shown below. Paste the `VERSION_ID` of your Voiceflow project into the `versionID` configuration option.
+1. Set up a `RuntimeClient` instance using a `RuntimeClientFactory` as shown below. Paste the `VERSION_ID` of your Voiceflow project into the `versionID` configuration option.
 
 ```js
-import RuntimeClient from "@voiceflow/runtime-client-js"
+import RuntimeClientFactory from "@voiceflow/runtime-client-js"
 
-const chatbot = new RuntimeClient({
-  versionID: 'XXXXXXXXXXXXXXXXXXXXXXXX' // the VERSION_ID goes here
-});
+const factory = new RuntimeClientFactory({
+   versionID: 'XXXXXXXXXXXXXXXXXXXXXXXX' // the VERSION_ID goes here 
+})
+const chatbot = factory.createClient();
 ```
 
 1. Call `.start()` to begin a conversation session with the Voiceflow app.
@@ -25,9 +26,7 @@ const chatbot = new RuntimeClient({
   const context = await chatbot.start();
  
   const traces = context.getResponse();
-  traces.forEach(trace => {
-    console.log(trace.payload.message);
-  });
+  traces.forEach(trace => console.log(trace.payload.message));
 })();
 ```
 
@@ -43,9 +42,7 @@ async(() => {
   const context2 = await chatbot.sendText(userInput);
  
   const traces2 = context2.getResponse();
-  traces2.forEach(trace => {
-    console.log(trace.payload.message);
-  });
+  traces2.forEach(trace => console.log(trace.payload.message));
 });
 ```
 

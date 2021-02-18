@@ -4,6 +4,9 @@
 
 ## Table of Contents
 
+- [Main Components](#main-components)
+  - [`RuntimeClientFactory`](#runtimeclientfactory)
+  - [`RuntimeClient`](#runtimeclient)
 - [Statefulness of RuntimeClient](#statefulness-of-runtimeclient)
   - [Conversation Session](#conversation-session)
   - [Interaction Methods](#interaction-methods)
@@ -36,6 +39,22 @@
 
 
 ## Features
+
+### Main Components
+
+The main components from `runtime-client-js` you should understand are the `RuntimeClientFactory` and the `RuntimeClient`. We will briefly introduce each component. We provide more detail in following sections.
+
+### `RuntimeClientFactory`
+
+The `RuntimeClientFactory` is a factory class that is used to create `RuntimeClient` instances, which are set to the same configuration passed into the factory itself. 
+
+For example, the `RuntimeClientFactory` accepts a `versionID`, let's say it has value `fishandchips`, representing the Voiceflow app we want to start a conversation with. Any `RuntimeClient` we construct with this particular factory will then contact the same Voiceflow app with the `versionID` of `fishandchips`
+
+### `RuntimeClient`
+
+The `RuntimeClient` is an object that represents one instance of a Voiceflow app. This is the main interface you use to interact with a Voiceflow app, advance the conversation session, and get a response. You do not construct `RuntimeClient`s directy.
+
+
 
 ### Statefulness of RuntimeClient
 
@@ -79,13 +98,12 @@ Different interaction method have different side-effects on the conversation ses
 1. `.start()` - Starts the conversation session and runs the application until it requests user input, at which point, the method returns the current `context`. If this is called while a conversation session is ongoing, then it starts a new conversation session from the beginning.
 2. `.sendText(userInput)` - Advances the conversation session based on the user's input and then runs the application until it requests user input, at which point, the method returns the current `context`. 
 
-
-
 Now, only certain interaction methods are allowed to be called at certain points in conversation session. 
 
-The `.start()` method is callable at any time. You can sort of think of it as a "pseudo-idempotent" method that always returns the resulting execution state after the VF app begins. However, if your VF app itself isn't idempotent, then `.start()` itself might not be idempotent.
+1. `.start()` is callable any time.
+2. `.sendText()` is callable only if the `RuntimeClient` contains some ongoing conversation session. That is, `runtimeClient.getContext().isEnding()` is `false`. If you call `.sendText()` when the return of the aforementioned `.isEnding()` call is `true`, then calling `.sendText()` throws an exception. 
 
-On the other hand, the `.sendText()` method is only callable while there's an ongoing conversation session. If the current conversation session terminates, then calling `.sendText()` throws an exception and `.start()` is the only valid interaction method that can be called.
+Thus, if `runtimeClient.getContext().isEnding()` is `true`, the only valid method you may call is `.start()` to restart the conversation session from the beginning.
 
 
 
@@ -98,7 +116,7 @@ const context1 = await chatbot.start();
 const context2 = await chatbot.sendText(userInput);
 ```
 
-As described in "Statefulness of RuntimeClient", interaction methods replace `RuntimeClient`'s copy of the conversation session state. However, these create a new `Context` object. We never modify previous `Context` objects inside of an interaction method. Therefore, we can access past application states through past `Context`s. This means you can build a **history** of ``Context` objects and implement time-travelling capabilities in your chatbot.
+As described in "Statefulness of RuntimeClient", interaction methods replace `RuntimeClient`'s copy of the conversation session state. However, these methods create a new `Context` object. We never modify previous `Context` objects inside of an interaction method. Therefore, we can access past application states through past `Context`s. This means you can build a **history** of `Context` objects and implement time-travelling capabilities in your chatbot.
 
 The `Context` object has a handful of methods to expose its internal data. We will describe a subset of them below.
 
@@ -114,9 +132,7 @@ To expose the other trace types through `.getResponse()`, see the `includeTypes`
 
 ```js
 const response = context.getResponse();
-response.forEach(({ payload }) => {
-  console.log(payload.message);
-});
+response.forEach(trace => console.log(trace.payload.message));
 ```
 
 
@@ -166,17 +182,17 @@ You can also check our [samples](https://github.com/voiceflow/rcjs-examples) for
 
 ### Configuration
 
-The `RuntimeClient` comes with additional `dataConfig` options for managing the data returned by `Context.getResponse()`. To summarize, there are four options currently available:
+The `RuntimeClientFactory` accepts configurations which it will apply to `RuntimeClient` instance. In particular, there is a `dataConfig` option for managing the data returned by `Context.getResponse()` for all `Context`s produced by a `RuntimeClient`. To summarize, there are four options currently available:
 
-1. `tts` - Set to `true` to enable text-to-speech functionality. Any returned speak traces will contain an additional`src` property containing an `.mp3` string, which is an audiofile that will speak out the trace text.
-2. `ssml` - Set to `true` to disable the `RuntimeClient`'s SSML sanitization and return the full text string with the SSML included. This may be useful if you want to use your own TTS system. 
+1. `tts` - Set to `true` to enable text-to-speech functionality. Any returned `SpeakTrace`s corresponding to Speak Steps on Voiceflow will contain an additional`src` property containing an `.mp3` string, which is an audio-file that will speak out the trace text. This option does not affect `SpeakTrace`s corresponding to Audio Steps in any way and a `src` property is always generated.
+2. `ssml` - Set to `true` to disable the `Context`'s SSML sanitization and return the full text string with the SSML included. This may be useful if you want to use your own TTS system. 
 3. `includeTypes` - Set to a list of `TraceType` strings which are the additional trace types your want from `.getResponse()`. A speak-type trace is always returned by `.getResponse()`. For the full list of available trace types and their `TraceType` strings, see  [Advanced Trace Types](#advanced-trace-types).
 4. `traceProcessor` - Set to a "trace processor" function which will be automatically called whenever an interaction method like `.sendText()` receives new traces.
 
 The Samples section has some working code demonstrating some of the configuration options. Also, see the subsections below for how to access the data exposed by `dataConfig` options.
 
 ```js
-const app = new RuntimeClient({
+const app = new RuntimeClientFactory({
     versionID: 'XXXXXXXXXXXXXXXXX',
     dataConfig: {
       	tts: true,
@@ -229,7 +245,7 @@ console.log(context.getResponse());
 
 #### `includeTypes`
 
-Once you have added additional trace types, you will need some conditional logic to check what kind of trace you're look at from `.getResponse()`
+Once you have specified additional trace types, you will need some conditional logic to check what kind of trace you're looking at. We recommend using [`makeTraceProcessor`](#maketraceprocessor) to handle the boilerplate conditional logic for you.
 
 ```js
 // Configure `includeTypes` to show debug traces
@@ -329,7 +345,7 @@ The argument types shown in the handler signatures are simplified. The arguments
 
 ##### Speak
 
-The `SpeakTrace` handler can either be a function or an object with properties `handleAudio` or `handleSpeech`. If you are only expecting `SpeakTrace`s from only Speak Steps or only Audio Steps, then this might be simpler.
+The `SpeakTrace` handler can either be a function or an object with properties `handleAudio` and `handleSpeech`. If you are only expecting `SpeakTrace`s from only Speak Steps or only Audio Steps, then this might be simpler.
 
 Otherwise, if you are expecting both types to be returned by `.getResponse()`, you can pass in an object with two handlers, one for Audio Steps, the other for Speak Steps, and the trace processor will call the correct handler for you.
 
@@ -541,6 +557,10 @@ const orderBot = new VFApp({
   versionID: 'order-bot'
 });
 ```
+
+
+
+### Backend Usage
 
 
 
