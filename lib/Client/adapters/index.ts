@@ -1,6 +1,6 @@
 import { GeneralTrace, SpeakTrace, TraceType } from '@voiceflow/general-types';
 import { SpeakType } from '@voiceflow/general-types/build/nodes/speak';
-import { parse } from 'html-parse-stringify';
+import htmlParse from 'html-parse-stringify';
 
 import { ResponseContext } from '../../types';
 
@@ -14,7 +14,7 @@ export const parseAudioStepSrc = (trace: GeneralTrace): GeneralTrace => {
     return trace;
   }
 
-  const node = parse(trace.payload.message)[0];
+  const node = htmlParse.parse(trace.payload.message)[0];
 
   if (!node || node.name !== 'audio') {
     return {
