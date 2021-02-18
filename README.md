@@ -26,26 +26,28 @@ Retrieve the `versionID` from the URL:
 `https://creator.voiceflow.com/project/{VERSION_ID}/...` and initialize the client
 
 ```javascript
-const RuntimeClient = require('@voiceflow/runtime-client-js');
+const VF = require('@voiceflow/runtime-client-js');
 
-const chatbot = new RuntimeClient({
+const factory = new VF.RuntimeClientFactory({
   versionID: 'XXXXXXXXXXXXXXXXXXXXXXXX', // voiceflow project versionID
   endpoint: 'https://general-runtime.voiceflow.com',
 });
 
-// initalize the conversation, get the starting prompt
-chatbot.start().then((context) => {
-  console.log(context.getResponses());
+const client = factory.createClient();
+
+// (optional) start the conversation
+client.start().then((context) => {
+  console.log(context.getResponse());
 });
 
 // call this function from any input source
 // e.g. interaction('can I have fries with that');
 async function interaction(input) {
   // get a context for every user interaction
-  const context = await chatbot.sendText(input);
+  const context = await client.sendText(input);
 
   // print out what the bot says back
-  console.log(context.getResponses());
+  console.log(context.getResponse());
 
   if (context.isEnding()) {
     console.log('conversation is over');

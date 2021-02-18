@@ -22,12 +22,8 @@ export class RuntimeClient<S extends Record<string, any> = Record<string, any>> 
     this.context = new Context({ request: null, state, trace: [] }, this.dataConfig);
   }
 
-  reset() {
-    this.context = new Context(resetContext(this.context.toJSON()));
-  }
-
   async start(): Promise<Context<S>> {
-    this.reset();
+    this.context = new Context(resetContext(this.context.toJSON()), this.dataConfig);
     return this.sendRequest(null);
   }
 
