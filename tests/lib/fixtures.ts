@@ -12,7 +12,7 @@ import {
 } from '@voiceflow/general-types';
 import { SpeakType } from '@voiceflow/general-types/build/nodes/speak';
 import { TraceStreamAction } from '@voiceflow/general-types/build/nodes/stream';
-import { APLType, CanvasVisibility, VisualType } from '@voiceflow/general-types/build/nodes/visual';
+import { CanvasVisibility, VisualType } from '@voiceflow/general-types/build/nodes/visual';
 
 export type VFAppVariablesSchema = {
   age: number | 0;
@@ -96,14 +96,6 @@ export const DEBUG_TRACE: DebugTrace = {
 
 export const END_TRACE: ExitTrace = {
   type: TraceType.END,
-};
-
-export const VISUAL_TRACE_APL: VisualTrace & { payload: { visualType: VisualType.APL } } = {
-  type: TraceType.VISUAL,
-  payload: {
-    visualType: VisualType.APL,
-    aplType: APLType.JSON,
-  },
 };
 
 export const VISUAL_TRACE_IMAGE: VisualTrace & { payload: { visualType: VisualType.IMAGE } } = {

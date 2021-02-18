@@ -1,4 +1,4 @@
-import { GeneralTrace, SpeakTrace, TraceType, VisualTrace } from '@voiceflow/general-types';
+import { GeneralTrace, SpeakTrace, TraceType } from '@voiceflow/general-types';
 import { invokeBlockHandler } from '@/lib/Utils/makeTraceProcessor/block';
 import { invokeChoiceHandler } from '@/lib/Utils/makeTraceProcessor/choice';
 import { invokeDebugHandler } from '@/lib/Utils/makeTraceProcessor/debug';
@@ -8,9 +8,9 @@ import { invokeSpeakHandler, SpeakTraceHandler, SpeakTraceHandlerMap } from '@/l
 import { invokeStreamHandler } from '@/lib/Utils/makeTraceProcessor/stream';
 import { expect } from 'chai';
 import sinon from 'sinon';
-import { BLOCK_TRACE, CHOICE_TRACE, DEBUG_TRACE, END_TRACE, FAKE_VISUAL_TRACE, FLOW_TRACE, SPEAK_TRACE, SPEAK_TRACE_AUDIO, STREAM_TRACE, VISUAL_TRACE_APL, VISUAL_TRACE_IMAGE } from '../../fixtures';
-import { blockHandler, choiceHandler, debugHandler, endHandler, FAKE_SPEAK_TRACE, flowHandler, RESULT, speakHandlerFunc, speakHandlerMap, streamHandler, TRACE_HANDLER_MAP, UNKNOWN_TRACE_TYPE, visualHandlerFunc, visualHandlerMap } from './fixtures';
-import { invokeVisualHandler, VisualTraceHandler } from '@/lib/Utils/makeTraceProcessor/visual';
+import { BLOCK_TRACE, CHOICE_TRACE, DEBUG_TRACE, END_TRACE, FLOW_TRACE, SPEAK_TRACE, SPEAK_TRACE_AUDIO, STREAM_TRACE, VISUAL_TRACE_IMAGE } from '../../fixtures';
+import { blockHandler, choiceHandler, debugHandler, endHandler, FAKE_SPEAK_TRACE, flowHandler, RESULT, speakHandlerFunc, speakHandlerMap, streamHandler, TRACE_HANDLER_MAP, UNKNOWN_TRACE_TYPE, visualHandlerFunc } from './fixtures';
+import { invokeVisualHandler } from '@/lib/Utils/makeTraceProcessor/visual';
 import { makeTraceProcessor } from '@/lib/Utils/makeTraceProcessor';
 
 describe('makeTraceProcessor', () => {
@@ -43,13 +43,24 @@ describe('makeTraceProcessor', () => {
         expect(result).to.eql(FLOW_TRACE.payload.diagramID);
     });
 
-    describe('invokeStreamHandler', () => {
+    it('invokeStreamHandler', () => {
         const result = invokeStreamHandler(STREAM_TRACE, streamHandler);
 
         expect(result).to.eql([
             STREAM_TRACE.payload.src,
             STREAM_TRACE.payload.action,
             STREAM_TRACE.payload.token,
+        ]);
+    });
+
+    it('invokeVisualHandler', () => {
+        const result = invokeVisualHandler(VISUAL_TRACE_IMAGE, visualHandlerFunc);
+
+        expect(result).to.eql([
+            VISUAL_TRACE_IMAGE.payload.image,
+            VISUAL_TRACE_IMAGE.payload.device,
+            VISUAL_TRACE_IMAGE.payload.dimensions,
+            VISUAL_TRACE_IMAGE.payload.canvasVisibility
         ]);
     });
 
@@ -103,55 +114,6 @@ describe('makeTraceProcessor', () => {
         it('unknown speak subtype', () => {
             const callback = () => invokeSpeakHandler(FAKE_SPEAK_TRACE as SpeakTrace, speakHandlerMap)
             expect(callback).to.throw("VFError: makeTraceProcessor's returned callback received an unknown SpeakTrace subtype");
-        });
-    });
-
-    describe('invokeVisualHandler', () => {
-        it('function handler', () => {
-            const result = invokeVisualHandler(VISUAL_TRACE_APL, visualHandlerFunc);
-
-            const { visualType, ...rest } = VISUAL_TRACE_APL.payload;
-            expect(result).to.eql([
-                rest,
-                visualType
-            ]);
-        });
-
-        it('invokes apl handler', () => {
-            const handler: VisualTraceHandler = {
-                handleAPL: visualHandlerMap.handleAPL
-            };
-
-            const result = invokeVisualHandler(VISUAL_TRACE_APL, handler);
-
-            const { visualType, ...restPayload } = VISUAL_TRACE_APL.payload;
-            expect(result).to.eql(restPayload);
-        });
-
-        it('invokes image handler', () => {
-            const handler: VisualTraceHandler = {
-                handleImage: visualHandlerMap.handleImage
-            };
-
-            const result = invokeVisualHandler(VISUAL_TRACE_IMAGE, handler);
-
-            const { visualType, ...restPayload } = VISUAL_TRACE_IMAGE.payload;
-            expect(result).to.eql(restPayload);
-        });
-
-        it('unimplemented apl handler', () => {
-            const callback = () => invokeVisualHandler(VISUAL_TRACE_APL, {});
-            expect(callback).to.throw("VFError: missing handler for VisualTrace's apl subtype");
-        });
-
-        it('unimplemented image handler', () => {
-            const callback = () => invokeVisualHandler(VISUAL_TRACE_IMAGE, {});
-            expect(callback).to.throw("VFError: missing handler for VisualTrace's image subtype");
-        });
-
-        it('invokeVisualHandler, unknown visual subtype', () => {
-            const callback = () => invokeVisualHandler(FAKE_VISUAL_TRACE as VisualTrace, visualHandlerMap)
-            expect(callback).to.throw("VFError: makeTraceProcessor's returned callback received an unknown VisualTrace subtype");
         });
     });
 

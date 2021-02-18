@@ -7,7 +7,7 @@ import { EndTraceHandler } from '@/lib/Utils/makeTraceProcessor/end';
 import { FlowTraceHandler } from '@/lib/Utils/makeTraceProcessor/flow';
 import { SpeakTraceHandlerFunction, SpeakTraceHandlerMap } from '@/lib/Utils/makeTraceProcessor/speak';
 import { StreamTraceHandler } from '@/lib/Utils/makeTraceProcessor/stream';
-import { VisualTraceHandlerFunction, VisualTraceHandlerMap } from '@/lib/Utils/makeTraceProcessor/visual';
+import { VisualTraceHandler } from '@/lib/Utils/makeTraceProcessor/visual';
 
 export const FAKE_SPEAK_TRACE = {
     type: TraceType.SPEAK,
@@ -52,18 +52,9 @@ export const speakHandlerMap: SpeakTraceHandlerMap = {
     }
 };
 
-export const visualHandlerMap: VisualTraceHandlerMap = {
-    handleAPL: (aplPayload) => {
-        return aplPayload;
-    },
-    handleImage: (imgPayload) => {
-        return imgPayload;
-    }
-}
-
 export const speakHandlerFunc: SpeakTraceHandlerFunction = (message, src, type) => [message, src, type];
 
-export const visualHandlerFunc: VisualTraceHandlerFunction = (payload, type) => [payload, type];
+export const visualHandlerFunc: VisualTraceHandler = (image, device, dimensions, visiblity) => [image, device, dimensions, visiblity];
 
 export const streamHandler: StreamTraceHandler = (src, action, token) => {
     return [src, action, token];
