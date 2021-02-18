@@ -48,13 +48,13 @@
 
 The main components from `runtime-client-js` you should understand are the `RuntimeClientFactory` and the `RuntimeClient`. We will briefly introduce each component. We provide more detail in following sections.
 
-### `RuntimeClientFactory`
+#### `RuntimeClientFactory`
 
 The `RuntimeClientFactory` is a factory class that is used to create `RuntimeClient` instances, which are set to the same configuration passed into the factory itself. 
 
 For example, the `RuntimeClientFactory` accepts a `versionID`, let's say it has value `fishandchips`, representing the Voiceflow app we want to start a conversation with. Any `RuntimeClient` we construct with this particular factory will then contact the same Voiceflow app with the `versionID` of `fishandchips`
 
-### `RuntimeClient`
+#### `RuntimeClient`
 
 The `RuntimeClient` is an object that represents one instance of a Voiceflow app. This is the main interface you use to interact with a Voiceflow app, advance the conversation session, and get a response. You do not construct `RuntimeClient`s directy.
 
