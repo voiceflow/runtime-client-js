@@ -24,6 +24,7 @@ export class RuntimeClient<S extends Record<string, any> = Record<string, any>> 
 
   async start(): Promise<Context<S>> {
     this.context.toJSON().state.stack = [];
+    this.context.toJSON().trace = [];
     return this.sendRequest(null);
   }
 
