@@ -1,7 +1,7 @@
 import { State } from '@voiceflow/runtime';
 
-import RuntimeClient from '@/lib/RuntimeClient';
 import Client from '@/lib/Client';
+import RuntimeClient from '@/lib/RuntimeClient';
 import { DataConfig } from '@/lib/types';
 
 import { validateVarMerge } from '../Variables/utils';

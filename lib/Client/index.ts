@@ -37,9 +37,7 @@ class Client<S extends Record<string, any> = Record<string, any>> {
   }
 
   async interact(body: RequestContext): Promise<ResponseContext> {
-    return this.axios
-      .post(`/interact/${this.versionID}`, body)
-      .then((response) => response.data)
+    return this.axios.post(`/interact/${this.versionID}`, body).then((response) => response.data);
   }
 
   getVersionID() {
