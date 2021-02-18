@@ -1,12 +1,13 @@
-import { STREAM_TRACE, SPEAK_TRACE, DEBUG_TRACE, END_TRACE, FLOW_TRACE, CHOICE_TRACE, BLOCK_TRACE, CHOICE_TRACE_WITH_NO_CHOICES } from "../fixtures";
 import { RequestType, TraceType } from '@voiceflow/general-types';
+import { SpeakType } from '@voiceflow/general-types/build/nodes/speak';
 import { State } from '@voiceflow/runtime';
 import _ from 'lodash';
 
 import { RequestContext, ResponseContext } from '@/lib/types';
-import { SpeakType } from "@voiceflow/general-types/build/nodes/speak";
 
-export { CHOICE_TRACE } from "../fixtures";
+import { BLOCK_TRACE, CHOICE_TRACE, CHOICE_TRACE_WITH_NO_CHOICES, DEBUG_TRACE, END_TRACE, FLOW_TRACE, SPEAK_TRACE, STREAM_TRACE } from '../fixtures';
+
+export { CHOICE_TRACE } from '../fixtures';
 
 export const VERSION_ID = 'dummy-version-id';
 

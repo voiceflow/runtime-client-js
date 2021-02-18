@@ -1,6 +1,6 @@
-import App from '@/lib/App';
+import App from '@/lib/RuntimeClientFactory';
 
-export * from '@/lib/App';
+export * from '@/lib/RuntimeClient';
 export * from '@/lib/types';
 export * from '@/lib/Utils';
 

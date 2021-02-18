@@ -1,7 +1,18 @@
-import { VisualTrace, BlockTrace, ChoiceTrace, DebugTrace, ExitTrace, FlowTrace, SpeakTrace, StreamTrace, TraceType, DeviceType } from "@voiceflow/general-types";
-import { SpeakType } from "@voiceflow/general-types/build/nodes/speak";
-import { TraceStreamAction } from "@voiceflow/general-types/build/nodes/stream";
-import { APLType, CanvasVisibility, VisualType } from "@voiceflow/general-types/build/nodes/visual";
+import {
+  BlockTrace,
+  ChoiceTrace,
+  DebugTrace,
+  DeviceType,
+  ExitTrace,
+  FlowTrace,
+  SpeakTrace,
+  StreamTrace,
+  TraceType,
+  VisualTrace,
+} from '@voiceflow/general-types';
+import { SpeakType } from '@voiceflow/general-types/build/nodes/speak';
+import { TraceStreamAction } from '@voiceflow/general-types/build/nodes/stream';
+import { APLType, CanvasVisibility, VisualType } from '@voiceflow/general-types/build/nodes/visual';
 
 export type VFAppVariablesSchema = {
   age: number | 0;
@@ -22,16 +33,16 @@ export const MAKE_SPEAK_TRACE = (payload: SpeakTrace['payload']): SpeakTrace => 
   type: TraceType.SPEAK,
   payload: {
     ...SPEAK_TRACE.payload,
-    ...payload
-  }
+    ...payload,
+  },
 });
 
 export const SPEAK_TRACE_AUDIO: SpeakTrace = {
   type: TraceType.SPEAK,
   payload: {
     type: SpeakType.AUDIO,
-    message: '<audio src=\"http://localhost:8000/audio.local/1612307079557-mixaund-tech-corporate.mp3\"/>',
-    src: 'http://localhost:8000/audio.local/1612307079557-mixaund-tech-corporate.mp3'
+    message: '<audio src="http://localhost:8000/audio.local/1612307079557-mixaund-tech-corporate.mp3"/>',
+    src: 'http://localhost:8000/audio.local/1612307079557-mixaund-tech-corporate.mp3',
   },
 };
 
@@ -91,9 +102,9 @@ export const VISUAL_TRACE_APL: VisualTrace & { payload: { visualType: VisualType
   type: TraceType.VISUAL,
   payload: {
     visualType: VisualType.APL,
-    aplType: APLType.JSON
-  }
-}
+    aplType: APLType.JSON,
+  },
+};
 
 export const VISUAL_TRACE_IMAGE: VisualTrace & { payload: { visualType: VisualType.IMAGE } } = {
   type: TraceType.VISUAL,
@@ -106,15 +117,15 @@ export const VISUAL_TRACE_IMAGE: VisualTrace & { payload: { visualType: VisualTy
       height: 200,
     },
     canvasVisibility: CanvasVisibility.CROPPED,
-  }
-}
+  },
+};
 
 export const FAKE_VISUAL_TRACE = {
   type: TraceType.VISUAL,
   payload: {
-    visualType: 'fake'
-  }
-}
+    visualType: 'fake',
+  },
+};
 
 export const INTERACT_ENDPOINT = (versionID: string) => `/interact/${versionID}`;
 

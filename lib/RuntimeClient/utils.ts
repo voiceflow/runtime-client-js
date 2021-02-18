@@ -3,7 +3,7 @@ import { Config, GeneralRequest } from '@voiceflow/general-types';
 import Context from '@/lib/Context';
 import { RequestContext } from '@/lib/types';
 
-import { DataConfig } from '../types';
+import { DataConfig, ResponseContext } from '../types';
 
 export const configAdapter = ({ tts = false }: DataConfig = {}): Config => ({
   tts,
@@ -17,3 +17,13 @@ export const makeRequestBody = <S>(context: Context<S>, request: GeneralRequest 
     config: configAdapter(dataConfig),
   };
 };
+
+// eslint-disable-next-line import/prefer-default-export
+export const resetContext = (context: ResponseContext): ResponseContext => ({
+  ...context,
+  state: {
+    ...context.state,
+    stack: [],
+  },
+  trace: [],
+});

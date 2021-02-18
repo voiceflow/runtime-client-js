@@ -1,12 +1,12 @@
 import { expect } from 'chai';
 import sinon from 'sinon';
 
-import { makeRequestBody } from '@/lib/App/utils';
 import Context from '@/lib/Context';
+import { makeRequestBody } from '@/lib/RuntimeClient/utils';
 
 import { START_RESPONSE_BODY } from '../Context/fixtures';
 
-describe('App utils', () => {
+describe('RuntimeClient utils', () => {
   afterEach(() => {
     sinon.restore();
   });

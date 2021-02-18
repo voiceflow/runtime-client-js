@@ -15,7 +15,7 @@ export type ResponseContext = {
 };
 
 export type RequestContext = {
-  state: State;
+  state?: State;
   request: GeneralRequest;
   config?: Config;
 };
