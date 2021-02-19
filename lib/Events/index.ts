@@ -8,7 +8,7 @@ export type GeneralTraceEventHandler<V extends Record<string, any>> = (object: G
 
 type _Map<T extends Record<string, any>, K extends TraceType = TraceType> = Map<K, Array<TraceEventHandler<K, T>>>;
 
-export class EventsManager<V extends Record<string, any>> {
+export class EventManager<V extends Record<string, any>> {
   private specHandlers: _Map<V>;
 
   private genHandlers: GeneralTraceEventHandler<V>[];
@@ -30,11 +30,11 @@ export class EventsManager<V extends Record<string, any>> {
     this.genHandlers.push(handler);
   }
 
-  handle<T extends TraceType>(event: T, trace: TraceMap[T], context: Context<V>) {
-    this.specHandlers.get(event)!.forEach((handler: TraceEventHandler<T, V>) => handler(trace, context));
+  handle<T extends TraceType>(trace: TraceMap[T], context: Context<V>) {
+    this.specHandlers.get(trace.type)!.forEach((handler: TraceEventHandler<T, V>) => handler(trace, context));
 
     this.genHandlers.forEach((handler: GeneralTraceEventHandler<V>) => handler(trace, context));
   }
 }
 
-export default EventsManager;
+export default EventManager;

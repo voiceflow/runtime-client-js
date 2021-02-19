@@ -4,7 +4,7 @@ import { State } from '@voiceflow/runtime';
 import Client from '@/lib/Client';
 import { VFClientError, VFTypeError } from '@/lib/Common';
 import Context from '@/lib/Context';
-import EventsManager, { GeneralTraceEventHandler, TraceEventHandler } from '@/lib/Events';
+import EventManager, { GeneralTraceEventHandler, TraceEventHandler } from '@/lib/Events';
 import { DataConfig, ResponseContext, TraceType } from '@/lib/types';
 
 import { isValidTraceType } from '../DataFilterer/utils';
@@ -23,12 +23,12 @@ export class RuntimeClient<V extends Record<string, any> = Record<string, any>> 
 
   private context: Context<V>;
 
-  private events: EventsManager<V>;
+  private events: EventManager<V>;
 
   constructor(state: State, { client, dataConfig = {} }: { client: Client<V>; dataConfig?: DataConfig }) {
     this.client = client;
     this.dataConfig = dataConfig;
-    this.events = new EventsManager();
+    this.events = new EventManager();
 
     this.context = new Context({ request: null, state, trace: [] }, this.dataConfig);
   }
@@ -55,7 +55,7 @@ export class RuntimeClient<V extends Record<string, any> = Record<string, any>> 
       this.context!.getResponse().forEach(this.dataConfig.traceProcessor);
     }
 
-    this.context!.getTrace().forEach((trace) => this.events.handle(trace.type, trace, this.context!));
+    this.context!.getTrace().forEach((trace) => this.events.handle(trace, this.context!));
 
     return this.context;
   }
