@@ -11,7 +11,7 @@ import { invokeSpeakHandler, SpeakTraceHandler } from './speak';
 import { invokeStreamHandler, StreamTraceHandler } from './stream';
 import { invokeVisualHandler, VisualTraceHandler } from './visual';
 
-export type TraceHandlerMap = Partial<{
+export type TraceProcessorMap = Partial<{
   [TraceType.BLOCK]: BlockTraceHandler;
   [TraceType.CHOICE]: ChoiceTraceHandler;
   [TraceType.DEBUG]: DebugTraceHandler;
@@ -35,7 +35,7 @@ export const invokeHandlerMap = new Map<TraceType, InvokeHandler>([
   [TraceType.VISUAL, invokeVisualHandler],
 ]);
 
-export const makeTraceProcessor = (handlers: TraceHandlerMap) => (trace: GeneralTrace) => {
+export const makeTraceProcessor = (handlers: TraceProcessorMap) => (trace: GeneralTrace) => {
   const invokeHandler = invokeHandlerMap.get(trace.type);
 
   if (!invokeHandler) {
