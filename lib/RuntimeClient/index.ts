@@ -5,7 +5,7 @@ import Client from '@/lib/Client';
 import { VFClientError, VFTypeError } from '@/lib/Common';
 import Context from '@/lib/Context';
 import EventManager, { GeneralTraceEventHandler, TraceEventHandler } from '@/lib/Events';
-import { DataConfig, ResponseContext, TraceType } from '@/lib/types';
+import { DataConfig, ResponseContext, TraceType, TRACE_EVENT } from '@/lib/types';
 
 import { isValidTraceType } from '../DataFilterer/utils';
 import { makeRequestBody, resetContext } from './utils';
@@ -60,8 +60,8 @@ export class RuntimeClient<V extends Record<string, any> = Record<string, any>> 
     return this.context;
   }
 
-  on<T extends TraceType | 'trace'>(event: T, handler: OnMethodHandlerArgMap<V>[T]) {
-    if (event === 'trace') {
+  on<T extends TraceType | TRACE_EVENT>(event: T, handler: OnMethodHandlerArgMap<V>[T]) {
+    if (event === TRACE_EVENT) {
       return this.events.onAny(handler as GeneralTraceEventHandler<V>);
     }
     if (isValidTraceType(event)) {
@@ -96,6 +96,10 @@ export class RuntimeClient<V extends Record<string, any> = Record<string, any>> 
 
   onVisual(handler: TraceEventHandler<TraceType.VISUAL, V>) {
     this.events.on(TraceType.VISUAL, handler);
+  }
+
+  onChoice(handler: TraceEventHandler<TraceType.CHOICE, V>) {
+    this.events.on(TraceType.CHOICE, handler);
   }
 
   setContext(contextJSON: ResponseContext) {

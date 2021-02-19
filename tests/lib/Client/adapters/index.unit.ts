@@ -2,10 +2,12 @@ import { SpeakType } from '@voiceflow/general-types/build/nodes/speak';
 import { expect } from 'chai';
 import sinon from 'sinon';
 
-import { adaptResponseContext } from '@/lib/Client/adapters';
+import { adaptResponseContext, extractAudioStep } from '@/lib/Client/adapters';
 import { RequestType, SpeakTrace, TraceType } from '@voiceflow/general-types';
 import { DBResponseContext } from '@/lib/Client/adapters/types';
 import { DB_VISUAL_TRACE } from '../fixtures';
+import { AUDIO_TRACE, SPEAK_TRACE } from '../../fixtures';
+import { MALFORMED_AUDIO_TRACE, MALFORMED_SPEAK_TRACE } from './fixtures';
 
 describe('adapters', () => {
   afterEach(() => {
@@ -64,6 +66,18 @@ describe('adapters', () => {
         },
         DB_VISUAL_TRACE
       ],
+    });
+  });
+
+  it('extractAudioStep', () => {
+    const messyData = {
+      trace: [MALFORMED_SPEAK_TRACE, MALFORMED_AUDIO_TRACE]
+    };
+
+    const result = extractAudioStep(messyData as any);
+
+    expect(result).to.eql({
+      trace: [SPEAK_TRACE, AUDIO_TRACE]
     });
   });
 });

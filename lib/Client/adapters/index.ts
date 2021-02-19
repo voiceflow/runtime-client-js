@@ -1,2 +1,2 @@
-export { parseAudioStepSrc, adaptResponseContext } from './addAudioSrc';
+export { adaptResponseContext } from './addAudioSrc';
 export { extractAudioStep } from './extractAudioStep';

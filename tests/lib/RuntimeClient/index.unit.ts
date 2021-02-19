@@ -1,11 +1,10 @@
-import { TraceType } from '@voiceflow/general-types';
 import chai, { expect } from 'chai';
 import chaiAsPromise from 'chai-as-promised';
 import _ from 'lodash';
 import sinon from 'sinon';
 
 import RuntimeClient from '@/lib/RuntimeClient';
-import { DataConfig } from '@/lib/types';
+import { DataConfig, TraceType, TRACE_EVENT } from '@/lib/types';
 
 import {
   CHOICE_TRACE,
@@ -23,7 +22,7 @@ import {
   USER_RESPONSE,
   VF_APP_INITIAL_STATE,
 } from '../Context/fixtures';
-import { DEBUG_TRACE, SPEAK_TRACE } from '../fixtures';
+import { AUDIO_TRACE, BLOCK_TRACE, DEBUG_TRACE, END_TRACE, FLOW_TRACE, SPEAK_TRACE } from '../fixtures';
 import { makeTraceProcessor } from '@/lib/Utils/makeTraceProcessor';
 
 chai.use(chaiAsPromise);
@@ -265,5 +264,112 @@ describe('RuntimeClient', () => {
     expect((response[0] as any).payload.message).to.eql('Books ought to have to have good endings.');
     expect((response[0] as any).payload.src).to.eql('data:audio/mpeg;base64,SUQzBAAAAAAA');
     expect(response.length).to.eql(2);
+  });
+
+  describe('events', () => {
+    it('on', async () => {
+      const { agent, client } = createRuntimeClient();
+      
+      const result1: any[] = [];
+      const result2: any[] = [];
+    
+      agent.on(TraceType.SPEAK, (trace, context) => {
+        result1.push(trace, context);
+      });
+      agent.on(TRACE_EVENT, (trace, context) => {
+        result2.push(trace, context);
+      });
+
+      client.interact.resolves(START_RESPONSE_BODY);
+
+      const context = await agent.start();
+
+      expect(result1).to.eql([
+        SPEAK_TRACE, context,
+      ]);
+      expect(result2).to.eql([
+        SPEAK_TRACE, context,
+        BLOCK_TRACE, context,
+        FLOW_TRACE, context,
+        AUDIO_TRACE, context,
+        DEBUG_TRACE, context,
+        CHOICE_TRACE, context
+      ]);
+    });
+
+    it('on, bad trace type', () => {
+      const { agent } = createRuntimeClient();
+
+      const BAD_TRACE_TYPE = 'bad' as TraceType;
+
+      const callback = () => {
+        agent.on(BAD_TRACE_TYPE, () => {});
+      }
+
+      expect(callback).to.throw();
+    });
+
+    it('onEvent', async () => {
+      const { agent, client } = createRuntimeClient();
+
+      const results: any = {};
+      Object.keys(TraceType)
+        .map(trace => trace.toLowerCase())
+        .forEach((trace) => {
+          results[trace] = [];
+        });
+      
+      const insertToResults = (trace: any, context: any) => {
+        results[trace.type].push(trace, context);
+      };
+
+      agent.onAudio(insertToResults);
+      agent.onBlock(insertToResults);
+      agent.onDebug(insertToResults);
+      agent.onEnd(insertToResults);
+      agent.onChoice(insertToResults);
+      agent.onFlow(insertToResults);
+      agent.onSpeak(insertToResults);
+      agent.onVisual(insertToResults);
+
+      client.interact.resolves(START_RESPONSE_BODY);
+
+      const context1 = await agent.start();
+
+      client.interact.resolves(SEND_TEXT_RESPONSE_BODY);
+
+      const context2 = await agent.sendText('some nonsense');
+
+      expect(results[TraceType.SPEAK]).to.eql([
+        SPEAK_TRACE, context1,
+        SPEAK_TRACE, context2
+      ]);
+
+      expect(results[TraceType.VISUAL]).to.eql([]);
+
+      expect(results[TraceType.FLOW]).to.eql([
+        FLOW_TRACE, context1
+      ]);
+
+      expect(results[TraceType.END]).to.eql([
+        END_TRACE, context2
+      ]);
+
+      expect(results[TraceType.DEBUG]).to.eql([
+        DEBUG_TRACE, context1
+      ]);
+
+      expect(results[TraceType.CHOICE]).to.eql([
+        CHOICE_TRACE, context1
+      ]);
+
+      expect(results[TraceType.BLOCK]).to.eql([
+        BLOCK_TRACE, context1
+      ]);
+
+      expect(results[TraceType.AUDIO]).to.eql([
+        AUDIO_TRACE, context1
+      ]);
+    });
   });
 });

@@ -1,1 +1,1 @@
-export { InvokeHandler, makeTraceProcessor } from './traceProcessor';
+export { makeTraceProcessor } from './traceProcessor';
