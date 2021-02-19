@@ -97,4 +97,15 @@ export type TraceHandlerMap = {
   [TraceType.VISUAL]: VisualTraceHandler;
 };
 
+export type TraceMap = {
+  [TraceType.BLOCK]: BlockTrace;
+  [TraceType.CHOICE]: ChoiceTrace;
+  [TraceType.DEBUG]: DebugTrace;
+  [TraceType.END]: EndTrace;
+  [TraceType.FLOW]: FlowTrace;
+  [TraceType.SPEAK]: SpeakTrace;
+  [TraceType.AUDIO]: AudioTrace;
+  [TraceType.VISUAL]: VisualTrace;
+}
+
 export type Choice = ChoiceTrace['payload']['choices'][number];

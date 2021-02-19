@@ -2,12 +2,20 @@ import { GeneralRequest, RequestType } from '@voiceflow/general-types';
 import { State } from '@voiceflow/runtime';
 
 import Client from '@/lib/Client';
-import { VFClientError } from '@/lib/Common';
+import { VFClientError, VFTypeError } from '@/lib/Common';
 import Context from '@/lib/Context';
-import { DataConfig, ResponseContext, TraceType } from '@/lib/types';
+import { DataConfig, ResponseContext, TraceHandlerMap, TraceType } from '@/lib/types';
 
-import EventsManager from '../Events';
+import EventsManager from '@/lib/Events';
 import { makeRequestBody, resetContext } from './utils';
+import { makeTraceProcessor } from '../Utils/makeTraceProcessor';
+import { isValidTraceType } from '../DataFilterer/utils';
+
+type OnMethodHandlerArgMap = {
+  [K in TraceType]: TraceHandlerMap[K];
+} & {
+  trace: ReturnType<typeof makeTraceProcessor>;
+}
 
 export class RuntimeClient<S extends Record<string, any> = Record<string, any>> {
   private client: Client<S>;
@@ -53,8 +61,42 @@ export class RuntimeClient<S extends Record<string, any> = Record<string, any>> 
     return this.context;
   }
 
-  on(event: TraceType, handler: any) {
-    this.events.on(event, handler);
+  on<S extends TraceType | 'trace'>(event: S, handler: OnMethodHandlerArgMap[S]) {
+    if (event === 'trace') {
+      return this.events.onAny(handler as ReturnType<typeof makeTraceProcessor>);
+    } else if (isValidTraceType(event)){
+      return this.events.on(event, handler as any);
+    } else {
+      throw new VFTypeError(`event "${event}" is not valid`);
+    }
+  }
+
+  onSpeak(handler: TraceHandlerMap[TraceType.SPEAK]) {
+    this.events.on(TraceType.SPEAK, handler);
+  }
+
+  onAudio(handler: TraceHandlerMap[TraceType.AUDIO]) {
+    this.events.on(TraceType.AUDIO, handler);
+  }
+
+  onBlock(handler: TraceHandlerMap[TraceType.BLOCK]) {
+    this.events.on(TraceType.BLOCK, handler);
+  }
+
+  onDebug(handler: TraceHandlerMap[TraceType.DEBUG]) {
+    this.events.on(TraceType.DEBUG, handler);
+  }
+
+  onEnd(handler: TraceHandlerMap[TraceType.END]) {
+    this.events.on(TraceType.END, handler);
+  }
+
+  onFlow(handler: TraceHandlerMap[TraceType.FLOW]) {
+    this.events.on(TraceType.FLOW, handler);
+  }
+
+  onVisual(handler: TraceHandlerMap[TraceType.VISUAL]) {
+    this.events.on(TraceType.VISUAL, handler);
   }
 
   setContext(contextJSON: ResponseContext) {
