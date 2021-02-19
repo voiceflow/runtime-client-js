@@ -1,1 +1,1 @@
-export { makeTraceProcessor } from './traceProcessor';
+export { makeTraceProcessor, TraceProcessorMap } from './traceProcessor';

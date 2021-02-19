@@ -5,7 +5,7 @@ import Client from '@/lib/Client';
 import { VFClientError, VFTypeError } from '@/lib/Common';
 import Context from '@/lib/Context';
 import EventManager, { GeneralTraceEventHandler, TraceEventHandler } from '@/lib/Events';
-import { DataConfig, ResponseContext, TraceType, TRACE_EVENT } from '@/lib/types';
+import { DataConfig, ResponseContext, TRACE_EVENT, TraceType } from '@/lib/types';
 
 import { isValidTraceType } from '../DataFilterer/utils';
 import { makeRequestBody, resetContext } from './utils';
