@@ -106,6 +106,6 @@ export type TraceMap = {
   [TraceType.SPEAK]: SpeakTrace;
   [TraceType.AUDIO]: AudioTrace;
   [TraceType.VISUAL]: VisualTrace;
-}
+};
 
 export type Choice = ChoiceTrace['payload']['choices'][number];

@@ -4,17 +4,17 @@ import { State } from '@voiceflow/runtime';
 import Client from '@/lib/Client';
 import { VFClientError, VFTypeError } from '@/lib/Common';
 import Context from '@/lib/Context';
+import EventsManager, { GeneralTraceEventHandler, TraceEventHandler } from '@/lib/Events';
 import { DataConfig, ResponseContext, TraceType } from '@/lib/types';
 
-import EventsManager, { GeneralTraceEventHandler, TraceEventHandler } from '@/lib/Events';
-import { makeRequestBody, resetContext } from './utils';
 import { isValidTraceType } from '../DataFilterer/utils';
+import { makeRequestBody, resetContext } from './utils';
 
 type OnMethodHandlerArgMap<V> = {
-  [K in TraceType]: TraceEventHandler<K, V>
+  [K in TraceType]: TraceEventHandler<K, V>;
 } & {
   trace: GeneralTraceEventHandler<V>;
-}
+};
 
 export class RuntimeClient<V extends Record<string, any> = Record<string, any>> {
   private client: Client<V>;
@@ -63,11 +63,11 @@ export class RuntimeClient<V extends Record<string, any> = Record<string, any>> 
   on<T extends TraceType | 'trace'>(event: T, handler: OnMethodHandlerArgMap<V>[T]) {
     if (event === 'trace') {
       return this.events.onAny(handler as GeneralTraceEventHandler<V>);
-    } else if (isValidTraceType(event)){
-      return this.events.on(event as any, handler as any);
-    } else {
-      throw new VFTypeError(`event "${event}" is not valid`);
     }
+    if (isValidTraceType(event)) {
+      return this.events.on(event as any, handler as any);
+    }
+    throw new VFTypeError(`event "${event}" is not valid`);
   }
 
   onSpeak(handler: TraceEventHandler<TraceType.SPEAK, V>) {
