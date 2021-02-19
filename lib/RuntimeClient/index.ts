@@ -4,9 +4,10 @@ import { State } from '@voiceflow/runtime';
 import Client from '@/lib/Client';
 import { VFClientError } from '@/lib/Common';
 import Context from '@/lib/Context';
-import { DataConfig, ResponseContext } from '@/lib/types';
+import { DataConfig, ResponseContext, RuntimeClientEvent } from '@/lib/types';
 
 import { makeRequestBody, resetContext } from './utils';
+import EventsManager from '../Events';
 
 export class RuntimeClient<S extends Record<string, any> = Record<string, any>> {
   private client: Client<S>;
@@ -15,9 +16,12 @@ export class RuntimeClient<S extends Record<string, any> = Record<string, any>> 
 
   private context: Context<S>;
 
+  private events: EventsManager;
+
   constructor(state: State, { client, dataConfig = {} }: { client: Client<S>; dataConfig?: DataConfig }) {
     this.client = client;
     this.dataConfig = dataConfig;
+    this.events = new EventsManager();
 
     this.context = new Context({ request: null, state, trace: [] }, this.dataConfig);
   }
@@ -44,7 +48,13 @@ export class RuntimeClient<S extends Record<string, any> = Record<string, any>> 
       this.context!.getResponse().forEach(this.dataConfig.traceProcessor);
     }
 
+    this.context!.getTrace().forEach(trace => this.events.handle(trace.type as RuntimeClientEvent, trace));
+
     return this.context;
+  }
+
+  on(event: RuntimeClientEvent, handler: any) {
+    this.events.on(event, handler);
   }
 
   setContext(contextJSON: ResponseContext) {
