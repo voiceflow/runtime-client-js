@@ -1,5 +1,4 @@
-import { FlowTrace } from '@voiceflow/general-types';
-
-export type FlowTraceHandler = (diagramID: FlowTrace['payload']['diagramID']) => any;
+import { FlowTrace, FlowTraceHandler } from '@/lib/types';
 
 export const invokeFlowHandler = (trace: FlowTrace, handler: FlowTraceHandler) => handler(trace.payload.diagramID);
+export default invokeFlowHandler;

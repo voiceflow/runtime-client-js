@@ -6,7 +6,6 @@ import sinon from 'sinon';
 
 import RuntimeClient from '@/lib/RuntimeClient';
 import { DataConfig } from '@/lib/types';
-import { makeTraceProcessor } from '@/lib/Utils';
 
 import {
   CHOICE_TRACE,
@@ -25,6 +24,7 @@ import {
   VF_APP_INITIAL_STATE,
 } from '../Context/fixtures';
 import { DEBUG_TRACE, SPEAK_TRACE } from '../fixtures';
+import { makeTraceProcessor } from '@/lib/Utils/makeTraceProcessor';
 
 chai.use(chaiAsPromise);
 

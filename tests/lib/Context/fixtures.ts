@@ -1,11 +1,10 @@
-import { RequestType, TraceType } from '@voiceflow/general-types';
-import { SpeakType } from '@voiceflow/general-types/build/nodes/speak';
+import { RequestType } from '@voiceflow/general-types';
 import { State } from '@voiceflow/runtime';
 import _ from 'lodash';
 
-import { RequestContext, ResponseContext } from '@/lib/types';
+import { RequestContext, ResponseContext, TraceType } from '@/lib/types';
 
-import { BLOCK_TRACE, CHOICE_TRACE, CHOICE_TRACE_WITH_NO_CHOICES, DEBUG_TRACE, END_TRACE, FLOW_TRACE, SPEAK_TRACE, STREAM_TRACE } from '../fixtures';
+import { AUDIO_TRACE, BLOCK_TRACE, CHOICE_TRACE, CHOICE_TRACE_WITH_NO_CHOICES, DEBUG_TRACE, END_TRACE, FLOW_TRACE, SPEAK_TRACE } from '../fixtures';
 
 export { CHOICE_TRACE } from '../fixtures';
 
@@ -59,7 +58,7 @@ export const VF_APP_NEXT_STATE_1: State = {
 export const START_RESPONSE_BODY = {
   state: VF_APP_NEXT_STATE_1,
   request: null,
-  trace: [SPEAK_TRACE, BLOCK_TRACE, FLOW_TRACE, STREAM_TRACE, DEBUG_TRACE, CHOICE_TRACE],
+  trace: [SPEAK_TRACE, BLOCK_TRACE, FLOW_TRACE, AUDIO_TRACE, DEBUG_TRACE, CHOICE_TRACE],
 };
 
 export const START_RESPONSE_BODY_WITH_NO_CHOICES = {
@@ -124,7 +123,6 @@ export const SEND_TEXT_RESPONSE_BODY_WITH_SSML_AND_TTS: ResponseContext = {
     {
       ...SPEAK_TRACE,
       payload: {
-        type: SpeakType.MESSAGE,
         message: '<voice>Books ought to have to have good endings.</voice>',
         src: 'data:audio/mpeg;base64,SUQzBAAAAAAA',
       },
@@ -159,7 +157,6 @@ export const START_RESPONSE_BODY_WITH_MULTIPLE_CHOICES: ResponseContext = {
         choices: CHOICES_1,
       },
     },
-    STREAM_TRACE,
     DEBUG_TRACE,
     {
       type: TraceType.CHOICE,

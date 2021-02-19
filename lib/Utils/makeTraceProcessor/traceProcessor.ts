@@ -1,15 +1,25 @@
-import { GeneralTrace, TraceType } from '@voiceflow/general-types';
-
 import { VFClientError } from '@/lib/Common';
+import {
+  AudioTraceHandler,
+  BlockTraceHandler,
+  ChoiceTraceHandler,
+  DebugTraceHandler,
+  EndTraceHandler,
+  FlowTraceHandler,
+  GeneralTrace,
+  SpeakTraceHandler,
+  TraceType,
+  VisualTraceHandler,
+} from '@/lib/types';
 
-import { BlockTraceHandler, invokeBlockHandler } from './block';
-import { ChoiceTraceHandler, invokeChoiceHandler } from './choice';
-import { DebugTraceHandler, invokeDebugHandler } from './debug';
-import { EndTraceHandler, invokeEndHandler } from './end';
-import { FlowTraceHandler, invokeFlowHandler } from './flow';
-import { invokeSpeakHandler, SpeakTraceHandler } from './speak';
-import { invokeStreamHandler, StreamTraceHandler } from './stream';
-import { invokeVisualHandler, VisualTraceHandler } from './visual';
+import { invokeAudioHandler } from './audio';
+import { invokeBlockHandler } from './block';
+import { invokeChoiceHandler } from './choice';
+import { invokeDebugHandler } from './debug';
+import { invokeEndHandler } from './end';
+import { invokeFlowHandler } from './flow';
+import { invokeSpeakHandler } from './speak';
+import { invokeVisualHandler } from './visual';
 
 export type TraceProcessorMap = Partial<{
   [TraceType.BLOCK]: BlockTraceHandler;
@@ -18,7 +28,7 @@ export type TraceProcessorMap = Partial<{
   [TraceType.END]: EndTraceHandler;
   [TraceType.FLOW]: FlowTraceHandler;
   [TraceType.SPEAK]: SpeakTraceHandler;
-  [TraceType.STREAM]: StreamTraceHandler;
+  [TraceType.AUDIO]: AudioTraceHandler;
   [TraceType.VISUAL]: VisualTraceHandler;
 }>;
 
@@ -31,7 +41,7 @@ export const invokeHandlerMap = new Map<TraceType, InvokeHandler>([
   [TraceType.END, invokeEndHandler],
   [TraceType.FLOW, invokeFlowHandler],
   [TraceType.SPEAK, invokeSpeakHandler],
-  [TraceType.STREAM, invokeStreamHandler],
+  [TraceType.AUDIO, invokeAudioHandler],
   [TraceType.VISUAL, invokeVisualHandler],
 ]);
 

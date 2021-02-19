@@ -4,7 +4,7 @@ import _cloneDeep from 'lodash/cloneDeep';
 
 import { RequestContext, ResponseContext } from '@/lib/types';
 
-import { adaptResponseContext } from './adapters';
+import { adaptResponseContext, extractAudioStep } from './adapters';
 
 export type ClientConfig<S> = { variables?: Partial<S>; endpoint: string; versionID: string };
 
@@ -42,7 +42,8 @@ export class Client<S extends Record<string, any> = Record<string, any>> {
     return this.axios
       .post(`/interact/${this.versionID}`, body)
       .then((response) => response.data)
-      .then((context) => adaptResponseContext(context));
+      .then((context) => adaptResponseContext(context))
+      .then((context) => extractAudioStep(context));
   }
 
   getVersionID() {
