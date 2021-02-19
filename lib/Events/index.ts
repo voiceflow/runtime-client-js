@@ -1,40 +1,43 @@
-import { VFClientError } from '@/lib/Common';
-import { GeneralTrace, TraceHandlerMap, TraceMap, TraceType } from '@/lib/types';
-import { invokeHandlerMap, makeTraceProcessor } from '@/lib/Utils/makeTraceProcessor/traceProcessor';
+import { GeneralTrace, TraceMap, TraceType } from '@/lib/types';
+import Context from '../Context';
 
-export class EventsManager {
-  private specHandlers: Record<string ,any>
-  private genHandlers: ReturnType<typeof makeTraceProcessor>[];
+export type TraceEventHandler<
+  T extends TraceType, 
+  V extends Record<string, any>
+> = (object: TraceMap[T], context: Context<V>) => void;
+
+export type GeneralTraceEventHandler<V extends Record<string, any>> = (object: GeneralTrace, context: Context<V>) => void;
+
+type _Map<
+  T extends Record<string, any>,
+  K extends TraceType = TraceType, 
+> = Map<K, Array<TraceEventHandler<K, T>>>;
+
+export class EventsManager<V extends Record<string, any>> {
+  private specHandlers: _Map<V>; 
+  private genHandlers: GeneralTraceEventHandler<V>[];
 
   constructor() {
-    this.specHandlers = {};
-    Object.keys(TraceType).forEach((traceType) => {
-      this.specHandlers[traceType] = [];
-    });
+    this.specHandlers = new Map();
+    const traceTypeVals = (Object.keys(TraceType).map(type => type.toLowerCase()) as TraceType[]);
+    traceTypeVals.forEach((traceType) => this.specHandlers.set(traceType, []));
+  
     this.genHandlers = [];
   }
 
-  on<S extends TraceType>(event: S, handler: TraceHandlerMap[S]) {
-    this.specHandlers[event].push(handler);
+  on<T extends TraceType>(event: T, handler: TraceEventHandler<T, V>) {
+    const handlerList = this.specHandlers.get(event)! as TraceEventHandler<T, V>[];
+    handlerList.push(handler);
   }
 
-  onAny(handler: ReturnType<typeof makeTraceProcessor>) {
+  onAny(handler: GeneralTraceEventHandler<V>) {
     this.genHandlers.push(handler);
   }
 
-  handle<S extends TraceType>(event: S, trace: TraceMap[S]) {
-    this.specHandlers[event].forEach((handler: any) => this.invokeWithHandler(trace, handler));
-    this.genHandlers.forEach((handler: any) => handler(trace));
-  }
+  handle<T extends TraceType>(event: T, trace: TraceMap[T], context: Context<V>) {
+    this.specHandlers.get(event)!.forEach((handler: TraceEventHandler<T, V>) => handler(trace, context));
 
-  private invokeWithHandler(trace: GeneralTrace, handler: any) {
-    const invokeHandler = invokeHandlerMap.get(trace.type);
-
-    if (!invokeHandler) {
-      throw new VFClientError(`invalid trace type "${trace.type}" was passed`);
-    }
-
-    return invokeHandler(trace, handler);
+    this.genHandlers.forEach((handler: GeneralTraceEventHandler<V>) => handler(trace, context));
   }
 }
 
