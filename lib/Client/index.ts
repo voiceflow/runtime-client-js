@@ -8,7 +8,7 @@ import { adaptResponseContext } from './adapters';
 
 export type ClientConfig<S> = { variables?: Partial<S>; endpoint: string; versionID: string };
 
-class Client<S extends Record<string, any> = Record<string, any>> {
+export class Client<S extends Record<string, any> = Record<string, any>> {
   private axios: AxiosInstance;
 
   private versionID: string;

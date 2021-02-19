@@ -6,7 +6,7 @@ import { DataConfig } from '@/lib/types';
 import { isValidTraceType, stripSSMLFromSpeak } from './utils';
 
 class DataFilterer {
-  private includeTypes = new Set<TraceType>([TraceType.SPEAK]);
+  private includeTypes = new Set<TraceType>([TraceType.SPEAK, TraceType.VISUAL]);
 
   private traceFilters: ((trace: GeneralTrace) => GeneralTrace)[] = [];
 
