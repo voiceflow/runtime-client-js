@@ -910,7 +910,7 @@
   dependencies:
     "@voiceflow/api-sdk" "1.21.0"
 
-"@voiceflow/general-types@^1.19.0", "@voiceflow/general-types@^1.29.0":
+"@voiceflow/general-types@^1.29.0":
   version "1.29.0"
   resolved "https://registry.yarnpkg.com/@voiceflow/general-types/-/general-types-1.29.0.tgz#26d76e1f9e225d1eeecb93f0294859b0fc72a3f6"
   integrity sha512-jdmYy5dDolk/r3GM3E4PP7GDrxpvS6f12ZPYl/avyT+QWIlVqosdhJmJ679rcqppBOdhfmJKQpnK1K/ASdPRCQ==
@@ -972,17 +972,6 @@
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/@voiceflow/prettier-config/-/prettier-config-1.0.5.tgz#307caf65040ae0c0539ecb8531b9e403381f11ab"
   integrity sha512-yM35E7UI0fD8yMgL7JImljvMLZVU+jCz/latc2s2e7Nlbr9kiMpO0FArjkaXVIghhcUeQ0y04lsFUHRu3kMzmA==
-
-"@voiceflow/runtime-client-js@^1.6.0":
-  version "1.6.0"
-  resolved "https://registry.yarnpkg.com/@voiceflow/runtime-client-js/-/runtime-client-js-1.6.0.tgz#e915cdbc7dc00ccac9e53a2545f41b86037bf996"
-  integrity sha512-J+ICkZ4lZ6ylNpZZmU8yxDIwErFu6fBFrpz30qQPsyqtnzgJuPdKF77FavMoCNGv51RTVZDMfoW1kDdFV9vVPQ==
-  dependencies:
-    "@types/lodash" "^4.14.168"
-    "@voiceflow/general-types" "^1.19.0"
-    "@voiceflow/runtime" "^1.20.1"
-    axios "^0.21.1"
-    lodash "^4.17.20"
 
 "@voiceflow/runtime@^1.20.1":
   version "1.20.1"
