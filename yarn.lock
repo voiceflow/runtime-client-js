@@ -910,7 +910,7 @@
   dependencies:
     "@voiceflow/api-sdk" "1.21.0"
 
-"@voiceflow/general-types@^1.19.0":
+"@voiceflow/general-types@^1.19.0", "@voiceflow/general-types@^1.29.0":
   version "1.29.0"
   resolved "https://registry.yarnpkg.com/@voiceflow/general-types/-/general-types-1.29.0.tgz#26d76e1f9e225d1eeecb93f0294859b0fc72a3f6"
   integrity sha512-jdmYy5dDolk/r3GM3E4PP7GDrxpvS6f12ZPYl/avyT+QWIlVqosdhJmJ679rcqppBOdhfmJKQpnK1K/ASdPRCQ==
