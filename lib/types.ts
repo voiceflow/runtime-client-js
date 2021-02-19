@@ -5,6 +5,7 @@ export type DataConfig = {
   tts?: boolean;
   ssml?: boolean;
   includeTypes?: string[];
+  excludeTypes?: string[];
   traceProcessor?: (trace: GeneralTrace) => any;
 };
 
