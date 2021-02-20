@@ -1,4 +1,4 @@
-import { TraceType } from '@voiceflow/general-types';
+import { TraceType } from '../types';
 
 export const validTraceTypes = new Set(Object.keys(TraceType));
 

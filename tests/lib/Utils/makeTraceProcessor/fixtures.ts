@@ -1,13 +1,4 @@
-import { TraceType } from '@voiceflow/general-types';
-import { TraceHandlerMap } from '@/lib/Utils/makeTraceProcessor';
-import { BlockTraceHandler } from '@/lib/Utils/makeTraceProcessor/block';
-import { ChoiceTraceHandler } from '@/lib/Utils/makeTraceProcessor/choice';
-import { DebugTraceHandler } from '@/lib/Utils/makeTraceProcessor/debug';
-import { EndTraceHandler } from '@/lib/Utils/makeTraceProcessor/end';
-import { FlowTraceHandler } from '@/lib/Utils/makeTraceProcessor/flow';
-import { SpeakTraceHandlerFunction, SpeakTraceHandlerMap } from '@/lib/Utils/makeTraceProcessor/speak';
-import { StreamTraceHandler } from '@/lib/Utils/makeTraceProcessor/stream';
-import { VisualTraceHandler } from '@/lib/Utils/makeTraceProcessor/visual';
+import { AudioTraceHandler, BlockTraceHandler, ChoiceTraceHandler, DebugTraceHandler, EndTraceHandler, FlowTraceHandler, SpeakTraceHandler, TraceHandlerMap, TraceType, VisualTraceHandler } from "@/lib/types";
 
 export const FAKE_SPEAK_TRACE = {
     type: TraceType.SPEAK,
@@ -42,23 +33,9 @@ export const endHandler: EndTraceHandler = () => {
 export const flowHandler: FlowTraceHandler = (diagramID: string) => {
     return diagramID;
 }
-
-export const speakHandlerMap: SpeakTraceHandlerMap = {
-    handleSpeech: (message, src) => {
-        return [message, src];
-    },
-    handleAudio: (message, src) => {
-        return [message, src];
-    }
-};
-
-export const speakHandlerFunc: SpeakTraceHandlerFunction = (message, src, type) => [message, src, type];
-
-export const visualHandlerFunc: VisualTraceHandler = (image, device, dimensions, visiblity) => [image, device, dimensions, visiblity];
-
-export const streamHandler: StreamTraceHandler = (src, action, token) => {
-    return [src, action, token];
-}
+export const speakHandler: SpeakTraceHandler = (message, src) => [message, src];
+export const audioHandler: AudioTraceHandler = (message, src) => [message, src];
+export const visualHandler: VisualTraceHandler = (image, device, dimensions, visiblity) => [image, device, dimensions, visiblity];
 
 export const TRACE_HANDLER_MAP: TraceHandlerMap = {
     [TraceType.BLOCK]: blockHandler,
@@ -66,6 +43,7 @@ export const TRACE_HANDLER_MAP: TraceHandlerMap = {
     [TraceType.DEBUG]: debugHandler,
     [TraceType.END]: endHandler,
     [TraceType.FLOW]: flowHandler,
-    [TraceType.SPEAK]: speakHandlerMap,
-    [TraceType.STREAM]: streamHandler,
+    [TraceType.SPEAK]: speakHandler,
+    [TraceType.AUDIO]: audioHandler,
+    [TraceType.VISUAL]: visualHandler
 };

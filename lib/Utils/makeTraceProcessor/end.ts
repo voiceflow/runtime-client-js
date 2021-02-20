@@ -1,5 +1,4 @@
-import { ExitTrace } from '@voiceflow/general-types';
+import { EndTrace, EndTraceHandler } from '@/lib/types';
 
-export type EndTraceHandler = () => any;
-
-export const invokeEndHandler = (_: ExitTrace, handler: EndTraceHandler) => handler();
+export const invokeEndHandler = (_: EndTrace, handler: EndTraceHandler) => handler();
+export default invokeEndHandler;

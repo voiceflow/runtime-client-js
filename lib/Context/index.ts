@@ -1,7 +1,5 @@
-import { TraceType } from '@voiceflow/general-types';
-
 import DataFilterer from '@/lib/DataFilterer';
-import { Choice, DataConfig, ResponseContext } from '@/lib/types';
+import { Choice, DataConfig, ResponseContext, TraceType } from '@/lib/types';
 
 import VariableManager from '../Variables';
 

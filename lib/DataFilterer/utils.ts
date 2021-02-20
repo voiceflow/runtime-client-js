@@ -1,6 +1,5 @@
-import { GeneralTrace, TraceType } from '@voiceflow/general-types';
-
 import { validTraceTypes } from '@/lib/Common';
+import { GeneralTrace, TraceType } from '@/lib/types';
 
 export const SSML_TAG_REGEX = /<\/?[^>]+(>|$)/g;
 

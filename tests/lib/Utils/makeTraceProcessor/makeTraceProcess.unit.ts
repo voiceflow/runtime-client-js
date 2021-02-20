@@ -1,16 +1,16 @@
-import { GeneralTrace, SpeakTrace, TraceType } from '@voiceflow/general-types';
-import { invokeBlockHandler } from '@/lib/Utils/makeTraceProcessor/block';
-import { invokeChoiceHandler } from '@/lib/Utils/makeTraceProcessor/choice';
-import { invokeDebugHandler } from '@/lib/Utils/makeTraceProcessor/debug';
-import { invokeEndHandler } from '@/lib/Utils/makeTraceProcessor/end';
-import { invokeFlowHandler } from '@/lib/Utils/makeTraceProcessor/flow';
-import { invokeSpeakHandler, SpeakTraceHandler, SpeakTraceHandlerMap } from '@/lib/Utils/makeTraceProcessor/speak';
-import { invokeStreamHandler } from '@/lib/Utils/makeTraceProcessor/stream';
+import invokeBlockHandler from '@/lib/Utils/makeTraceProcessor/block';
+import invokeChoiceHandler from '@/lib/Utils/makeTraceProcessor/choice';
+import invokeDebugHandler from '@/lib/Utils/makeTraceProcessor/debug';
+import invokeEndHandler from '@/lib/Utils/makeTraceProcessor/end';
+import { GeneralTrace, TraceType } from '@/lib/types';
 import { expect } from 'chai';
 import sinon from 'sinon';
-import { BLOCK_TRACE, CHOICE_TRACE, DEBUG_TRACE, END_TRACE, FLOW_TRACE, SPEAK_TRACE, SPEAK_TRACE_AUDIO, STREAM_TRACE, VISUAL_TRACE_IMAGE } from '../../fixtures';
-import { blockHandler, choiceHandler, debugHandler, endHandler, FAKE_SPEAK_TRACE, flowHandler, RESULT, speakHandlerFunc, speakHandlerMap, streamHandler, TRACE_HANDLER_MAP, UNKNOWN_TRACE_TYPE, visualHandlerFunc } from './fixtures';
-import { invokeVisualHandler } from '@/lib/Utils/makeTraceProcessor/visual';
+import { AUDIO_TRACE, BLOCK_TRACE, CHOICE_TRACE, DEBUG_TRACE, END_TRACE, FLOW_TRACE, SPEAK_TRACE, VISUAL_TRACE } from '../../fixtures';
+import { audioHandler, blockHandler, choiceHandler, debugHandler, endHandler, flowHandler, RESULT, speakHandler, TRACE_HANDLER_MAP, UNKNOWN_TRACE_TYPE, visualHandler } from './fixtures';
+import invokeFlowHandler from '@/lib/Utils/makeTraceProcessor/flow';
+import invokeVisualHandler from '@/lib/Utils/makeTraceProcessor/visual';
+import invokeSpeakHandler from '@/lib/Utils/makeTraceProcessor/speak';
+import invokeAudioHandler from '@/lib/Utils/makeTraceProcessor/audio';
 import { makeTraceProcessor } from '@/lib/Utils/makeTraceProcessor';
 
 describe('makeTraceProcessor', () => {
@@ -43,78 +43,33 @@ describe('makeTraceProcessor', () => {
         expect(result).to.eql(FLOW_TRACE.payload.diagramID);
     });
 
-    it('invokeStreamHandler', () => {
-        const result = invokeStreamHandler(STREAM_TRACE, streamHandler);
-
-        expect(result).to.eql([
-            STREAM_TRACE.payload.src,
-            STREAM_TRACE.payload.action,
-            STREAM_TRACE.payload.token,
-        ]);
-    });
-
     it('invokeVisualHandler', () => {
-        const result = invokeVisualHandler(VISUAL_TRACE_IMAGE, visualHandlerFunc);
+        const result = invokeVisualHandler(VISUAL_TRACE, visualHandler);
 
         expect(result).to.eql([
-            VISUAL_TRACE_IMAGE.payload.image,
-            VISUAL_TRACE_IMAGE.payload.device,
-            VISUAL_TRACE_IMAGE.payload.dimensions,
-            VISUAL_TRACE_IMAGE.payload.canvasVisibility
+            VISUAL_TRACE.payload.image,
+            VISUAL_TRACE.payload.device,
+            VISUAL_TRACE.payload.dimensions,
+            VISUAL_TRACE.payload.canvasVisibility
         ]);
     });
 
-    describe('invokeSpeakHandler', () => {
-        it('function handler', () => {
-            const result = invokeSpeakHandler(SPEAK_TRACE, speakHandlerFunc);
+    it('invokeSpeakHandler', () => {
+        const result = invokeSpeakHandler(SPEAK_TRACE, speakHandler);
 
-            expect(result).to.eql([
-                SPEAK_TRACE.payload.message,
-                SPEAK_TRACE.payload.src,
-                SPEAK_TRACE.payload.type
-            ]);
-        });
+        expect(result).to.eql([
+            SPEAK_TRACE.payload.message,
+            SPEAK_TRACE.payload.src,
+        ]);
+    });
 
-        it('invokes tts handler', () => {
-            const handler: SpeakTraceHandlerMap = {
-                handleSpeech: speakHandlerMap.handleSpeech
-            }
+    it('invokeAudioHandler', () => {
+        const result = invokeAudioHandler(AUDIO_TRACE, audioHandler);
 
-            const result = invokeSpeakHandler(SPEAK_TRACE, handler);
-
-            expect(result).to.eql([
-                SPEAK_TRACE.payload.message,
-                SPEAK_TRACE.payload.src
-            ]);
-        });
-
-        it('invokes audio handler', () => {
-            const handler: SpeakTraceHandler = {
-                handleAudio: speakHandlerMap.handleAudio
-            }
-
-            const result = invokeSpeakHandler(SPEAK_TRACE_AUDIO, handler);
-
-            expect(result).to.eql([
-                SPEAK_TRACE_AUDIO.payload.message,
-                SPEAK_TRACE_AUDIO.payload.src
-            ]);
-        });
-
-        it('unimplemented speak handler', () => {
-            const callback = () => invokeSpeakHandler(SPEAK_TRACE, {});
-            expect(callback).to.throw("VFError: missing handler for SpeakTrace's speak subtype");
-        });
-
-        it('unimplemented audio handler', () => {
-            const callback = () => invokeSpeakHandler(SPEAK_TRACE_AUDIO, {});
-            expect(callback).to.throw("VFError: missing handler for SpeakTrace's audio subtype");
-        });
-
-        it('unknown speak subtype', () => {
-            const callback = () => invokeSpeakHandler(FAKE_SPEAK_TRACE as SpeakTrace, speakHandlerMap)
-            expect(callback).to.throw("VFError: makeTraceProcessor's returned callback received an unknown SpeakTrace subtype");
-        });
+        expect(result).to.eql([
+            AUDIO_TRACE.payload.message,
+            AUDIO_TRACE.payload.src,
+        ]);
     });
 
     describe('makeTraceProcessor', () => {

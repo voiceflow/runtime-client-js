@@ -1,17 +1,15 @@
 import {
+  AudioTrace,
   BlockTrace,
   ChoiceTrace,
   DebugTrace,
-  DeviceType,
-  ExitTrace,
+  EndTrace,
   FlowTrace,
   SpeakTrace,
-  StreamTrace,
   TraceType,
   VisualTrace,
-} from '@voiceflow/general-types';
-import { SpeakType } from '@voiceflow/general-types/build/nodes/speak';
-import { TraceStreamAction } from '@voiceflow/general-types/build/nodes/stream';
+} from '@/lib/types';
+import { DeviceType } from '@voiceflow/general-types';
 import { CanvasVisibility, VisualType } from '@voiceflow/general-types/build/nodes/visual';
 
 export type VFAppVariablesSchema = {
@@ -23,7 +21,6 @@ export type VFAppVariablesSchema = {
 export const SPEAK_TRACE: SpeakTrace = {
   type: TraceType.SPEAK,
   payload: {
-    type: SpeakType.MESSAGE,
     message: 'Books ought to have to have good endings.',
     src: 'data:audio/mpeg:some-large-tts-audio-file',
   },
@@ -37,10 +34,9 @@ export const MAKE_SPEAK_TRACE = (payload: SpeakTrace['payload']): SpeakTrace => 
   },
 });
 
-export const SPEAK_TRACE_AUDIO: SpeakTrace = {
-  type: TraceType.SPEAK,
+export const AUDIO_TRACE: AudioTrace = {
+  type: TraceType.AUDIO,
   payload: {
-    type: SpeakType.AUDIO,
     message: '<audio src="http://localhost:8000/audio.local/1612307079557-mixaund-tech-corporate.mp3"/>',
     src: 'http://localhost:8000/audio.local/1612307079557-mixaund-tech-corporate.mp3',
   },
@@ -78,15 +74,6 @@ export const FLOW_TRACE: FlowTrace = {
   },
 };
 
-export const STREAM_TRACE: StreamTrace = {
-  type: TraceType.STREAM,
-  payload: {
-    src: 'the source-string',
-    action: TraceStreamAction.LOOP,
-    token: 'some token for the stream',
-  },
-};
-
 export const DEBUG_TRACE: DebugTrace = {
   type: TraceType.DEBUG,
   payload: {
@@ -94,11 +81,11 @@ export const DEBUG_TRACE: DebugTrace = {
   },
 };
 
-export const END_TRACE: ExitTrace = {
+export const END_TRACE: EndTrace = {
   type: TraceType.END,
 };
 
-export const VISUAL_TRACE_IMAGE: VisualTrace & { payload: { visualType: VisualType.IMAGE } } = {
+export const VISUAL_TRACE: VisualTrace = {
   type: TraceType.VISUAL,
   payload: {
     visualType: VisualType.IMAGE,
