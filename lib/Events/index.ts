@@ -1,5 +1,6 @@
-import { GeneralTrace, TraceMap, TraceType } from '@/lib/types';
 import Bluebird from 'bluebird';
+
+import { GeneralTrace, TraceMap, TraceType } from '@/lib/types';
 
 import Context from '../Context';
 
