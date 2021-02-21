@@ -1,3 +1,5 @@
+import Bluebird from 'bluebird';
+
 import { GeneralTrace, TraceMap, TraceType } from '@/lib/types';
 
 import Context from '../Context';
@@ -30,10 +32,14 @@ export class EventManager<V extends Record<string, any>> {
     this.genHandlers.push(handler);
   }
 
-  handle<T extends TraceType>(trace: TraceMap[T], context: Context<V>) {
-    this.specHandlers.get(trace.type)!.forEach((handler: TraceEventHandler<T, V>) => handler(trace, context));
+  async handle<T extends TraceType>(trace: TraceMap[T], context: Context<V>) {
+    await Bluebird.each(this.specHandlers.get(trace.type)!, async (handler: TraceEventHandler<T, V>) => {
+      await handler(trace, context);
+    });
 
-    this.genHandlers.forEach((handler: GeneralTraceEventHandler<V>) => handler(trace, context));
+    await Bluebird.each(this.genHandlers, async (handler: GeneralTraceEventHandler<V>) => {
+      await handler(trace, context);
+    });
   }
 }
 

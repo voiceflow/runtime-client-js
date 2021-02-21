@@ -1,11 +1,12 @@
 import { GeneralRequest, RequestType } from '@voiceflow/general-types';
 import { State } from '@voiceflow/runtime';
+import Bluebird from 'bluebird';
 
 import Client from '@/lib/Client';
 import { VFClientError, VFTypeError } from '@/lib/Common';
 import Context from '@/lib/Context';
 import EventManager, { GeneralTraceEventHandler, TraceEventHandler } from '@/lib/Events';
-import { DataConfig, ResponseContext, TRACE_EVENT, TraceType } from '@/lib/types';
+import { DataConfig, GeneralTrace, ResponseContext, TRACE_EVENT, TraceType } from '@/lib/types';
 
 import { isValidTraceType } from '../DataFilterer/utils';
 import { makeRequestBody, resetContext } from './utils';
@@ -55,7 +56,9 @@ export class RuntimeClient<V extends Record<string, any> = Record<string, any>> 
       this.context!.getResponse().forEach(this.dataConfig.traceProcessor);
     }
 
-    this.context!.getTrace().forEach((trace) => this.events.handle(trace, this.context!));
+    await Bluebird.each(this.context!.getTrace(), async (trace: GeneralTrace) => {
+      await this.events.handle(trace, this.context!);
+    });
 
     return this.context;
   }
