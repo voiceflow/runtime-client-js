@@ -12,7 +12,7 @@ import {
   START_RESPONSE_BODY_WITH_MULTIPLE_CHOICES,
   VF_APP_NEXT_STATE_1,
 } from './fixtures';
-import { SPEAK_TRACE, SPEAK_TRACE_UNSANITIZED, VFAppVariablesSchema } from '../fixtures';
+import { SPEAK_TRACE, VFAppVariablesSchema } from '../fixtures';
 
 describe('Context', () => {
   afterEach(() => {
@@ -27,15 +27,6 @@ describe('Context', () => {
     expect(context.isEnding()).to.eql(false);
     expect(context.getTrace()).to.eql(START_RESPONSE_BODY_WITH_MULTIPLE_CHOICES.trace);
     expect(context.getChips()).to.eql([...CHOICES_1, ...CHOICES_2, ...CHOICES_3]);
-  });
-
-  it('getTrace(), sanitize option', () => {
-    const context = new Context({
-      ...START_RESPONSE_BODY,
-      trace: [SPEAK_TRACE_UNSANITIZED]
-    })
-
-    expect(context.getTrace({ sanitize: false })[0]).to.eql(SPEAK_TRACE_UNSANITIZED);
   });
 
   it('end state', () => {

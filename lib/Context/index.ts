@@ -3,10 +3,6 @@ import { Choice, DataConfig, ResponseContext, TraceType } from '@/lib/types';
 
 import VariableManager from '../Variables';
 
-export type GetTraceOptions = {
-  sanitize?: boolean;
-};
-
 export class Context<S extends Record<string, any> = Record<string, any>> {
   private dataFilterer: DataFilterer;
 
@@ -25,14 +21,9 @@ export class Context<S extends Record<string, any> = Record<string, any>> {
     return this.dataFilterer.filterTraces(this.context.trace);
   }
 
-  // returns the entire unfiltered list of traces of the context; can configure whether trace data should be sanitized or not
-  getTrace(options: GetTraceOptions = {}) {
-    const { sanitize = true } = options;
-
-    let result = this.context.trace;
-    if (sanitize) result = this.dataFilterer.sanitizeTraces(result);
-
-    return result;
+  // returns the entire raw trace of the context
+  getTrace() {
+    return this.context.trace;
   }
 
   // returns the raw context object

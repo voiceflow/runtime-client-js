@@ -4,9 +4,9 @@ import { GeneralTrace, TraceMap, TraceType } from '@/lib/types';
 
 import Context from '../Context';
 
-export type TraceEventHandler<T extends TraceType, V extends Record<string, any>> = (trace: TraceMap[T], context: Context<V>) => void;
+export type TraceEventHandler<T extends TraceType, V extends Record<string, any>> = (object: TraceMap[T], context: Context<V>) => void;
 
-export type GeneralTraceEventHandler<V extends Record<string, any>> = (trace: GeneralTrace, context: Context<V>) => void;
+export type GeneralTraceEventHandler<V extends Record<string, any>> = (object: GeneralTrace, context: Context<V>) => void;
 
 type _Map<T extends Record<string, any>, K extends TraceType = TraceType> = Map<K, Array<TraceEventHandler<K, T>>>;
 
