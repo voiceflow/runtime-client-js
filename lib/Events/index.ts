@@ -4,9 +4,9 @@ import { GeneralTrace, TraceMap, TraceType } from '@/lib/types';
 
 import Context from '../Context';
 
-export type TraceEventHandler<T extends TraceType, V extends Record<string, any>> = (object: TraceMap[T], context: Context<V>) => void;
+export type TraceEventHandler<T extends TraceType, V extends Record<string, any>> = (trace: TraceMap[T], context: Context<V>) => void;
 
-export type GeneralTraceEventHandler<V extends Record<string, any>> = (object: GeneralTrace, context: Context<V>) => void;
+export type GeneralTraceEventHandler<V extends Record<string, any>> = (trace: GeneralTrace, context: Context<V>) => void;
 
 type _Map<T extends Record<string, any>, K extends TraceType = TraceType> = Map<K, Array<TraceEventHandler<K, T>>>;
 
@@ -28,8 +28,18 @@ export class EventManager<V extends Record<string, any>> {
     handlerList.push(handler);
   }
 
+  off<T extends TraceType>(event: T, handler: TraceEventHandler<T, V>) {
+    const handlerList = this.specHandlers.get(event)! as TraceEventHandler<T, V>[];
+    const toDel = handlerList.indexOf(handler);
+    handlerList.splice(toDel, 1);
+  }
+
   onAny(handler: GeneralTraceEventHandler<V>) {
     this.genHandlers.push(handler);
+  }
+
+  offAny(handler: GeneralTraceEventHandler<V>) {
+    this.genHandlers.splice(this.genHandlers.indexOf(handler), 1);
   }
 
   async handle<T extends TraceType>(trace: TraceMap[T], context: Context<V>) {

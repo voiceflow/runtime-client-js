@@ -82,7 +82,7 @@ export type FlowTraceHandler = (diagramID: FlowTrace['payload']['diagramID']) =>
 
 export type SpeakTraceHandler = (message: SpeakTrace['payload']['message'], src: SpeakTrace['payload']['src']) => any;
 
-export type AudioTraceHandler = (message: SpeakTrace['payload']['message'], src: SpeakTrace['payload']['src']) => any;
+export type AudioTraceHandler = (src: SpeakTrace['payload']['src']) => any;
 
 export type VisualTraceHandler = (image: string | null, device: DeviceType | null, dimensions: Dimensions | null, visiblity: CanvasVisibility) => any;
 

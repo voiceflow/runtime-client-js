@@ -66,10 +66,7 @@ describe('makeTraceProcessor', () => {
     it('invokeAudioHandler', () => {
         const result = invokeAudioHandler(AUDIO_TRACE, audioHandler);
 
-        expect(result).to.eql([
-            AUDIO_TRACE.payload.message,
-            AUDIO_TRACE.payload.src,
-        ]);
+        expect(result).to.eql([AUDIO_TRACE.payload.src]);
     });
 
     describe('makeTraceProcessor', () => {

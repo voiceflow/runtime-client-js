@@ -23,7 +23,15 @@ export const SPEAK_TRACE: SpeakTrace = {
   payload: {
     message: 'Books ought to have to have good endings.',
     src: 'data:audio/mpeg:some-large-tts-audio-file',
-  },
+  }, 
+}
+
+export const SPEAK_TRACE_UNSANITIZED: SpeakTrace = {
+  ...SPEAK_TRACE,
+  payload: {
+    ...SPEAK_TRACE.payload,
+    message: `<voice>${SPEAK_TRACE.payload.message}</voice>`
+  }
 };
 
 export const MAKE_SPEAK_TRACE = (payload: SpeakTrace['payload']): SpeakTrace => ({

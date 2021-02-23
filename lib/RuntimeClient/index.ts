@@ -63,13 +63,14 @@ export class RuntimeClient<V extends Record<string, any> = Record<string, any>> 
     if (this.context.isEnding()) {
       throw new VFClientError('RuntimeClient.sendText() was called but the conversation has ended');
     }
+
     this.setContext(await this.client.interact(makeRequestBody(this.context!, request, this.dataConfig)));
 
     if (this.dataConfig.traceProcessor) {
       this.context!.getResponse().forEach(this.dataConfig.traceProcessor);
     }
 
-    await Bluebird.each(this.context!.getTrace(), async (trace: GeneralTrace) => {
+    await Bluebird.each(this.context!.getTrace({ sanitize: this.dataConfig.ssml }), async (trace: GeneralTrace) => {
       await this.events.handle(trace, this.context!);
     });
 
@@ -82,6 +83,16 @@ export class RuntimeClient<V extends Record<string, any> = Record<string, any>> 
     }
     if (isValidTraceType(event)) {
       return this.events.on(event as any, handler as any);
+    }
+    throw new VFTypeError(`event "${event}" is not valid`);
+  }
+
+  off<T extends TraceType | TRACE_EVENT>(event: T, handler: OnMethodHandlerArgMap<V>[T]) {
+    if (event === TRACE_EVENT) {
+      return this.events.offAny(handler as GeneralTraceEventHandler<V>);
+    }
+    if (isValidTraceType(event)) {
+      return this.events.off(event as any, handler as any);
     }
     throw new VFTypeError(`event "${event}" is not valid`);
   }

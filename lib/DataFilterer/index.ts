@@ -22,15 +22,18 @@ class DataFilterer {
     }
   }
 
-  filterTraces(traces: GeneralTrace[]): GeneralTrace[] {
-    return traces
-      .filter(({ type }) => this.includeTypes!.has(type))
-      .map((trace) => {
-        this.traceFilters.forEach((filter) => {
-          trace = filter(trace);
-        });
-        return trace;
+  sanitizeTraces(traces: GeneralTrace[]): GeneralTrace[] {
+    return traces.map((trace) => {
+      this.traceFilters.forEach((filter) => {
+        trace = filter(trace);
       });
+      return trace;
+    });
+  }
+
+  filterTraces(traces: GeneralTrace[]): GeneralTrace[] {
+    const filteredTraces = traces.filter(({ type }) => this.includeTypes!.has(type));
+    return this.sanitizeTraces(filteredTraces);
   }
 }
 

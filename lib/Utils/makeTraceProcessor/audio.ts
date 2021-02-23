@@ -1,9 +1,6 @@
 import { AudioTrace, AudioTraceHandler } from '@/lib/types';
 
 export const invokeAudioHandler = (trace: AudioTrace, handler: AudioTraceHandler) => {
-  const {
-    payload: { message, src },
-  } = trace;
-  return handler(message, src);
+  return handler(trace.payload.src);
 };
 export default invokeAudioHandler;

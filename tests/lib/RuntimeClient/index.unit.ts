@@ -4,8 +4,7 @@ import _ from 'lodash';
 import sinon from 'sinon';
 
 import RuntimeClient from '@/lib/RuntimeClient';
-import { DataConfig, TRACE_EVENT, TraceType } from '@/lib/types';
-import { makeTraceProcessor } from '@/lib/Utils/makeTraceProcessor';
+import { DataConfig, GeneralTrace, TraceType, TRACE_EVENT } from '@/lib/types';
 
 import {
   CHOICE_TRACE,
@@ -24,8 +23,10 @@ import {
   START_RESPONSE_BODY_WITH_NO_CHOICES,
   USER_RESPONSE,
   VF_APP_INITIAL_STATE,
+  START_RESPONSE_BODY_UNSANITIZED,
 } from '../Context/fixtures';
-import { AUDIO_TRACE, BLOCK_TRACE, DEBUG_TRACE, END_TRACE, FLOW_TRACE, SPEAK_TRACE } from '../fixtures';
+import { AUDIO_TRACE, BLOCK_TRACE, DEBUG_TRACE, END_TRACE, FLOW_TRACE, SPEAK_TRACE, SPEAK_TRACE_UNSANITIZED } from '../fixtures';
+import { makeTraceProcessor } from '@/lib/Utils/makeTraceProcessor';
 
 chai.use(chaiAsPromise);
 
@@ -357,6 +358,55 @@ describe('RuntimeClient', () => {
       expect(callback).to.throw();
     });
 
+    it('off', async () => {
+      const { agent, client } = createRuntimeClient();
+      
+      const result1: any[] = [];
+      const result2: any[] = [];
+
+      const toRemove1 = (trace: GeneralTrace, context: any) => {
+        result1.push(trace, context);
+      };
+      const toRemove2 = (trace: GeneralTrace, context: any) => {
+        result2.push(trace, context);
+      };
+      agent.on(TraceType.SPEAK, toRemove1);
+      agent.on(TRACE_EVENT, toRemove2);
+
+      client.interact.resolves(START_RESPONSE_BODY);
+
+      const context1 = await agent.start();
+
+      agent.off(TraceType.SPEAK, toRemove1);
+      agent.off(TRACE_EVENT, toRemove2);
+
+      await agent.start();
+
+      expect(result1).to.eql([
+        SPEAK_TRACE, context1,
+      ]);
+      expect(result2).to.eql([
+        SPEAK_TRACE, context1,
+        BLOCK_TRACE, context1,
+        FLOW_TRACE, context1,
+        AUDIO_TRACE, context1,
+        DEBUG_TRACE, context1,
+        CHOICE_TRACE, context1
+      ]);
+    });
+
+    it('off, bad trace type', () => {
+      const { agent } = createRuntimeClient();
+
+      const BAD_TRACE_TYPE = 'bad' as TraceType;
+
+      const callback = () => {
+        agent.off(BAD_TRACE_TYPE, () => {});
+      }
+
+      expect(callback).to.throw();
+    });
+  
     it('onEvent', async () => {
       const { agent, client } = createRuntimeClient();
 
@@ -403,6 +453,24 @@ describe('RuntimeClient', () => {
       expect(results[TraceType.BLOCK]).to.eql([BLOCK_TRACE, context1]);
 
       expect(results[TraceType.AUDIO]).to.eql([AUDIO_TRACE, context1]);
+    });
+
+    it('config, no ssml in events', async () => {
+      const { agent, client } = createRuntimeClient({
+        ssml: false
+      });
+      
+      const result: GeneralTrace[] = [];
+  
+      agent.on(TraceType.SPEAK, (trace) => {
+        result.push(trace)
+      });
+  
+      client.interact.resolves(START_RESPONSE_BODY_UNSANITIZED);
+  
+      await agent.start();
+  
+      expect(result).to.eql([SPEAK_TRACE_UNSANITIZED])
     });
   });
 });

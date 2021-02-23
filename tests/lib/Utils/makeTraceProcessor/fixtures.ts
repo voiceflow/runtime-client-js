@@ -34,7 +34,7 @@ export const flowHandler: FlowTraceHandler = (diagramID: string) => {
     return diagramID;
 }
 export const speakHandler: SpeakTraceHandler = (message, src) => [message, src];
-export const audioHandler: AudioTraceHandler = (message, src) => [message, src];
+export const audioHandler: AudioTraceHandler = (src) => [src];
 export const visualHandler: VisualTraceHandler = (image, device, dimensions, visiblity) => [image, device, dimensions, visiblity];
 
 export const TRACE_HANDLER_MAP: TraceHandlerMap = {
