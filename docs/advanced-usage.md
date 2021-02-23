@@ -92,7 +92,14 @@ Different interaction method have different side-effects on the conversation ses
 
 1. `.start()` - Starts the conversation session and runs the application until it requests user input, at which point, the method returns the current `context`. If this is called while a conversation session is ongoing, then it starts a new conversation session from the beginning.
 2. `.sendText(userInput)` - Advances the conversation session based on the user's input and then runs the application until it requests user input, at which point, the method returns the current `context`.
-2. `.sendIntent(intentName, entities)` - Advances the conversation session based an intent being invoked - make sure that the `intentName` exists in the interaction model on your Voiceflow project. This bypasses NLP/NLU resolution, and is useful in explicitly triggering certain conversation paths. The method returns the current `context`.
+3. `.sendIntent(intentName, entities)` - Advances the conversation session based an intent being invoked - make sure that the `intentName` exists in the interaction model on your Voiceflow project. This bypasses NLP/NLU resolution, and is useful in explicitly triggering certain conversation paths. The method returns the current `context`.
+
+Now, only certain interaction methods are allowed to be called at certain points in conversation session.
+
+1. `.start()` is callable any time.
+2. `.sendText()` and `.sendIntent()` are callable only if the `RuntimeClient` contains some ongoing conversation session. That is, `runtimeClient.getContext().isEnding()` is `false`. If you call `.sendText()` when the return of the aforementioned `.isEnding()` call is `true`, then calling `.sendText()` throws an exception.
+
+Thus, if `runtimeClient.getContext().isEnding()` is `true`, the only valid method you may call is `.start()` to restart the conversation session from the beginning.
 
 ### Response Methods
 
