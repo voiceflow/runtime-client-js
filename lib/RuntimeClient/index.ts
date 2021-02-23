@@ -129,38 +129,6 @@ export class RuntimeClient<V extends Record<string, any> = Record<string, any>> 
     this.events.on(TraceType.CHOICE, handler);
   }
 
-  offSpeak(handler: TraceEventHandler<TraceType.SPEAK, V>) {
-    this.events.off(TraceType.SPEAK, handler);
-  }
-
-  offAudio(handler: TraceEventHandler<TraceType.AUDIO, V>) {
-    this.events.off(TraceType.AUDIO, handler);
-  }
-
-  offBlock(handler: TraceEventHandler<TraceType.BLOCK, V>) {
-    this.events.off(TraceType.BLOCK, handler);
-  }
-
-  offDebug(handler: TraceEventHandler<TraceType.DEBUG, V>) {
-    this.events.off(TraceType.DEBUG, handler);
-  }
-
-  offEnd(handler: TraceEventHandler<TraceType.END, V>) {
-    this.events.off(TraceType.END, handler);
-  }
-
-  offFlow(handler: TraceEventHandler<TraceType.FLOW, V>) {
-    this.events.off(TraceType.FLOW, handler);
-  }
-
-  offVisual(handler: TraceEventHandler<TraceType.VISUAL, V>) {
-    this.events.off(TraceType.VISUAL, handler);
-  }
-
-  offChoice(handler: TraceEventHandler<TraceType.CHOICE, V>) {
-    this.events.off(TraceType.CHOICE, handler);
-  }
-
   setContext(contextJSON: ResponseContext) {
     this.context = new Context(contextJSON, this.dataConfig);
   }

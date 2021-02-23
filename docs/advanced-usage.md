@@ -157,10 +157,9 @@ rclient.on(TRACE_EVENT, (trace, context) => {				// register a handler for any G
 await rclient.start();															// trigger event handler if `SpeakTrace` received
 ```
 
-You can remove event handlers using the equivalent `.off()` function.
+You can remove event handlers using the `.off()` function as shown below. 
 
 - `.off(event: TraceType | TRACE_EVENT, handler: Function)`
-- `.offSpeak(handler: Function)`
 
 Another thing to note, event handlers can be asynchronous. Since traces are processed sequentially, you can create a delay between the handling of each trace by instantiating a promise with a timeout. This is helpful for implementing fancy UI logic that creates a delay between the rendering of text responses.
 

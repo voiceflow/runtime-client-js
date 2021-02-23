@@ -455,56 +455,6 @@ describe('RuntimeClient', () => {
       expect(results[TraceType.AUDIO]).to.eql([AUDIO_TRACE, context1]);
     });
 
-    it('offEvent', async () => {
-      const { agent, client } = createRuntimeClient();
-
-      const results: any = {};
-      Object.keys(TraceType)
-        .map(trace => trace.toLowerCase())
-        .forEach((trace) => {
-          results[trace] = [];
-        });
-      
-      const insertToResults = (trace: any, context: any) => {
-        results[trace.type].push(trace, context);
-      };
-
-      agent.onAudio(insertToResults);
-      agent.onBlock(insertToResults);
-      agent.onDebug(insertToResults);
-      agent.onEnd(insertToResults);
-      agent.onChoice(insertToResults);
-      agent.onFlow(insertToResults);
-      agent.onSpeak(insertToResults);
-      agent.onVisual(insertToResults);
-
-      agent.offAudio(insertToResults);
-      agent.offBlock(insertToResults);
-      agent.offDebug(insertToResults);
-      agent.offEnd(insertToResults);
-      agent.offChoice(insertToResults);
-      agent.offFlow(insertToResults);
-      agent.offSpeak(insertToResults);
-      agent.offVisual(insertToResults);
-
-      client.interact.resolves(START_RESPONSE_BODY);
-
-      await agent.start();
-
-      client.interact.resolves(SEND_TEXT_RESPONSE_BODY);
-
-      await agent.sendText('some nonsense');
-
-      expect(results[TraceType.SPEAK]).to.eql([]);
-      expect(results[TraceType.VISUAL]).to.eql([]);
-      expect(results[TraceType.FLOW]).to.eql([]);
-      expect(results[TraceType.END]).to.eql([]);
-      expect(results[TraceType.DEBUG]).to.eql([]);
-      expect(results[TraceType.CHOICE]).to.eql([]);
-      expect(results[TraceType.BLOCK]).to.eql([]);
-      expect(results[TraceType.AUDIO]).to.eql([]);
-    });
-
     it('config, no ssml in events', async () => {
       const { agent, client } = createRuntimeClient({
         ssml: false
