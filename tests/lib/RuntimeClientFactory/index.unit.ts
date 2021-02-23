@@ -32,19 +32,31 @@ describe('RuntimeClientFactory', () => {
     it('constructor', () => {
       const { client } = createRuntimeClientFactory();
 
-      expect(client.args).to.eql([[{ versionID: VERSION_ID, endpoint: DEFAULT_ENDPOINT, variables: undefined }]]);
+      expect(client.args).to.eql([[{ versionID: VERSION_ID, endpoint: DEFAULT_ENDPOINT, variables: undefined, axiosConfig: undefined }]]);
     });
 
     it('variables', () => {
       const { client } = createRuntimeClientFactory({ variables: 'foo' as any });
 
-      expect(client.args).to.eql([[{ versionID: VERSION_ID, endpoint: DEFAULT_ENDPOINT, variables: 'foo' }]]);
+      expect(client.args).to.eql([[{ versionID: VERSION_ID, endpoint: DEFAULT_ENDPOINT, variables: 'foo', axiosConfig: undefined }]]);
+    });
+
+    it('axiosConfig', () => {
+      const { client } = createRuntimeClientFactory({ axiosConfig: 'foo' as any });
+
+      expect(client.args).to.eql([[{ versionID: VERSION_ID, endpoint: DEFAULT_ENDPOINT, variables: undefined, axiosConfig: 'foo' }]]);
     });
 
     it('optional', () => {
-      const { client } = createRuntimeClientFactory({ variables: 'foo' as any, versionID: 'bar', endpoint: 'x', dataConfig: 'y' as any });
+      const { client } = createRuntimeClientFactory({
+        variables: 'foo' as any,
+        versionID: 'bar',
+        endpoint: 'x',
+        dataConfig: 'y' as any,
+        axiosConfig: 'bar' as any,
+      });
 
-      expect(client.args).to.eql([[{ versionID: 'bar', endpoint: 'x', variables: 'foo' }]]);
+      expect(client.args).to.eql([[{ versionID: 'bar', endpoint: 'x', variables: 'foo', axiosConfig: 'bar' }]]);
     });
 
     it('does not accept invalid variables', () => {

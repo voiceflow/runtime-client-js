@@ -1,4 +1,5 @@
 import { State } from '@voiceflow/runtime';
+import { AxiosRequestConfig } from 'axios';
 
 import Client from '@/lib/Client';
 import RuntimeClient from '@/lib/RuntimeClient';
@@ -12,6 +13,7 @@ export type FactoryConfig<S extends State['variables']> = {
   endpoint?: string;
   dataConfig?: DataConfig;
   variables?: Partial<S>;
+  axiosConfig?: AxiosRequestConfig;
 };
 
 export class RuntimeClientFactory<S extends Record<string, any> = Record<string, any>> {
@@ -21,12 +23,12 @@ export class RuntimeClientFactory<S extends Record<string, any> = Record<string,
 
   private defaultState: State;
 
-  constructor({ versionID, endpoint = DEFAULT_ENDPOINT, dataConfig, variables }: FactoryConfig<S>) {
+  constructor({ versionID, endpoint = DEFAULT_ENDPOINT, dataConfig, variables, axiosConfig }: FactoryConfig<S>) {
     if (variables) {
       validateVarMerge(variables);
     }
 
-    this.client = new Client({ variables, endpoint, versionID });
+    this.client = new Client({ variables, endpoint, versionID, axiosConfig });
     this.defaultState = { stack: [], storage: {}, variables: { ...variables } };
 
     this.dataConfig = {
