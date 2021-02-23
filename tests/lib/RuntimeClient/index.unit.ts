@@ -4,13 +4,16 @@ import _ from 'lodash';
 import sinon from 'sinon';
 
 import RuntimeClient from '@/lib/RuntimeClient';
-import { DataConfig, TraceType, TRACE_EVENT } from '@/lib/types';
+import { DataConfig, TRACE_EVENT, TraceType } from '@/lib/types';
+import { makeTraceProcessor } from '@/lib/Utils/makeTraceProcessor';
 
 import {
   CHOICE_TRACE,
   CHOICES_1,
   CHOICES_2,
   CHOICES_3,
+  INTENT_RESPONSE,
+  SEND_INTENT_REQUEST_BODY,
   SEND_TEXT_REQUEST_BODY,
   SEND_TEXT_REQUEST_BODY_TTS_ON,
   SEND_TEXT_RESPONSE_BODY,
@@ -23,7 +26,6 @@ import {
   VF_APP_INITIAL_STATE,
 } from '../Context/fixtures';
 import { AUDIO_TRACE, BLOCK_TRACE, DEBUG_TRACE, END_TRACE, FLOW_TRACE, SPEAK_TRACE } from '../fixtures';
-import { makeTraceProcessor } from '@/lib/Utils/makeTraceProcessor';
 
 chai.use(chaiAsPromise);
 
@@ -103,6 +105,48 @@ describe('RuntimeClient', () => {
 
     expect(client.interact.callCount).to.eql(2);
     expect(client.interact.args[1]).to.eql([SEND_TEXT_REQUEST_BODY]);
+
+    expect(data.toJSON()).to.eql(SEND_TEXT_RESPONSE_BODY);
+  });
+
+  it('sendIntent', async () => {
+    const { agent, client } = createRuntimeClient();
+
+    client.interact.resolves(START_RESPONSE_BODY);
+
+    await agent.start();
+
+    client.interact.resolves(SEND_TEXT_RESPONSE_BODY);
+
+    const data = await agent.sendIntent(INTENT_RESPONSE.intent.name, INTENT_RESPONSE.entities, INTENT_RESPONSE.query, INTENT_RESPONSE.confidence);
+
+    expect(client.interact.callCount).to.eql(2);
+    expect(client.interact.args[1]).to.eql([SEND_INTENT_REQUEST_BODY]);
+
+    expect(data.toJSON()).to.eql(SEND_TEXT_RESPONSE_BODY);
+  });
+
+  it('sendIntent, empty', async () => {
+    const { agent, client } = createRuntimeClient();
+
+    client.interact.resolves(START_RESPONSE_BODY);
+
+    await agent.start();
+
+    client.interact.resolves(SEND_TEXT_RESPONSE_BODY);
+
+    const data = await agent.sendIntent(INTENT_RESPONSE.intent.name);
+
+    expect(client.interact.callCount).to.eql(2);
+    expect(client.interact.args[1]).to.eql([
+      {
+        ...SEND_INTENT_REQUEST_BODY,
+        request: {
+          ...SEND_INTENT_REQUEST_BODY.request,
+          payload: { intent: { name: INTENT_RESPONSE.intent.name }, entities: [], query: '', confidence: undefined },
+        },
+      },
+    ]);
 
     expect(data.toJSON()).to.eql(SEND_TEXT_RESPONSE_BODY);
   });
@@ -269,10 +313,10 @@ describe('RuntimeClient', () => {
   describe('events', () => {
     it('on', async () => {
       const { agent, client } = createRuntimeClient();
-      
+
       const result1: any[] = [];
       const result2: any[] = [];
-    
+
       agent.on(TraceType.SPEAK, (trace, context) => {
         result1.push(trace, context);
       });
@@ -284,16 +328,20 @@ describe('RuntimeClient', () => {
 
       const context = await agent.start();
 
-      expect(result1).to.eql([
-        SPEAK_TRACE, context,
-      ]);
+      expect(result1).to.eql([SPEAK_TRACE, context]);
       expect(result2).to.eql([
-        SPEAK_TRACE, context,
-        BLOCK_TRACE, context,
-        FLOW_TRACE, context,
-        AUDIO_TRACE, context,
-        DEBUG_TRACE, context,
-        CHOICE_TRACE, context
+        SPEAK_TRACE,
+        context,
+        BLOCK_TRACE,
+        context,
+        FLOW_TRACE,
+        context,
+        AUDIO_TRACE,
+        context,
+        DEBUG_TRACE,
+        context,
+        CHOICE_TRACE,
+        context,
       ]);
     });
 
@@ -304,7 +352,7 @@ describe('RuntimeClient', () => {
 
       const callback = () => {
         agent.on(BAD_TRACE_TYPE, () => {});
-      }
+      };
 
       expect(callback).to.throw();
     });
@@ -314,11 +362,11 @@ describe('RuntimeClient', () => {
 
       const results: any = {};
       Object.keys(TraceType)
-        .map(trace => trace.toLowerCase())
+        .map((trace) => trace.toLowerCase())
         .forEach((trace) => {
           results[trace] = [];
         });
-      
+
       const insertToResults = (trace: any, context: any) => {
         results[trace.type].push(trace, context);
       };
@@ -340,36 +388,21 @@ describe('RuntimeClient', () => {
 
       const context2 = await agent.sendText('some nonsense');
 
-      expect(results[TraceType.SPEAK]).to.eql([
-        SPEAK_TRACE, context1,
-        SPEAK_TRACE, context2
-      ]);
+      expect(results[TraceType.SPEAK]).to.eql([SPEAK_TRACE, context1, SPEAK_TRACE, context2]);
 
       expect(results[TraceType.VISUAL]).to.eql([]);
 
-      expect(results[TraceType.FLOW]).to.eql([
-        FLOW_TRACE, context1
-      ]);
+      expect(results[TraceType.FLOW]).to.eql([FLOW_TRACE, context1]);
 
-      expect(results[TraceType.END]).to.eql([
-        END_TRACE, context2
-      ]);
+      expect(results[TraceType.END]).to.eql([END_TRACE, context2]);
 
-      expect(results[TraceType.DEBUG]).to.eql([
-        DEBUG_TRACE, context1
-      ]);
+      expect(results[TraceType.DEBUG]).to.eql([DEBUG_TRACE, context1]);
 
-      expect(results[TraceType.CHOICE]).to.eql([
-        CHOICE_TRACE, context1
-      ]);
+      expect(results[TraceType.CHOICE]).to.eql([CHOICE_TRACE, context1]);
 
-      expect(results[TraceType.BLOCK]).to.eql([
-        BLOCK_TRACE, context1
-      ]);
+      expect(results[TraceType.BLOCK]).to.eql([BLOCK_TRACE, context1]);
 
-      expect(results[TraceType.AUDIO]).to.eql([
-        AUDIO_TRACE, context1
-      ]);
+      expect(results[TraceType.AUDIO]).to.eql([AUDIO_TRACE, context1]);
     });
   });
 });

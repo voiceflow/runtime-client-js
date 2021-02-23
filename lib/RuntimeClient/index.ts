@@ -46,6 +46,19 @@ export class RuntimeClient<V extends Record<string, any> = Record<string, any>> 
     return this.sendRequest({ type: RequestType.TEXT, payload: userInput });
   }
 
+  async sendIntent(
+    name: string,
+    entities: {
+      name: string;
+      value: string;
+      query?: string;
+    }[] = [],
+    query = '',
+    confidence?: number
+  ): Promise<Context<V>> {
+    return this.sendRequest({ type: RequestType.INTENT, payload: { intent: { name }, entities, query, confidence } });
+  }
+
   async sendRequest(request: GeneralRequest) {
     if (this.context.isEnding()) {
       throw new VFClientError('RuntimeClient.sendText() was called but the conversation has ended');
