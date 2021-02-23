@@ -1,4 +1,4 @@
-import { RequestType } from '@voiceflow/general-types';
+import { IntentRequest, RequestType } from '@voiceflow/general-types';
 import { State } from '@voiceflow/runtime';
 import _ from 'lodash';
 
@@ -67,12 +67,29 @@ export const START_RESPONSE_BODY_WITH_NO_CHOICES = {
 };
 
 export const USER_RESPONSE = 'This is what the user says in response to the voice assistant';
+export const INTENT_RESPONSE: IntentRequest['payload'] = {
+  intent: { name: 'anyIntent' },
+  entities: [{ name: 'foo', value: 'bar' }],
+  query: USER_RESPONSE,
+  confidence: 1,
+};
 
 export const SEND_TEXT_REQUEST_BODY: RequestContext = {
   state: VF_APP_NEXT_STATE_1,
   request: {
     type: RequestType.TEXT,
     payload: USER_RESPONSE,
+  },
+  config: {
+    tts: false,
+  },
+};
+
+export const SEND_INTENT_REQUEST_BODY: RequestContext = {
+  state: VF_APP_NEXT_STATE_1,
+  request: {
+    type: RequestType.INTENT,
+    payload: INTENT_RESPONSE,
   },
   config: {
     tts: false,
