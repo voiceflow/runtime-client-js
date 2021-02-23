@@ -17,10 +17,6 @@ type OnMethodHandlerArgMap<V> = {
   trace: GeneralTraceEventHandler<V>;
 };
 
-export type InteractionMethodOptions = Partial<{
-  sanitizeTraces: boolean;
-}>;
-
 export class RuntimeClient<V extends Record<string, any> = Record<string, any>> {
   private client: Client<V>;
 
@@ -38,14 +34,14 @@ export class RuntimeClient<V extends Record<string, any> = Record<string, any>> 
     this.context = new Context({ request: null, state, trace: [] }, this.dataConfig);
   }
 
-  async start(options?: InteractionMethodOptions): Promise<Context<V>> {
+  async start(): Promise<Context<V>> {
     this.context = new Context(resetContext(this.context.toJSON()), this.dataConfig);
-    return this.sendRequest(null, options);
+    return this.sendRequest(null);
   }
 
-  async sendText(userInput: string, options?: InteractionMethodOptions): Promise<Context<V>> {
+  async sendText(userInput: string): Promise<Context<V>> {
     if (!userInput?.trim?.()) {
-      return this.sendRequest(null, options);
+      return this.sendRequest(null);
     }
     return this.sendRequest({ type: RequestType.TEXT, payload: userInput });
   }
@@ -63,12 +59,10 @@ export class RuntimeClient<V extends Record<string, any> = Record<string, any>> 
     return this.sendRequest({ type: RequestType.INTENT, payload: { intent: { name }, entities, query, confidence } });
   }
 
-  async sendRequest(request: GeneralRequest, options: InteractionMethodOptions = {}) {
+  async sendRequest(request: GeneralRequest) {
     if (this.context.isEnding()) {
       throw new VFClientError('RuntimeClient.sendText() was called but the conversation has ended');
     }
-
-    const { sanitizeTraces: sanitize } = options;
 
     this.setContext(await this.client.interact(makeRequestBody(this.context!, request, this.dataConfig)));
 
@@ -77,7 +71,7 @@ export class RuntimeClient<V extends Record<string, any> = Record<string, any>> 
     }
 
     await Bluebird.each(
-      this.context!.getTrace({ sanitize }), 
+      this.context!.getTrace({ sanitize: this.dataConfig.ssml }), 
       async (trace: GeneralTrace) => {
         await this.events.handle(trace, this.context!);
       });

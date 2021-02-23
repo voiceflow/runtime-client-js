@@ -93,22 +93,6 @@ describe('RuntimeClient', () => {
     expect(agent.getContext()?.toJSON()).to.eql(START_RESPONSE_BODY);
   });
 
-  it('start, options', async () => {
-    const { agent, client } = createRuntimeClient();
-    
-    const result: GeneralTrace[] = [];
-
-    agent.on(TraceType.SPEAK, (trace) => {
-      result.push(trace)
-    });
-
-    client.interact.resolves(START_RESPONSE_BODY_UNSANITIZED);
-
-    await agent.start({ sanitizeTraces: false });
-
-    expect(result).to.eql([SPEAK_TRACE_UNSANITIZED])
-  });
-
   it('sendText', async () => {
     const { agent, client } = createRuntimeClient();
 
@@ -420,6 +404,24 @@ describe('RuntimeClient', () => {
       expect(results[TraceType.BLOCK]).to.eql([BLOCK_TRACE, context1]);
 
       expect(results[TraceType.AUDIO]).to.eql([AUDIO_TRACE, context1]);
+    });
+
+    it('config, no ssml in events', async () => {
+      const { agent, client } = createRuntimeClient({
+        ssml: false
+      });
+      
+      const result: GeneralTrace[] = [];
+  
+      agent.on(TraceType.SPEAK, (trace) => {
+        result.push(trace)
+      });
+  
+      client.interact.resolves(START_RESPONSE_BODY_UNSANITIZED);
+  
+      await agent.start();
+  
+      expect(result).to.eql([SPEAK_TRACE_UNSANITIZED])
     });
   });
 });
