@@ -149,10 +149,10 @@ Note, since Trace Events occur in the order of the trace response, then handlers
 
 ```ts
 rclient.on(TraceType.SPEAK, (trace, context) => {		// register a handler for only SpeakTraces
-  myStore.traces.push(trace.payload.message);				// traces will be added to your local store in order
+  console.log(trace.payload.message);								// traces will be added to your local store in order
 });
 rclient.on(TRACE_EVENT, (trace, context) => {				// register a handler for any GeneralTrace
-  myStore.history.push(trace);
+  console.log(trace);
 });
 await rclient.start();															// trigger event handler if `SpeakTrace` received
 ```
