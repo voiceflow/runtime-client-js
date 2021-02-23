@@ -89,6 +89,16 @@ export class RuntimeClient<V extends Record<string, any> = Record<string, any>> 
     throw new VFTypeError(`event "${event}" is not valid`);
   }
 
+  off<T extends TraceType | TRACE_EVENT>(event: T, handler: OnMethodHandlerArgMap<V>[T]) {
+    if (event === TRACE_EVENT) {
+      return this.events.offAny(handler as GeneralTraceEventHandler<V>);
+    }
+    if (isValidTraceType(event)) {
+      return this.events.off(event as any, handler as any);
+    }
+    throw new VFTypeError(`event "${event}" is not valid`);
+  }
+
   onSpeak(handler: TraceEventHandler<TraceType.SPEAK, V>) {
     this.events.on(TraceType.SPEAK, handler);
   }
@@ -119,6 +129,38 @@ export class RuntimeClient<V extends Record<string, any> = Record<string, any>> 
 
   onChoice(handler: TraceEventHandler<TraceType.CHOICE, V>) {
     this.events.on(TraceType.CHOICE, handler);
+  }
+
+  offSpeak(handler: TraceEventHandler<TraceType.SPEAK, V>) {
+    this.events.off(TraceType.SPEAK, handler);
+  }
+
+  offAudio(handler: TraceEventHandler<TraceType.AUDIO, V>) {
+    this.events.off(TraceType.AUDIO, handler);
+  }
+
+  offBlock(handler: TraceEventHandler<TraceType.BLOCK, V>) {
+    this.events.off(TraceType.BLOCK, handler);
+  }
+
+  offDebug(handler: TraceEventHandler<TraceType.DEBUG, V>) {
+    this.events.off(TraceType.DEBUG, handler);
+  }
+
+  offEnd(handler: TraceEventHandler<TraceType.END, V>) {
+    this.events.off(TraceType.END, handler);
+  }
+
+  offFlow(handler: TraceEventHandler<TraceType.FLOW, V>) {
+    this.events.off(TraceType.FLOW, handler);
+  }
+
+  offVisual(handler: TraceEventHandler<TraceType.VISUAL, V>) {
+    this.events.off(TraceType.VISUAL, handler);
+  }
+
+  offChoice(handler: TraceEventHandler<TraceType.CHOICE, V>) {
+    this.events.off(TraceType.CHOICE, handler);
   }
 
   setContext(contextJSON: ResponseContext) {

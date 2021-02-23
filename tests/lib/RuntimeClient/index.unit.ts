@@ -358,6 +358,55 @@ describe('RuntimeClient', () => {
       expect(callback).to.throw();
     });
 
+    it('off', async () => {
+      const { agent, client } = createRuntimeClient();
+      
+      const result1: any[] = [];
+      const result2: any[] = [];
+
+      const toRemove1 = (trace: GeneralTrace, context: any) => {
+        result1.push(trace, context);
+      };
+      const toRemove2 = (trace: GeneralTrace, context: any) => {
+        result2.push(trace, context);
+      };
+      agent.on(TraceType.SPEAK, toRemove1);
+      agent.on(TRACE_EVENT, toRemove2);
+
+      client.interact.resolves(START_RESPONSE_BODY);
+
+      const context1 = await agent.start();
+
+      agent.off(TraceType.SPEAK, toRemove1);
+      agent.off(TRACE_EVENT, toRemove2);
+
+      await agent.start();
+
+      expect(result1).to.eql([
+        SPEAK_TRACE, context1,
+      ]);
+      expect(result2).to.eql([
+        SPEAK_TRACE, context1,
+        BLOCK_TRACE, context1,
+        FLOW_TRACE, context1,
+        AUDIO_TRACE, context1,
+        DEBUG_TRACE, context1,
+        CHOICE_TRACE, context1
+      ]);
+    });
+
+    it('off, bad trace type', () => {
+      const { agent } = createRuntimeClient();
+
+      const BAD_TRACE_TYPE = 'bad' as TraceType;
+
+      const callback = () => {
+        agent.off(BAD_TRACE_TYPE, () => {});
+      }
+
+      expect(callback).to.throw();
+    });
+  
     it('onEvent', async () => {
       const { agent, client } = createRuntimeClient();
 
@@ -404,6 +453,56 @@ describe('RuntimeClient', () => {
       expect(results[TraceType.BLOCK]).to.eql([BLOCK_TRACE, context1]);
 
       expect(results[TraceType.AUDIO]).to.eql([AUDIO_TRACE, context1]);
+    });
+
+    it('offEvent', async () => {
+      const { agent, client } = createRuntimeClient();
+
+      const results: any = {};
+      Object.keys(TraceType)
+        .map(trace => trace.toLowerCase())
+        .forEach((trace) => {
+          results[trace] = [];
+        });
+      
+      const insertToResults = (trace: any, context: any) => {
+        results[trace.type].push(trace, context);
+      };
+
+      agent.onAudio(insertToResults);
+      agent.onBlock(insertToResults);
+      agent.onDebug(insertToResults);
+      agent.onEnd(insertToResults);
+      agent.onChoice(insertToResults);
+      agent.onFlow(insertToResults);
+      agent.onSpeak(insertToResults);
+      agent.onVisual(insertToResults);
+
+      agent.offAudio(insertToResults);
+      agent.offBlock(insertToResults);
+      agent.offDebug(insertToResults);
+      agent.offEnd(insertToResults);
+      agent.offChoice(insertToResults);
+      agent.offFlow(insertToResults);
+      agent.offSpeak(insertToResults);
+      agent.offVisual(insertToResults);
+
+      client.interact.resolves(START_RESPONSE_BODY);
+
+      await agent.start();
+
+      client.interact.resolves(SEND_TEXT_RESPONSE_BODY);
+
+      await agent.sendText('some nonsense');
+
+      expect(results[TraceType.SPEAK]).to.eql([]);
+      expect(results[TraceType.VISUAL]).to.eql([]);
+      expect(results[TraceType.FLOW]).to.eql([]);
+      expect(results[TraceType.END]).to.eql([]);
+      expect(results[TraceType.DEBUG]).to.eql([]);
+      expect(results[TraceType.CHOICE]).to.eql([]);
+      expect(results[TraceType.BLOCK]).to.eql([]);
+      expect(results[TraceType.AUDIO]).to.eql([]);
     });
 
     it('config, no ssml in events', async () => {

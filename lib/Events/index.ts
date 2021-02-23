@@ -28,8 +28,18 @@ export class EventManager<V extends Record<string, any>> {
     handlerList.push(handler);
   }
 
+  off<T extends TraceType>(event: T, handler: TraceEventHandler<T, V>) {
+    const handlerList = this.specHandlers.get(event)! as TraceEventHandler<T, V>[];
+    const toDel = handlerList.indexOf(handler);
+    handlerList.splice(toDel, 1);
+  }
+
   onAny(handler: GeneralTraceEventHandler<V>) {
     this.genHandlers.push(handler);
+  }
+
+  offAny(handler: GeneralTraceEventHandler<V>) {
+    this.genHandlers.splice(this.genHandlers.indexOf(handler), 1);
   }
 
   async handle<T extends TraceType>(trace: TraceMap[T], context: Context<V>) {
