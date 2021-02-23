@@ -71,7 +71,7 @@ client.onSpeak((trace) => {
   console.log(trace);
 });
 
-// Begin a conversation session
+// (optional) explicitly begin a conversation session
 client.start();
 
 // call this function from any input source

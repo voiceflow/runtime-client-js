@@ -41,27 +41,25 @@
 - [Advanced Trace Types](#advanced-trace-types)
 - [Runtime](#runtime)
 
-## Features
-
-### Main Components
+## Main Components
 
 The main components from `runtime-client-js` you should understand are the `RuntimeClientFactory` and the `RuntimeClient`. We will briefly introduce each component. We provide more detail in following sections.
 
-#### `RuntimeClientFactory`
+### `RuntimeClientFactory`
 
 The `RuntimeClientFactory` is a factory class that is used to create `RuntimeClient` instances, which are set to the same configuration passed into the factory itself.
 
 For example, the `RuntimeClientFactory` accepts a `versionID`, let's say it has value `fishandchips`, representing the Voiceflow app we want to start a conversation with. Any `RuntimeClient` we construct with this particular factory will then contact the same Voiceflow app with the `versionID` of `fishandchips`
 
-#### `RuntimeClient`
+### `RuntimeClient`
 
 The `RuntimeClient` is an object that represents one instance of a Voiceflow app. This is the main interface you use to interact with a Voiceflow app, advance the conversation session, and get a response. You do not construct `RuntimeClient`s directy.
 
-### Statefulness of RuntimeClient
+## Statefulness of RuntimeClient
 
 A `RuntimeClient` instance is a **stateful** object that represents some Voiceflow (VF) application. It has **interaction methods** such as `.sendText()` which produce side-effects that modify the `RuntimeClient`'s internal state, which represents the state of the current conversation session (which we will define shortly).
 
-#### Conversation Session
+### Conversation Session
 
 We frequently refer to a conversation session in the documentation. A **conversation session** is an ongoing execution of the Voiceflow app.
 
@@ -82,7 +80,7 @@ console.log(context3.isEnding()); // prints "true" so conversation session has e
 
 Alternatively, the current conversation session can end if we call `.start()` to start a new session from the beginning.
 
-#### Interaction Methods
+### Interaction Methods
 
 An **interaction method** is any method of `RuntimeClient` which sends a request to our runtime servers. Interaction methods transition the conversation session and produce side-effects on the current internal state of `RuntimeClient`.
 
@@ -102,7 +100,7 @@ Now, only certain interaction methods are allowed to be called at certain points
 
 Thus, if `runtimeClient.getContext().isEnding()` is `true`, the only valid method you may call is `.start()` to restart the conversation session from the beginning.
 
-#### Response Methods
+### Response Methods
 
 A **response method** is any method of `RuntimeClient` that looks like this: `.on___(callbackFn)` (i.e. `.onSpeak`). The `callbackFn` will look like this: `(trace, context) => ...` These get triggered whenever an interaction method is finished. Response methods allow you control the behavior of your app whenever based on the blocks in your Voiceflow project - by iterating through the `context.getTrace()` and matching the correct trace type.
 
@@ -120,7 +118,7 @@ To see what the trace contains, try something like `onSpeak((trace) => console.l
 
 Response methods accept promises and will execute with `async/await`. So if you do `.onSpeak(async (message) => await somePromise(message))`, the next response method won't trigger until this one is done.
 
-### Context
+## Context
 
 For even more detail and control, Interaction methods all return a `Context` object. The `Context` is a snapshot of the Voiceflow application's state and includes data such as the variable values.
 
@@ -133,7 +131,7 @@ As described in "Statefulness of RuntimeClient", interaction methods replace `Ru
 
 The `Context` object has a handful of methods to expose its internal data. We will describe a subset of them below.
 
-#### `.getResponse()`
+### `.getResponse()`
 
 Returns a list of traces representing the Voiceflow app's response.
 
@@ -146,7 +144,7 @@ const response = context.getResponse();
 response.forEach((trace) => console.log(trace.payload.message));
 ```
 
-#### `.isEnding()`
+### `.isEnding()`
 
 Returns `true` if the application state wrapped by the `Context` is the last state before the corresponding conversation session ended. Returns `false` otherwise.
 
@@ -161,7 +159,7 @@ do {
 terminateApp(); // perform any cleanup
 ```
 
-#### `.getChips()`
+### `.getChips()`
 
 The `.getChips()` method returns a list of suggestion chips. If you are unfamiliar with this terminology, a **suggestion chip** is simply a suggested response that the user can send to a voice interface.
 
@@ -185,7 +183,7 @@ chips.forEach(({ name }) => {
 
 You can also check our [samples](https://github.com/voiceflow/rcjs-examples) for a working implementation of suggestion chips on the browser.
 
-### Configuration
+## Configuration
 
 The `RuntimeClientFactory` accepts configurations which it will apply to `RuntimeClient` instance it constructs. In particular, there is a `dataConfig` option for managing the data returned by `Context.getResponse()` for all `Context`s produced by a `RuntimeClient`. To summarize, there are four options currently available:
 
@@ -208,7 +206,7 @@ const app = new RuntimeClientFactory({
 });
 ```
 
-#### `tts`
+### `tts`
 
 Once you have this to `true`, you can access the TTS audio-file through `payload.src` in a `SpeakTrace` as shown below
 
@@ -218,7 +216,7 @@ const audio = new Audio(speakTrace.payload.src); // HTMLAudioElement
 audio.play();
 ```
 
-#### `ssml`
+### `ssml`
 
 When this is set to `true`, the `message` string returned by a `SpeakTrace` will contain your SSML that you added through Voiceflow Creator.
 
@@ -242,7 +240,7 @@ console.log(context.getResponse());
 */
 ```
 
-#### `includeTypes`
+### `includeTypes`
 
 Once you have specified additional trace types, you will need some conditional logic to check what kind of trace you're looking at. We recommend using [`makeTraceProcessor`](#maketraceprocessor) to handle the boilerplate conditional logic for you.
 
@@ -270,7 +268,7 @@ traces.forEach(({ type, payload }) => {
 });
 ```
 
-#### `traceProcessor`
+### `traceProcessor`
 
 This option accepts any kind of function that accepts a `GeneralTrace`, but it might be easier to use `makeTraceProcessor`
 
@@ -289,7 +287,7 @@ const context = await app.start();
 context.getResponse().forEach(traceProcessor); // this line is implicitly called
 ```
 
-### `makeTraceProcessor`
+## `makeTraceProcessor`
 
 A typical pattern for handling a Voiceflow app's response is to use a higher-order function (e.g. `map`) to invoke a callback on each trace in `Context.trace`.
 
@@ -332,11 +330,11 @@ async () => {
 };
 ```
 
-#### Handler Signatures
+### Handler Signatures
 
 The argument types shown in the handler signatures are simplified. The arguments are ultimately the attributes from a trace's `payload` attribute. To see more precise types for the handler arguments, find the corresponding payload attribute's type defined in [Advanced Trace Types](#advanced-trace-types)
 
-##### Speak
+### Speak
 
 The `SpeakTrace` handler can either be a function or an object with properties `handleAudio` and `handleSpeech`. If you are only expecting `SpeakTrace`s from only Speak Steps or only Audio Steps, then this might be simpler.
 
@@ -371,7 +369,7 @@ const traceProcessor = makeTraceProcessor({
 });
 ```
 
-##### Debug
+### Debug
 
 ```ts
 type DebugTraceHandler = (message: string) => any;
@@ -381,7 +379,7 @@ const traceProcessor = makeTraceProcessor({
 });
 ```
 
-##### Visual
+### Visual
 
 ```ts
 type VisualTraceHandler = (
@@ -396,7 +394,7 @@ const traceProcessor = makeTraceProcessor({
 });
 ```
 
-##### Choice
+### Choice
 
 ```ts
 type Choice = {
@@ -410,7 +408,7 @@ const traceProcessor = makeTraceProcessor({
 });
 ```
 
-##### Exit
+### Exit
 
 Note that we sometimes refer to an `ExitTrace` with `"end"` instead.
 
@@ -422,7 +420,7 @@ const traceProcessor = makeTraceProcessor({
 });
 ```
 
-##### Flow
+### Flow
 
 ```ts
 type FlowTraceHandler = (diagramID: string) => any;
@@ -432,7 +430,7 @@ const traceProcessor = makeTraceProcessor({
 });
 ```
 
-##### Block
+### Block
 
 ```ts
 type BlockTraceHandler = (blockID: string) => any;
@@ -442,9 +440,9 @@ const traceProcessor = makeTraceProcessor({
 });
 ```
 
-### Variables
+## Variables
 
-#### Getters
+### Getters
 
 Voiceflow projects have variables that are modified as the app is executing. You can access the variable state at a particular point in time through `context.variables`. Recall that a `Context` is a snapshot of app state, so the value of `.variables` at one particular `Context` is the value of the variables at some previous fixed point in time.
 
@@ -463,7 +461,7 @@ const name = allVariables.name;
 const keys = context.variables.getKeys();
 ```
 
-#### Setters
+### Setters
 
 You can also set variables through a `Context`
 
@@ -486,7 +484,7 @@ Recall that each `Context` returned by the `RuntimeClient` is a snapshot of the 
 
 Additionally, if you want to implement time-travelling and keep a record of past `Context`s, then do **not** use a setter, as it will modify any past `Context`s that you call the setter on, thus, leaving your record in a misleading state.
 
-#### Enabling Stricter Typing
+### Enabling Stricter Typing
 
 The Runtime Client is implemented in TypeScript and has strict types on all of its methods. The `.variables` submodule can also be configured to support stricter types.
 
@@ -511,7 +509,7 @@ const name = context.variables.get('name'); // return value is inferred to be a 
 context.variables.set('name', 12); // TypeError! expected a "number" not a "string"
 ```
 
-### Multiple Applications
+## Multiple Applications
 
 You can integrate any number of different Voiceflow applications to your project, simply by constructing multiple `RuntimeClientFactory` instances, then constructing the `RuntimeClient` with `.createClient()`.
 
@@ -532,9 +530,9 @@ const orderBotFactory = new RuntimeClientFactory({
 const orderBot = orderBotFactory.createClient();
 ```
 
-### Backend Usage
+## Backend Usage
 
-#### Problem
+### Problem
 
 In the backend, we may want to create a `RuntimeClient` to service a request from our clients. Previously in this document, we mainly described how to use `RuntimeClient` on the frontend by initializing it as a stateful global object. However, in the backend this approach does not work.
 
@@ -576,7 +574,7 @@ app.get('/', async (req, res) => {
 });
 ```
 
-#### Solution
+### Solution
 
 The `.createClient()` can accept an additional `state` object, which solves the problem of using the `RuntimeClient` on the backend. The `.createClient()` method has different behaviour depending on the value of `state`
 
@@ -616,11 +614,11 @@ Conceptually, the `RuntimeClient` can be used on the frontend as a stateful glob
 
 For a full-working sample demonstrating this technique, see [here](https://github.com/voiceflow/rcjs-examples/tree/master/server).
 
-### Best Practices
+## Best Practices
 
 Keep in mind that the `State` object in a Voiceflow application state will contains the value of any Voiceflow variables. We strongly recommend not embedding any sensitive information in Voiceflow variables or in any of your Voiceflow app responses. The `State` is transmitted over HTTP requests to our runtime servers.
 
-### Advanced Trace Types
+## Advanced Trace Types
 
 A `GeneralTrace` is an object which represents one piece of the overall response from a Voiceflow app. Specialized traces like `SpeakTrace` are a sub-type of the more abstract `GeneralTrace` super-type, as shown below.
 
@@ -654,7 +652,7 @@ enum TraceType {
 
 For each of the specialized trace types, we will describe each trace's purpose and their payload structure below.
 
-#### SpeakTrace
+### SpeakTrace
 
 - **PURPOSE:** Contains the "real" response of the voice interface. Corresponds to a Speak Step or Audio Step on Voiceflow.
 - **PAYLOAD:**
@@ -676,7 +674,7 @@ type P = {
 };
 ```
 
-#### DebugTrace
+### DebugTrace
 
 - **PURPOSE:** Contains a message that describes the control flow of the Voiceflow, e.g, matched intents, which blocks to move to.
 - **PAYLOAD:**
@@ -688,7 +686,7 @@ type P = {
 };
 ```
 
-#### VisualTrace
+### VisualTrace
 
 - **PURPOSE:** Contains the data used by the Visual Step to display images.
 - **PAYLOAD:**
@@ -724,7 +722,7 @@ type P = {
 };
 ```
 
-#### ChoiceTrace
+### ChoiceTrace
 
 - **PURPOSE:** Contains suggested response that the user can make. Only appears at the end of a list of traces returned by the app. We recommend using `.getChips()` to access the suggested responses, rather than processing this trace manually.
 - **PAYLOAD:**
@@ -735,12 +733,12 @@ type P = {
 };
 ```
 
-#### ExitTrace
+### ExitTrace
 
 - **PURPOSE:** Indicates if the Voiceflow app has terminated or not. Only appears at the end of a list of traces returned by the app. We recommend using `.isEnding()` to determine if the conversation is over, rather than processing this trace manually.
 - **PAYLOAD:** The payload is `undefined`
 
-#### FlowTrace
+### FlowTrace
 
 - **PURPOSE:** Indicates that the Voiceflow app has switched into a flow. This might be useful for debugging.
 - **PAYLOAD:**
@@ -752,7 +750,7 @@ type P = {
 };
 ```
 
-#### BlockTrace
+### BlockTrace
 
 - **PURPOSE:** Indicates that the Voiceflow app has entered a block.
 - **PAYLOAD:**
@@ -764,7 +762,7 @@ type P = {
 };
 ```
 
-### Runtime
+## Runtime
 
 As the name suggests, `runtime-client-js` interfaces with a Voiceflow "runtime" server. You can check out our [runtime SDK](https://github.com/voiceflow/general-runtime) for building runtime servers. Modifying the runtime allows for extensive customization of bot behavior and integrations.
 
