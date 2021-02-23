@@ -20,11 +20,6 @@ export class Context<S extends Record<string, any> = Record<string, any>> {
     return this.context.trace.reduce<Choice[]>((acc, trace) => (trace.type !== TraceType.CHOICE ? acc : [...acc, ...trace.payload.choices]), []);
   }
 
-  // returns the filtered trace
-  getResponse() {
-    return this.dataFilterer.filterTraces(this.context.trace);
-  }
-
   // returns the entire unfiltered list of traces of the context; can configure whether trace data should be sanitized or not
   getTrace(options: GetTraceOptions = {}) {
     const { sanitize = true } = options;

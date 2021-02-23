@@ -26,7 +26,6 @@ import {
   START_RESPONSE_BODY_UNSANITIZED,
 } from '../Context/fixtures';
 import { AUDIO_TRACE, BLOCK_TRACE, DEBUG_TRACE, END_TRACE, FLOW_TRACE, SPEAK_TRACE, SPEAK_TRACE_UNSANITIZED } from '../fixtures';
-import { makeTraceProcessor } from '@/lib/Utils/makeTraceProcessor';
 
 chai.use(chaiAsPromise);
 
@@ -53,30 +52,6 @@ describe('RuntimeClient', () => {
 
       expect(agent.getContext().toJSON()).to.eql({ state: VF_APP_INITIAL_STATE, request: null, trace: [] });
     });
-  });
-
-  it('options, traceProcessor', async () => {
-    const result: string[] = [];
-
-    const traceProcessor = makeTraceProcessor({
-      [TraceType.SPEAK]: (message) => {
-        result.push(message);
-      },
-      [TraceType.DEBUG]: (message) => {
-        result.push(message);
-      },
-    });
-
-    const { agent, client } = createRuntimeClient({
-      traceProcessor,
-      includeTypes: ['debug'],
-    });
-
-    client.interact.resolves(START_RESPONSE_BODY_WITH_MULTIPLE_CHOICES);
-
-    await agent.start();
-
-    expect(result).to.eql([DEBUG_TRACE.payload.message, SPEAK_TRACE.payload.message]);
   });
 
   it('start', async () => {
@@ -267,7 +242,6 @@ describe('RuntimeClient', () => {
     const { agent, client } = createRuntimeClient({
       tts: true,
       ssml: true,
-      includeTypes: ['debug', 'choice'],
     });
 
     client.interact.resolves(START_RESPONSE_BODY);
@@ -277,21 +251,19 @@ describe('RuntimeClient', () => {
     client.interact.resolves(SEND_TEXT_RESPONSE_BODY_WITH_SSML_AND_TTS);
 
     const context = await agent.sendText(USER_RESPONSE);
-    const response = context.getResponse();
+    const response = context.getTrace();
 
     expect(client.interact.callCount).to.eql(2);
     expect(client.interact.args[1]).to.eql([SEND_TEXT_REQUEST_BODY_TTS_ON]);
 
     expect((response[0] as any).payload.message).to.eql('<voice>Books ought to have to have good endings.</voice>');
     expect((response[0] as any).payload.src).to.eql('data:audio/mpeg;base64,SUQzBAAAAAAA');
-    expect(response.length).to.eql(2);
   });
 
   it('advanced config, SSML set to false', async () => {
     const { agent, client } = createRuntimeClient({
       tts: true,
       ssml: false,
-      includeTypes: ['speak', 'debug', 'choice'],
     });
 
     client.interact.resolves(START_RESPONSE_BODY);
@@ -301,14 +273,13 @@ describe('RuntimeClient', () => {
     client.interact.resolves(SEND_TEXT_RESPONSE_BODY_WITH_SSML_AND_TTS);
 
     const context = await agent.sendText(USER_RESPONSE);
-    const response = context.getResponse();
+    const response = context.getTrace();
 
     expect(client.interact.callCount).to.eql(2);
     expect(client.interact.args[1]).to.eql([SEND_TEXT_REQUEST_BODY_TTS_ON]);
 
     expect((response[0] as any).payload.message).to.eql('Books ought to have to have good endings.');
     expect((response[0] as any).payload.src).to.eql('data:audio/mpeg;base64,SUQzBAAAAAAA');
-    expect(response.length).to.eql(2);
   });
 
   describe('events', () => {
