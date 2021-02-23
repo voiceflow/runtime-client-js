@@ -1,40 +1,9 @@
-import { VisualTrace } from '@voiceflow/general-types';
-import { VisualType } from '@voiceflow/general-types/build/nodes/visual';
-import _ from 'lodash';
+import { VisualTrace, VisualTraceHandler } from '@/lib/types';
 
-import { VFClientError, VFTypeError } from '@/lib/Common';
-
-type APLPayload = Omit<VisualTrace['payload'] & { visualType: VisualType.APL }, 'visualType'>;
-type ImagePayload = Omit<VisualTrace['payload'] & { visualType: VisualType.IMAGE }, 'visualType'>;
-export type VisualTraceAPLHandler = (aplPayload: APLPayload) => any;
-export type VisualTraceImageHandler = (imgPayload: ImagePayload) => any;
-export type VisualTraceHandlerFunction = (payload: APLPayload | ImagePayload, visualType: VisualType) => any;
-export type VisualTraceHandlerMap = Partial<{
-  handleAPL: VisualTraceAPLHandler;
-  handleImage: VisualTraceImageHandler;
-}>;
-export type VisualTraceHandler = VisualTraceHandlerFunction | VisualTraceHandlerMap;
-
-export const invokeVisualHandler = (trace: VisualTrace, visualHandler: VisualTraceHandler) => {
+export const invokeVisualHandler = (trace: VisualTrace, handler: VisualTraceHandler) => {
   const {
-    payload: { visualType, ...rest },
+    payload: { image, device, dimensions, canvasVisibility },
   } = trace;
-
-  if (_.isFunction(visualHandler)) {
-    return visualHandler(rest, visualType);
-  }
-
-  if (visualType === VisualType.APL) {
-    if (!visualHandler.handleAPL) {
-      throw new VFClientError("missing handler for VisualTrace's apl subtype");
-    }
-    return visualHandler.handleAPL(rest as APLPayload);
-  }
-  if (visualType === VisualType.IMAGE) {
-    if (!visualHandler.handleImage) {
-      throw new VFClientError("missing handler for VisualTrace's image subtype");
-    }
-    return visualHandler.handleImage(rest as ImagePayload);
-  }
-  throw new VFTypeError("makeTraceProcessor's returned callback received an unknown VisualTrace subtype");
+  return handler(image, device, dimensions, canvasVisibility);
 };
+export default invokeVisualHandler;

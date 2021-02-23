@@ -1,11 +1,9 @@
-import { TraceType } from '@voiceflow/general-types';
-
 import DataFilterer from '@/lib/DataFilterer';
-import { Choice, DataConfig, ResponseContext } from '@/lib/types';
+import { Choice, DataConfig, ResponseContext, TraceType } from '@/lib/types';
 
 import VariableManager from '../Variables';
 
-class Context<S extends Record<string, any> = Record<string, any>> {
+export class Context<S extends Record<string, any> = Record<string, any>> {
   private dataFilterer: DataFilterer;
 
   public variables = new VariableManager<S>(this.toJSON.bind(this), this.setVariables.bind(this));

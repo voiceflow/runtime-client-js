@@ -1,5 +1,4 @@
-import { ChoiceTrace } from '@voiceflow/general-types';
-
-export type ChoiceTraceHandler = (choices: ChoiceTrace['payload']['choices']) => any;
+import { ChoiceTrace, ChoiceTraceHandler } from '@/lib/types';
 
 export const invokeChoiceHandler = (trace: ChoiceTrace, handler: ChoiceTraceHandler) => handler(trace.payload.choices);
+export default invokeChoiceHandler;

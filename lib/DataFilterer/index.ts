@@ -1,12 +1,10 @@
-import { GeneralTrace, TraceType } from '@voiceflow/general-types';
-
 import { VFTypeError } from '@/lib/Common';
-import { DataConfig } from '@/lib/types';
+import { DataConfig, GeneralTrace, TraceType } from '@/lib/types';
 
 import { isValidTraceType, stripSSMLFromSpeak } from './utils';
 
 class DataFilterer {
-  private includeTypes = new Set<TraceType>([TraceType.SPEAK]);
+  private includeTypes = new Set<TraceType>([TraceType.SPEAK, TraceType.VISUAL]);
 
   private traceFilters: ((trace: GeneralTrace) => GeneralTrace)[] = [];
 

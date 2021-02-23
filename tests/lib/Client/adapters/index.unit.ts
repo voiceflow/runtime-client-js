@@ -1,11 +1,13 @@
-import { RequestType, SpeakTrace, TraceType } from '@voiceflow/general-types';
 import { SpeakType } from '@voiceflow/general-types/build/nodes/speak';
 import { expect } from 'chai';
 import sinon from 'sinon';
 
-import { adaptResponseContext } from '@/lib/Client/adapters';
-import { ResponseContext } from '@/lib/types';
-import { VISUAL_TRACE_IMAGE } from '../../fixtures';
+import { adaptResponseContext, extractAudioStep } from '@/lib/Client/adapters';
+import { RequestType, SpeakTrace, TraceType } from '@voiceflow/general-types';
+import { DBResponseContext } from '@/lib/Client/adapters/types';
+import { DB_VISUAL_TRACE } from '../fixtures';
+import { AUDIO_TRACE, SPEAK_TRACE } from '../../fixtures';
+import { MALFORMED_AUDIO_TRACE, MALFORMED_SPEAK_TRACE } from './fixtures';
 
 describe('adapters', () => {
   afterEach(() => {
@@ -28,7 +30,7 @@ describe('adapters', () => {
       },
     } as SpeakTrace;
 
-    const malformedResponse: ResponseContext = {
+    const malformedResponse: DBResponseContext = {
       state: {
         variables: {},
         stack: [],
@@ -38,7 +40,7 @@ describe('adapters', () => {
         type: RequestType.TEXT,
         payload: 'some user input',
       },
-      trace: [malformedTrace1, malformedTrace2, VISUAL_TRACE_IMAGE],
+      trace: [malformedTrace1, malformedTrace2, DB_VISUAL_TRACE],
     };
 
     const result = adaptResponseContext(malformedResponse);
@@ -62,8 +64,20 @@ describe('adapters', () => {
             type: SpeakType.MESSAGE,
           },
         },
-        VISUAL_TRACE_IMAGE
+        DB_VISUAL_TRACE
       ],
+    });
+  });
+
+  it('extractAudioStep', () => {
+    const messyData = {
+      trace: [MALFORMED_SPEAK_TRACE, MALFORMED_AUDIO_TRACE]
+    };
+
+    const result = extractAudioStep(messyData as any);
+
+    expect(result).to.eql({
+      trace: [SPEAK_TRACE, AUDIO_TRACE]
     });
   });
 });

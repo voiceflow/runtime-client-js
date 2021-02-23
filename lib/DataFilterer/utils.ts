@@ -1,14 +1,12 @@
-import { GeneralTrace, TraceType } from '@voiceflow/general-types';
-import { SpeakType } from '@voiceflow/general-types/build/nodes/speak';
-
 import { validTraceTypes } from '@/lib/Common';
+import { GeneralTrace, TraceType } from '@/lib/types';
 
 export const SSML_TAG_REGEX = /<\/?[^>]+(>|$)/g;
 
 export const isValidTraceType = (type: string): type is TraceType => validTraceTypes.has(type.toUpperCase());
 
 export const stripSSMLFromSpeak = (trace: GeneralTrace): GeneralTrace => {
-  return trace.type !== TraceType.SPEAK || trace.payload.type !== SpeakType.MESSAGE
+  return trace.type !== TraceType.SPEAK
     ? trace
     : {
         ...trace,

@@ -1,16 +1,14 @@
 # Voiceflow Runtime Client
 
-The Voiceflow Runtime Client is an SDK for running Voiceflow apps in JavaScript. 
+The Voiceflow Runtime Client is an SDK for running Voiceflow apps in JavaScript.
 
 First, you build a fully-functioning conversational app on [Voiceflow](https://creator.voiceflow.com). Then, you integrate that app into a JavaScript project using the SDK. This allows you to quickly add any kind of voice interface, such as a chatbot, to your project, without the hassle of implementing the conversational flow using code.
 
-The Runtime Client can be used with jQuery, React, and any other JavaScript library or framework. 
+The Runtime Client can be used with jQuery, React, and any other JavaScript library or framework.
 
 [![circleci](https://circleci.com/gh/voiceflow/runtime-client-js/tree/master.svg?style=shield&circle-token=a4447ba98e39b43cc47fd6da870ca68ff0ca5db0)](https://circleci.com/gh/voiceflow/runtime-client-js/tree/master)
 [![codecov](https://codecov.io/gh/voiceflow/runtime-client-js/branch/master/graph/badge.svg?token=RYypRxePDX)](https://codecov.io/gh/voiceflow/runtime-client-js)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=voiceflow_runtime-client-js&metric=alert_status&token=088b80f6baf3c958b609f31f64b65289bd4586dc)](https://sonarcloud.io/dashboard?id=voiceflow_runtime-client-js)
-
-
 
 ## Table of Contents
 
@@ -19,9 +17,7 @@ The Runtime Client can be used with jQuery, React, and any other JavaScript libr
 3. [Install](#install)
 4. [Getting Started](#getting-started)
 5. [Advanced Usage](#advanced-usage)
-7. [Development](#api-reference)
-
-
+6. [Development](#api-reference)
 
 ## Demos
 
@@ -42,7 +38,6 @@ See the parent [rcjs-examples](https://github.com/voiceflow/rcjs-examples) repo 
 - Using TTS (React) - [source](https://github.com/voiceflow/rcjs-examples/tree/master/text-to-speech)
 - Using Suggestion Chips (React) - [source](https://github.com/voiceflow/rcjs-examples/tree/master/suggestion-chips)
 
-
 ## Install
 
 ```bash
@@ -55,102 +50,49 @@ yarn add @voiceflow/runtime-client-js
 
 ## Getting Started
 
-### Minimal Working Integration, ES6 and Async/Await
+### Minimal Working Integration
 
 The minimum code to start using the SDK is shown below:
 
 ```js
-import RuntimeClientFactory from "@voiceflow/runtime-client-js";
+const { RuntimeClientFactory } = require('@voiceflow/runtime-client-js');
+// alternatively for ESM/ES6
+// import RuntimeClientFactory from '@voiceflow/runtime-client-js'
 
-// Construct an object 
+// Construct an object
 const factory = new RuntimeClientFactory({
   versionID: 'your-version-id-here', // ADD YOUR VERSION ID HERE
+  endpoint: 'https://general-runtime.voiceflow.com',
 });
-const chatbot = factory.createClient();
+const client = factory.createClient();
 
-(async () => {
-  // Begin a conversation session
-  const context = await chatbot.start();
-  
-  // Show the voice app's initial response
-  const traces = context.getResponse();
-  traces.forEach(trace => console.log(trace.payload.message));
-  
-  // Continue the conversation session
-  const userInput = "I would like a large cheeseburger"; // change this string to what your app expects
-  const context2 = await chatbot.sendText(userInput);
-  
-  // Show the voice app's subsequent response
-  const traces2 = context2.getResponse();
-  traces2.forEach(trace => console.log(trace.payload.message));
-  
-  // Check if conversation has ended after .sendText() and .start() calls
-  if (context2.isEnding()) {
-    cleanupMyApp();
-    const context3 = await chatbot.start(); // Maybe restart the chatbot application with .start()
-  }
-})();
-```
-
-
-
-### Minimal Working Integration, CommonJS and Promises
-
-```js
-const RuntimeClientFactory = require('@voiceflow/runtime-client-js').default;
-
-// Construct an object 
-const factory = new RuntimeClientFactory({
-  versionID: 'your-version-id-here', // ADD YOUR VERSION ID HERE
+client.onSpeak((trace) => {
+  // whenever we come across a speak block, just say the message
+  console.log(trace);
 });
-const chatbot = factory.createClient();
 
 // Begin a conversation session
-chatbot.start()
-	.then(context => {
-    // Show the voice app's initial response
-    const traces = context.getResponse();
-    traces.forEach(trace => console.log(trace.payload.message));
+client.start();
 
-    // Continue the conversation session
-    const userInput = "I would like a large cheeseburger";
-    const context2 = chatbot.sendText(userInput);
+// call this function from any input source
+const interact = (input) => client.sendText(input);
 
-    return context2;
-	})
-	.then(context => {
-		// Show the voice app's subsequent response
-		const traces2 = context.getResponse();
-		traces2.forEach(trace => console.log(trace.payload.message));
-
-		// Check if conversation has ended after .sendText() and .start() calls
-		if (context.isEnding()) {
-		  cleanupMyApp();
-		  return chatbot.start();
-		}
-		return context;
-	});
+// e.g. interact('can I have fries with that');
 ```
 
-
+pass in user input with the `client.sendText(input)` function, and any of your `client.on...` functions will trigger during the response.
 
 ### Setting up a Voiceflow App
 
 See [here](docs/setting-up-vf-app.md) for instructions on how to quickly setup a Voiceflow app to try out your project.
 
-
-
 ### Integration Step-by-Step
 
 See [here](docs/step-by-step.md) for a step-by-step breakdown of the Minimal Working Integration. Make sure to read "Setting up a Voiceflow App" first.
 
-
-
 ## Advanced Usage
 
 See the documentation [here](docs/advanced-usage.md) for the available advanced features of the SDK.
-
-
 
 ## Development
 
@@ -172,15 +114,13 @@ Use `yarn lint:fix` to check and automatically fix linting issues where possible
 
 #### `yarn test`
 
-Use this command to run all of the integration and unit tests. Make sure that your PR achieves 100% coverage and tests for potential edge-cases. 
+Use this command to run all of the integration and unit tests. Make sure that your PR achieves 100% coverage and tests for potential edge-cases.
 
 Use `yarn test:single` to execute a single unit or integration test.
 
 Use `yarn test:unit` to run all of the unit tests
 
 Use `yarn test:integration` to run all of the integration tests.
-
-
 
 ### Submitting a PR
 
