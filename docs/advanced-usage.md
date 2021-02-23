@@ -4,42 +4,55 @@
 
 ## Table of Contents
 
-- [Main Components](#main-components)
-  - [`RuntimeClientFactory`](#runtimeclientfactory)
-  - [`RuntimeClient`](#runtimeclient)
-- [Statefulness of RuntimeClient](#statefulness-of-runtimeclient)
-  - [Conversation Session](#conversation-session)
-  - [Interaction Methods](#interaction-methods)
-  - [Response Methods](#response-methods)
-- [Context](#context)
-  - [`.getResponse()`](#getresponse)
-  - [`.isEnding()`](#isending)
-  - [`.getChips()`](#getchips)
-- [Configuration](#configuration)
-  - [`tts`](#tts)
-  - [`ssml`](#ssml)
-  - [`includeTypes`](#includetypes)
-  - [`traceProcessor`](#traceprocessor)
-- [`makeTraceProcessor`](#maketraceprocessor)
-  - [Handler Signatures](#handler-signatures)
-    - [Speak](#speak)
-    - [Debug](#debug)
-    - [Visual](#visual)
-    - [Choice](#choice)
-    - [Exit](#exit)
-    - [Flow](#flow)
-    - [Block](#block)
-- [Variables](#variables)
-  - [Getters](#getters)
-  - [Setters](#setters)
-  - [Enabling Stricter Typing](#enabling-stricter-typing)
-- [Multiple Applications](#multiple-applications)
-- [Backend Usage](#backend-usage)
-  - [Problem](#problem)
-  - [Solution](#solution)
-- [Best Practices](#best-practices)
-- [Advanced Trace Types](#advanced-trace-types)
-- [Runtime](#runtime)
+- [Advanced Usage](#advanced-usage)
+  - [Table of Contents](#table-of-contents)
+  - [Main Components](#main-components)
+    - [`RuntimeClientFactory`](#runtimeclientfactory)
+    - [`RuntimeClient`](#runtimeclient)
+  - [Statefulness of RuntimeClient](#statefulness-of-runtimeclient)
+    - [Conversation Session](#conversation-session)
+    - [Interaction Methods](#interaction-methods)
+  - [Events](#events)
+    - [Event Types](#event-types)
+    - [Event Handlers](#event-handlers)
+  - [Context](#context)
+    - [`.getResponse()`](#getresponse)
+    - [`.isEnding()`](#isending)
+    - [`.getChips()`](#getchips)
+  - [Configuration](#configuration)
+    - [`tts`](#tts)
+    - [`ssml`](#ssml)
+    - [`includeTypes`](#includetypes)
+    - [`traceProcessor`](#traceprocessor)
+  - [`makeTraceProcessor`](#maketraceprocessor)
+    - [Handler Signatures](#handler-signatures)
+      - [Speak](#speak)
+      - [Audio](#audio)
+      - [Debug](#debug)
+      - [Visual](#visual)
+      - [Choice](#choice)
+      - [Exit](#exit)
+      - [Flow](#flow)
+      - [Block](#block)
+  - [Variables](#variables)
+    - [Getters](#getters)
+    - [Setters](#setters)
+    - [Enabling Stricter Typing](#enabling-stricter-typing)
+  - [Multiple Applications](#multiple-applications)
+  - [Backend Usage](#backend-usage)
+    - [Problem](#problem)
+    - [Solution](#solution)
+  - [Best Practices](#best-practices)
+  - [Advanced Trace Types](#advanced-trace-types)
+    - [SpeakTrace](#speaktrace)
+    - [AudioTrace](#audiotrace)
+    - [DebugTrace](#debugtrace)
+    - [VisualTrace](#visualtrace)
+    - [ChoiceTrace](#choicetrace)
+    - [ExitTrace](#exittrace)
+    - [FlowTrace](#flowtrace)
+    - [BlockTrace](#blocktrace)
+  - [Runtime](#runtime)
 
 ## Main Components
 
@@ -99,25 +112,75 @@ Now, only certain interaction methods are allowed to be called at certain points
 1. `.start()` is callable any time.
 2. `.sendText()` and `.sendIntent()` are callable only if the `RuntimeClient` contains some ongoing conversation session. That is, `runtimeClient.getContext().isEnding()` is `false`. If you call `.sendText()` when the return of the aforementioned `.isEnding()` call is `true`, then calling `.sendText()` throws an exception.
 
-Thus, if `runtimeClient.getContext().isEnding()` is `true`, the only valid method you may call is `.start()` to restart the conversation session from the beginning.
+Thus, if `.isEnding()` is `true`, the only valid method you may call is `.start()` to restart the conversation session from the beginning.
 
-### Response Methods
+## Events
 
-A **response method** is any method of `RuntimeClient` that looks like this: `.on___(callbackFn)` (i.e. `.onSpeak`). The `callbackFn` will look like this: `(trace, context) => ...` These get triggered whenever an interaction method is finished. Response methods allow you control the behavior of your app whenever based on the blocks in your Voiceflow project - by iterating through the `context.getTrace()` and matching the correct trace type.
+The `RuntimeClient` has an event system that notifies the developer of any changes in the `RuntimeClient`'s data. 
 
-To see what the trace contains, try something like `onSpeak((trace) => console.log(trace))`. For the definition of traces, see [Advanced Trace Types](#advanced-trace-types)
+### Event Types
 
-- `onSpeak(callbackFn)`
-- `onAudio(callbackFn)`
-- `onBlock(callbackFn)`
-- `onDebug(callbackFn)`
-- `onEnd(callbackFn)`
-- `onFlow(callbackFn)`
-- `onVisual(callbackFn)`
-- `onChoice(callbackFn)`
-- `on(type, callbackFn)`
+Trace Events when the `RuntimeClient` receives a response from our Runtime servers. For **all** traces that `RuntimeClient` receives from our Runtime servers - not just the traces you've configured to see with the `includeTypes` option - we trigger a corresponding event for that trace.
 
-Response methods accept promises and will execute with `async/await`. So if you do `.onSpeak(async (message) => await somePromise(message))`, the next response method won't trigger until this one is done.
+The full list of events is listed below.
+
+- `TraceType.X` - When a specific trace of type `X` is being processed, there is a corresponding event that is fired, e.g., if `SpeakTrace` is received then the `TraceType.SPEAK` event is triggered.
+- `TRACE_EVENT` - Triggered when any trace is being processed.
+
+Moreover, Trace Events are **guaranteed to occur in the order of the trace response**. For example, if the `RuntimeClient` received a list containing `BlockTrace`, `SpeakTrace`, `DebugTrace`, `SpeakTrace` in that order, then the following events will occur in this exact order:
+
+- `TraceType.BLOCK`
+- `TRACE_EVENT`
+- `TraceType.SPEAK` - Corresponds with the first `SpeakTrace` in the list
+- `TRACE_EVENT`
+- `TraceType.DEBUG`
+- `TRACE_EVENT`
+- `TraceType.SPEAK` - Corresponds with the second `SpeakTrace` in the list
+- `TRACE_EVENT`
+
+### Event Handlers
+
+To register an event handler, use the below methods:
+
+- `.on(event: TraceType | TRACE_EVENT, handler: Function)` - This method is used to register `handler` on the given `event`
+- `.onSpeak(handler: Function)` - This method is used to register `handler` on a `TraceType.SPEAK` event. There exists equivalents for all other trace types as well.
+
+Note, since Trace Events occur in the order of the trace response, then handlers also execute sequentially in the order. That is, we call handlers for a trace in the response list, only after all previous traces in the list are handled.
+
+```ts
+rclient.on(TraceType.SPEAK, (trace, context) => {		// register a handler for only SpeakTraces
+  myStore.traces.push(trace.payload.message);				// traces will be added to your local store in order
+});
+rclient.on(TRACE_EVENT, (trace, context) => {				// register a handler for any GeneralTrace
+  myStore.history.push(trace);
+});
+await rclient.start();															// trigger event handler if `SpeakTrace` received
+```
+
+Event handlers can be asynchronous. Since traces are processed sequentially, you can create a delay between the handling of each trace by instantiating a promise with a timeout. This is helpful for implementing fancy UI logic that creates a delay between the rendering of text responses.
+
+```js
+rclient.on(TraceType.SPEAK, (trace, context) => {		
+  // Unpack the data from the `.payload`
+	const { payload: { message, src } } = trace;
+  
+  // Add the response text to the store, so it triggers a UI update.
+  myStore.traces.push(trace.payload.message);
+
+  // Construct an HTMLAudioElement to speak out the response text.
+  const audio = new Audio(src);
+  await new Promise(res => audio.addEventListener('loadedmetadata', res));
+
+  // Play the audio and wait until the audio finishes, before displaying the next SpeakTrace
+  audio.play();
+  await new Promise(res => setTimeout(res, audio.duration * 1000));
+});
+await rclient.start();
+```
+
+If you are working in TypeScript, you will get auto-completion for `trace` objects. Alternatively, for documentation on each trace's payload, see [Advanced Trace Types](#advanced-trace-types).
+
+
 
 ## Context
 
@@ -335,19 +398,11 @@ async () => {
 
 The argument types shown in the handler signatures are simplified. The arguments are ultimately the attributes from a trace's `payload` attribute. To see more precise types for the handler arguments, find the corresponding payload attribute's type defined in [Advanced Trace Types](#advanced-trace-types)
 
-### Speak
-
-The `SpeakTrace` handler can either be a function or an object with properties `handleAudio` and `handleSpeech`. If you are only expecting `SpeakTrace`s from only Speak Steps or only Audio Steps, then this might be simpler.
-
-Otherwise, if you are expecting both types to be returned by `.getResponse()`, you can pass in an object with two handlers, one for Audio Steps, the other for Speak Steps, and the trace processor will call the correct handler for you.
+#### Speak
 
 ```ts
 // OPTION 1
-type SpeakTraceHandlerFunction = (
-  message: string,
-  src: undefined | string,
-  type: undefined | string,
-) => any;
+type SpeakTraceHandler = (message: string, src: undefined | string,) => any;
 
 const traceProcessor = makeTraceProcessor({
     speak: (message) => {
@@ -355,22 +410,25 @@ const traceProcessor = makeTraceProcessor({
       	return `vf-speak-${++i}`;
     },
 });
+```
 
-// OPTION 2
-type SpeakTraceHandlerMap = {
-  handleAudio: undefined | (message: string, src: string) => any;
-  handleSpeech: undefined | (message: string, src: string) => any;
-};
+#### Audio
+
+```ts
+// OPTION 1
+type AudioTraceHandler = (src: string) => any;
 
 const traceProcessor = makeTraceProcessor({
-    speak: {
-      handleAudio: (message) => console.log(`audio file = ${message}`),
-      handleSpeech: (message) => console.log(`text = ${message}`)
+    speak: (src) => {
+      const player = new AudioPlayer({
+        filename: url
+      });
+      player.play();
     },
 });
 ```
 
-### Debug
+#### Debug
 
 ```ts
 type DebugTraceHandler = (message: string) => any;
@@ -380,7 +438,7 @@ const traceProcessor = makeTraceProcessor({
 });
 ```
 
-### Visual
+#### Visual
 
 ```ts
 type VisualTraceHandler = (
@@ -395,7 +453,7 @@ const traceProcessor = makeTraceProcessor({
 });
 ```
 
-### Choice
+#### Choice
 
 ```ts
 type Choice = {
@@ -409,7 +467,7 @@ const traceProcessor = makeTraceProcessor({
 });
 ```
 
-### Exit
+#### Exit
 
 Note that we sometimes refer to an `ExitTrace` with `"end"` instead.
 
@@ -421,7 +479,7 @@ const traceProcessor = makeTraceProcessor({
 });
 ```
 
-### Flow
+#### Flow
 
 ```ts
 type FlowTraceHandler = (diagramID: string) => any;
@@ -431,7 +489,7 @@ const traceProcessor = makeTraceProcessor({
 });
 ```
 
-### Block
+#### Block
 
 ```ts
 type BlockTraceHandler = (blockID: string) => any;
@@ -624,7 +682,7 @@ Keep in mind that the `State` object in a Voiceflow application state will conta
 A `GeneralTrace` is an object which represents one piece of the overall response from a Voiceflow app. Specialized traces like `SpeakTrace` are a sub-type of the more abstract `GeneralTrace` super-type, as shown below.
 
 ```ts
-export type GeneralTrace = ExitTrace | SpeakTrace | ChoiceTrace | FlowTrace | StreamTrace | BlockTrace | DebugTrace | VisualTrace;
+export type GeneralTrace = EndTrace | SpeakTrace | ChoiceTrace | FlowTrace | StreamTrace | BlockTrace | DebugTrace | VisualTrace | AudioTrace;
 ```
 
 All trace obejcts have a `type` and `payload` property, but differ in what the value of `type` and `payload` is. Shown below is a type that describes the common structure of trace objects. **NOTE**: the `Trace` type isn't actually declared in the package and is only shown for illustration.
@@ -634,16 +692,17 @@ const Trace<T extends TraceType, P> = {
   trace: T;
   payload: P;
 };
-// e.g. type SpeakTrace = Trace<TraceType.SPEAK, { message: string, src: string, type?: string }>
+// e.g. type SpeakTrace = Trace<TraceType.SPEAK, { message: string, src: string }>
 ```
 
-In TypeScript, the `string enum` called `TraceType` is exported by this package and you can use it to quickly access the trace type string. A partial list of the available trace types is shown below.
+In TypeScript, the `string enum` called `TraceType` is exported by this package and you can use it to quickly access the trace type string. A list of the available trace types is shown below.
 
-```js
+```ts
 enum TraceType {
     END = "end",
     FLOW = "flow",
     SPEAK = "speak",
+    AUDIO = 'audio',
     BLOCK = "block",
     DEBUG = "debug",
     CHOICE = "choice",
@@ -655,23 +714,31 @@ For each of the specialized trace types, we will describe each trace's purpose a
 
 ### SpeakTrace
 
-- **PURPOSE:** Contains the "real" response of the voice interface. Corresponds to a Speak Step or Audio Step on Voiceflow.
+- **PURPOSE:** Contains the "real" response of the voice interface. Corresponds to a Speak Step on Voiceflow.
 - **PAYLOAD:**
   - **`message`** - The text representation of the response from the voice interface. We strip any SSML that you may have added to the response on Voiceflow. To see the SSML, see the `ssml` option for the `RuntimeClient` constructor.
-  - **`type`** - If `"audio"`, then this `SpeakTrace` corresponds to an Audio Step on the Voiceflow diagram. If `"message"`, then this corresponds to a Speak Step on the Voiceflow diagram.
-  - **`src`** - If `type` is `"audio"`, then this property always appears and contains a URL to the audio-file associated with the Audio Step. If `type` is `"message"`, then this property only appears if the `tts` option in `RuntimeClient` constructor is set to `true`.
+  - **`src`** - This property is a URL to an audio-file that voices out the `message`. This property contains valid data only if the `tts` option in `RuntimeClient` constructor is set to `true`. 
   - **`voice`** - Only appears if `type` is `"message"` and `tts` is enabled. This property is the name of the voice assistant you chose to read out the Speak Step text.
 
 ```ts
-enum SpeakType {
-  AUDIO = 'audio',
-  MESSAGE = 'message',
-}
 type P = {
   message: string;
-  type: SpeakType;
   src?: string | null;
   voice?: string;
+};
+```
+
+### AudioTrace
+
+- **PURPOSE:** Contains the "real" response of the Voice interface. Corresponds to an Audio Step on Voiceflow
+- **PAYLOAD:**
+  - **`src`** - This property is a URL to an audio-file that contains the response. 
+  - **`message`** - An SSML representation of the audio-file being played. This is somewhat less useful.
+
+```ts
+type P = {
+  src: string;
+  message: string;
 };
 ```
 
