@@ -4,7 +4,7 @@ import _ from 'lodash';
 
 import { RequestContext, ResponseContext, TraceType } from '@/lib/types';
 
-import { AUDIO_TRACE, BLOCK_TRACE, CHOICE_TRACE, CHOICE_TRACE_WITH_NO_CHOICES, DEBUG_TRACE, END_TRACE, FLOW_TRACE, SPEAK_TRACE } from '../fixtures';
+import { AUDIO_TRACE, BLOCK_TRACE, CHOICE_TRACE, CHOICE_TRACE_WITH_NO_CHOICES, DEBUG_TRACE, END_TRACE, FLOW_TRACE, SPEAK_TRACE, SPEAK_TRACE_UNSANITIZED } from '../fixtures';
 
 export { CHOICE_TRACE } from '../fixtures';
 
@@ -65,6 +65,11 @@ export const START_RESPONSE_BODY_WITH_NO_CHOICES = {
   ...START_RESPONSE_BODY,
   trace: [..._.initial(START_RESPONSE_BODY.trace), CHOICE_TRACE_WITH_NO_CHOICES],
 };
+
+export const START_RESPONSE_BODY_UNSANITIZED = {
+  ...START_RESPONSE_BODY,
+  trace: [SPEAK_TRACE_UNSANITIZED]
+}
 
 export const USER_RESPONSE = 'This is what the user says in response to the voice assistant';
 export const INTENT_RESPONSE: IntentRequest['payload'] = {

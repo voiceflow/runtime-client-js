@@ -4,8 +4,7 @@ import _ from 'lodash';
 import sinon from 'sinon';
 
 import RuntimeClient from '@/lib/RuntimeClient';
-import { DataConfig, TRACE_EVENT, TraceType } from '@/lib/types';
-import { makeTraceProcessor } from '@/lib/Utils/makeTraceProcessor';
+import { DataConfig, GeneralTrace, TraceType, TRACE_EVENT } from '@/lib/types';
 
 import {
   CHOICE_TRACE,
@@ -24,8 +23,10 @@ import {
   START_RESPONSE_BODY_WITH_NO_CHOICES,
   USER_RESPONSE,
   VF_APP_INITIAL_STATE,
+  START_RESPONSE_BODY_UNSANITIZED,
 } from '../Context/fixtures';
-import { AUDIO_TRACE, BLOCK_TRACE, DEBUG_TRACE, END_TRACE, FLOW_TRACE, SPEAK_TRACE } from '../fixtures';
+import { AUDIO_TRACE, BLOCK_TRACE, DEBUG_TRACE, END_TRACE, FLOW_TRACE, SPEAK_TRACE, SPEAK_TRACE_UNSANITIZED } from '../fixtures';
+import { makeTraceProcessor } from '@/lib/Utils/makeTraceProcessor';
 
 chai.use(chaiAsPromise);
 
@@ -90,6 +91,22 @@ describe('RuntimeClient', () => {
 
     expect(data.toJSON()).to.eql(START_RESPONSE_BODY);
     expect(agent.getContext()?.toJSON()).to.eql(START_RESPONSE_BODY);
+  });
+
+  it('start, options', async () => {
+    const { agent, client } = createRuntimeClient();
+    
+    const result: GeneralTrace[] = [];
+
+    agent.on(TraceType.SPEAK, (trace) => {
+      result.push(trace)
+    });
+
+    client.interact.resolves(START_RESPONSE_BODY_UNSANITIZED);
+
+    await agent.start({ sanitizeTraces: false });
+
+    expect(result).to.eql([SPEAK_TRACE_UNSANITIZED])
   });
 
   it('sendText', async () => {

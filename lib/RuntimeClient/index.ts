@@ -17,6 +17,10 @@ type OnMethodHandlerArgMap<V> = {
   trace: GeneralTraceEventHandler<V>;
 };
 
+export type InteractionMethodOptions = Partial<{
+  sanitizeTraces: boolean;
+}>;
+
 export class RuntimeClient<V extends Record<string, any> = Record<string, any>> {
   private client: Client<V>;
 
@@ -34,14 +38,14 @@ export class RuntimeClient<V extends Record<string, any> = Record<string, any>> 
     this.context = new Context({ request: null, state, trace: [] }, this.dataConfig);
   }
 
-  async start(): Promise<Context<V>> {
+  async start(options?: InteractionMethodOptions): Promise<Context<V>> {
     this.context = new Context(resetContext(this.context.toJSON()), this.dataConfig);
-    return this.sendRequest(null);
+    return this.sendRequest(null, options);
   }
 
-  async sendText(userInput: string): Promise<Context<V>> {
+  async sendText(userInput: string, options?: InteractionMethodOptions): Promise<Context<V>> {
     if (!userInput?.trim?.()) {
-      return this.sendRequest(null);
+      return this.sendRequest(null, options);
     }
     return this.sendRequest({ type: RequestType.TEXT, payload: userInput });
   }
@@ -59,19 +63,24 @@ export class RuntimeClient<V extends Record<string, any> = Record<string, any>> 
     return this.sendRequest({ type: RequestType.INTENT, payload: { intent: { name }, entities, query, confidence } });
   }
 
-  async sendRequest(request: GeneralRequest) {
+  async sendRequest(request: GeneralRequest, options: InteractionMethodOptions = {}) {
     if (this.context.isEnding()) {
       throw new VFClientError('RuntimeClient.sendText() was called but the conversation has ended');
     }
+
+    const { sanitizeTraces: sanitize } = options;
+
     this.setContext(await this.client.interact(makeRequestBody(this.context!, request, this.dataConfig)));
 
     if (this.dataConfig.traceProcessor) {
       this.context!.getResponse().forEach(this.dataConfig.traceProcessor);
     }
 
-    await Bluebird.each(this.context!.getTrace(), async (trace: GeneralTrace) => {
-      await this.events.handle(trace, this.context!);
-    });
+    await Bluebird.each(
+      this.context!.getTrace({ sanitize }), 
+      async (trace: GeneralTrace) => {
+        await this.events.handle(trace, this.context!);
+      });
 
     return this.context;
   }
