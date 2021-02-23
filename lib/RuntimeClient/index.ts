@@ -1,4 +1,4 @@
-import { GeneralRequest, RequestType } from '@voiceflow/general-types';
+import { GeneralRequest, IntentRequest, RequestType } from '@voiceflow/general-types';
 import { State } from '@voiceflow/runtime';
 import Bluebird from 'bluebird';
 
@@ -44,6 +44,19 @@ export class RuntimeClient<V extends Record<string, any> = Record<string, any>> 
       return this.sendRequest(null);
     }
     return this.sendRequest({ type: RequestType.TEXT, payload: userInput });
+  }
+
+  async sendIntent(
+    name: string,
+    entities: {
+      name: string;
+      value: string;
+      query?: string;
+    }[] = [],
+    query = '',
+    confidence?: number
+  ): Promise<Context<V>> {
+    return this.sendRequest({ type: RequestType.INTENT, payload: { intent: { name }, entities, query, confidence } });
   }
 
   async sendRequest(request: GeneralRequest) {
