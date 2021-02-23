@@ -34,7 +34,6 @@ export class RuntimeClientFactory<S extends Record<string, any> = Record<string,
     this.dataConfig = {
       tts: false,
       ssml: false,
-      includeTypes: [],
       ...dataConfig,
     };
   }

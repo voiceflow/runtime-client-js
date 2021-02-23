@@ -66,10 +66,6 @@ export class RuntimeClient<V extends Record<string, any> = Record<string, any>> 
 
     this.setContext(await this.client.interact(makeRequestBody(this.context!, request, this.dataConfig)));
 
-    if (this.dataConfig.traceProcessor) {
-      this.context!.getResponse().forEach(this.dataConfig.traceProcessor);
-    }
-
     await Bluebird.each(this.context!.getTrace({ sanitize: this.dataConfig.ssml }), async (trace: GeneralTrace) => {
       await this.events.handle(trace, this.context!);
     });

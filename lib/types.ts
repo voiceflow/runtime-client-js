@@ -54,8 +54,6 @@ export type GeneralTrace = BlockTrace | ChoiceTrace | DebugTrace | EndTrace | Fl
 export type DataConfig = {
   tts?: boolean;
   ssml?: boolean;
-  includeTypes?: string[];
-  traceProcessor?: (trace: GeneralTrace) => any;
 };
 
 export type ResponseContext = {

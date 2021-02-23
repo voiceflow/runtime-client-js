@@ -16,24 +16,11 @@
     - [Event Types](#event-types)
     - [Event Handlers](#event-handlers)
   - [Context](#context)
-    - [`.getResponse()`](#getresponse)
     - [`.isEnding()`](#isending)
     - [`.getChips()`](#getchips)
   - [Configuration](#configuration)
     - [`tts`](#tts)
     - [`ssml`](#ssml)
-    - [`includeTypes`](#includetypes)
-    - [`traceProcessor`](#traceprocessor)
-  - [`makeTraceProcessor`](#maketraceprocessor)
-    - [Handler Signatures](#handler-signatures)
-      - [Speak](#speak)
-      - [Audio](#audio)
-      - [Debug](#debug)
-      - [Visual](#visual)
-      - [Choice](#choice)
-      - [Exit](#exit)
-      - [Flow](#flow)
-      - [Block](#block)
   - [Variables](#variables)
     - [Getters](#getters)
     - [Setters](#setters)
@@ -43,7 +30,7 @@
     - [Problem](#problem)
     - [Solution](#solution)
   - [Best Practices](#best-practices)
-  - [Advanced Trace Types](#advanced-trace-types)
+  - [Trace Types](#trace-types)
     - [SpeakTrace](#speaktrace)
     - [AudioTrace](#audiotrace)
     - [DebugTrace](#debugtrace)
@@ -120,7 +107,7 @@ The `RuntimeClient` has an event system that notifies the developer of any chang
 
 ### Event Types
 
-Trace Events when the `RuntimeClient` receives a response from our Runtime servers. For **all** traces that `RuntimeClient` receives from our Runtime servers - not just the traces you've configured to see with the `includeTypes` option - we trigger a corresponding event for that trace.
+Trace Events when the `RuntimeClient` receives a response from our Runtime servers. For each trace that `RuntimeClient` receives from our Runtime servers we trigger a corresponding event for that trace.
 
 The full list of events is listed below.
 
@@ -182,7 +169,7 @@ rclient.on(TraceType.SPEAK, (trace, context) => {
 await rclient.start();
 ```
 
-If you are working in TypeScript, you will get auto-completion for `trace` objects. Alternatively, for documentation on each trace's payload, see [Advanced Trace Types](#advanced-trace-types).
+If you are working in TypeScript, you will get auto-completion for `trace` objects. Alternatively, for documentation on each trace's payload, see [Trace Types](#trace-types).
 
 
 
@@ -199,17 +186,19 @@ As described in "Statefulness of RuntimeClient", interaction methods replace `Ru
 
 The `Context` object has a handful of methods to expose its internal data. We will describe a subset of them below.
 
-### `.getResponse()`
+### `.getTrace()`
 
-Returns a list of traces representing the Voiceflow app's response.
-
-Although we say that the list of traces represents the app response, the `.getResponse()` is returning a **view** that presents a subset of all the traces returned by runtime server. By default, the `Context` will only expose `SpeakTrace`s through this view, so that we don't overwhelm the developer with irrelevant traces.
-
-To expose the other trace types through `.getResponse()`, see the `includeTypes` option in the [Configuration](#configuration) section. Alternatively, you can view the unfiltered list of all traces using `context.getTrace()`.
+Returns a list of traces representing the Voiceflow app's response. We recommend using the event-system instead if you want to handle the data in the response.
 
 ```js
-const response = context.getResponse();
-response.forEach((trace) => console.log(trace.payload.message));
+const response = context.getTrace();
+response.forEach((trace) => {
+  if (trace.type === TraceType.SPEAK) {
+  	console.log(trace.payload.message)
+  } else if (trace.type === TraceType.DEBUG) {
+    errorLogger.log(trace.payload.message);
+  }
+});
 ```
 
 ### `.isEnding()`
@@ -253,12 +242,10 @@ You can also check our [samples](https://github.com/voiceflow/rcjs-examples) for
 
 ## Configuration
 
-The `RuntimeClientFactory` accepts configurations which it will apply to `RuntimeClient` instance it constructs. In particular, there is a `dataConfig` option for managing the data returned by `Context.getResponse()` for all `Context`s produced by a `RuntimeClient`. To summarize, there are four options currently available:
+The `RuntimeClientFactory` accepts configurations which it will apply to `RuntimeClient` instance it constructs. In particular, there is a `dataConfig` option for managing the data returned by `Context.getTrace()` for all `Context`s produced by a `RuntimeClient`. To summarize, there are four options currently available:
 
 1. `tts` - Set to `true` to enable text-to-speech functionality. Any returned `SpeakTrace`s corresponding to Speak Steps on Voiceflow will contain an additional`src` property containing an `.mp3` string, which is an audio-file that will speak out the trace text. This option does not affect `SpeakTrace`s corresponding to Audio Steps in any way and a `src` property is always generated.
-2. `ssml` - Set to `true` to disable the `Context`'s SSML sanitization and return the full text string with the SSML included. This may be useful if you want to use your own TTS system.
-3. `includeTypes` - Set to a list of `TraceType` strings which are the additional trace types your want from `.getResponse()`. A speak-type trace is always returned by `.getResponse()`. For the full list of available trace types and their `TraceType` strings, see [Advanced Trace Types](#advanced-trace-types).
-4. `traceProcessor` - Set to a "trace processor" function which will be automatically called whenever an interaction method like `.sendText()` receives new traces.
+2. `ssml` - Set to `true` to disable the `Context`'s SSML sanitization and return the full text string with the SSML included. This may be useful if you want to use your own TTS system
 
 The Samples section has some working code demonstrating some of the configuration options. Also, see the subsections below for how to access the data exposed by `dataConfig` options.
 
@@ -268,8 +255,6 @@ const app = new RuntimeClientFactory({
     dataConfig: {
       	tts: true,
       	ssml: true,
-        includeTypes: ['debug', 'stream', 'block']
-      	traceProcessor: myTraceProcessor
     }
 });
 ```
@@ -279,7 +264,7 @@ const app = new RuntimeClientFactory({
 Once you have this to `true`, you can access the TTS audio-file through `payload.src` in a `SpeakTrace` as shown below
 
 ```js
-const speakTrace = context.getResponse()[0];
+const speakTrace = context.getTrace()[0];				 // assume first element is a SpeakTrace
 const audio = new Audio(speakTrace.payload.src); // HTMLAudioElement
 audio.play();
 ```
@@ -289,7 +274,7 @@ audio.play();
 When this is set to `true`, the `message` string returned by a `SpeakTrace` will contain your SSML that you added through Voiceflow Creator.
 
 ```js
-console.log(context.getResponse());
+console.log(context.getTrace());
 /* prints out the following:
 [
   {
@@ -299,208 +284,13 @@ console.log(context.getResponse());
     }
   },
   {
-    "type": "speak",
+    "type": "debug",
     "payload": {
-      "message": "<voice name=\"Alexa\">How can I help? </voice>"
+      "message": "matched with Intent 'Fallback'"
     }
   }
 ]
 */
-```
-
-### `includeTypes`
-
-Once you have specified additional trace types, you will need some conditional logic to check what kind of trace you're looking at. We recommend using [`makeTraceProcessor`](#maketraceprocessor) to handle the boilerplate conditional logic for you.
-
-```js
-// Configure `includeTypes` to show debug traces
-const factory = new RuntimeClientFactory({
-  versionID: 'XXXXXXXXXXXXXXXXX',
-  dataConfig: {
-    includeTypes: ['debug'],
-  },
-});
-const app = factory.createClient();
-
-// Get the response and check if we have a speak or debug trace.
-const traces = context.getResponse();
-traces.forEach(({ type, payload }) => {
-  switch (type) {
-    case 'speak':
-      return handleSpeakPayload(payload);
-    case 'debug':
-      return handleDebugPayload(payload);
-    default:
-      throw new Error('Unknown trace type');
-  }
-});
-```
-
-### `traceProcessor`
-
-This option accepts any kind of function that accepts a `GeneralTrace`, but it might be easier to use `makeTraceProcessor`
-
-```js
-const traceProcessor = makeTraceProcessor({
-  speak: (message) => console.log(message),
-});
-
-const factory = new RuntimeClientFactory({
-  versionID: 'XXXXXXXXXXXXXXXXX',
-  traceProcessor,
-});
-const app = factory.createClient();
-
-const context = await app.start();
-context.getResponse().forEach(traceProcessor); // this line is implicitly called
-```
-
-## `makeTraceProcessor`
-
-A typical pattern for handling a Voiceflow app's response is to use a higher-order function (e.g. `map`) to invoke a callback on each trace in `Context.trace`.
-
-Unfortunately, if we also use the `includeTypes` property then there are many types of traces, each with their own unique attributes. If we wanted to process the entire list of traces, we would need boilerplate logic to (1) check the trace type, (2) unpack the data in the `payload` attriute, (3) pass that data into the appropriate handler.
-
-Instead the `runtime-client-js` package exposes a utility called `makeTraceProcessor` which allows you to quickly define a **trace processor** function that can be passed as a callback of a higher-order function (see below).
-
-The trace processor function will take in a `GeneralTrace` object, then determine which specific type of trace it is, e.g., a `SpeakTrace`. Then, it extracts the attributes in that trace's `payload` object and passes them as individual arguments to call a handler function that you specify.
-
-See a working project that uses `makeTraceProcessor` [here](https://github.com/voiceflow/rcjs-examples/tree/master/trace-processor).
-
-**Arguments:**
-
-- `handlerMap` - `object` - An object whose keys are `TraceType` strings (e.g. speak`for` `SpeakTrace`s), and whose values are handlers for that trace type. The full list of handler signatures is in the following subsection. For the full list of `TraceType` strings, see [Advanced Trace Types](#advanced-trace-types)
-
-**Returns:**
-
-- `traceProcessor` - `(trace: GeneralTrace) => any` - A function that accepts any trace type and returns the return value of that trace type's handler in `handlerMap`
-
-**Example:**
-
-```js
-import { makeTraceProcessor } from '@voiceflow/runtime-client-js';
-
-// Defining a trace processor
-const i = 0;
-const traceProcessor = makeTraceProcessor({
-  speak: (message) => {
-    console.log(`speakHandler says: ${message}`);
-    return `vf-speak-${++i}`;
-  },
-});
-
-// Usage
-async () => {
-  const context = await chatbot.start();
-
-  const result1 = context.getResponse().map(traceProcessor);
-  // e.g. result = ['vf-speak-1', 'vf-speak-2', 'vf-speak-3']
-};
-```
-
-### Handler Signatures
-
-The argument types shown in the handler signatures are simplified. The arguments are ultimately the attributes from a trace's `payload` attribute. To see more precise types for the handler arguments, find the corresponding payload attribute's type defined in [Advanced Trace Types](#advanced-trace-types)
-
-#### Speak
-
-```ts
-// OPTION 1
-type SpeakTraceHandler = (message: string, src: undefined | string,) => any;
-
-const traceProcessor = makeTraceProcessor({
-    speak: (message) => {
-        console.log(`speakHandler says: ${message}`);
-      	return `vf-speak-${++i}`;
-    },
-});
-```
-
-#### Audio
-
-```ts
-// OPTION 1
-type AudioTraceHandler = (src: string) => any;
-
-const traceProcessor = makeTraceProcessor({
-    speak: (src) => {
-      const player = new AudioPlayer({
-        filename: url
-      });
-      player.play();
-    },
-});
-```
-
-#### Debug
-
-```ts
-type DebugTraceHandler = (message: string) => any;
-
-const traceProcessor = makeTraceProcessor({
-  debug: (message) => errorLogger.log(message),
-});
-```
-
-#### Visual
-
-```ts
-type VisualTraceHandler = (
-  image: string | null,
-  device: string | null,
-  dimensions: { width: string; height: string } | null,
-  canvasVisibility: 'full' | 'cropped'
-) => any;
-
-const traceProcessor = makeTraceProcessor({
-  visual: (image) => frontend.displayImage(image),
-});
-```
-
-#### Choice
-
-```ts
-type Choice = {
-  intent: undefined | string;
-  name: string;
-}[];
-type ChoiceTraceHandler = (choices: Choice[]) => any;
-
-const traceProcessor = makeTraceProcessor({
-  choice: (choices) => showSuggestionChips(choices.map((choice) => choice.name)),
-});
-```
-
-#### Exit
-
-Note that we sometimes refer to an `ExitTrace` with `"end"` instead.
-
-```ts
-type EndTraceHandler = () => any;
-
-const traceProcessor = makeTraceProcessor({
-  end: () => console.log('Got an end/exit trace!'),
-});
-```
-
-#### Flow
-
-```ts
-type FlowTraceHandler = (diagramID: string) => any;
-
-const traceProcessor = makeTraceProcessor({
-  flow: (diagramID) => console.log(diagramID),
-});
-```
-
-#### Block
-
-```ts
-type BlockTraceHandler = (blockID: string) => any;
-
-const traceProcessor = makeTraceProcessor({
-  block: (blockID) => console.log(blockID),
-});
 ```
 
 ## Variables
@@ -619,7 +409,7 @@ app.get('/', async (req, res) => {
 
   const context = await runtimeClients[req.userID].sendText(req.userInput);
 
-  return context.getResponse();
+  return context.getTrace();
 });
 ```
 
@@ -633,7 +423,7 @@ app.get('/', async (req, res) => {
 
   const context = await client.sendText(req.userInput);
 
-  return context.getResponse();
+  return context.getTrace();
 });
 ```
 
@@ -669,7 +459,7 @@ app.post('/:userID', async (req, res) => {
   }
 
   // send the traces
-  res.send(context.getResponse());
+  res.send(context.getTrace());
 });
 ```
 
@@ -681,7 +471,7 @@ For a full-working sample demonstrating this technique, see [here](https://githu
 
 Keep in mind that the `State` object in a Voiceflow application state will contains the value of any Voiceflow variables. We strongly recommend not embedding any sensitive information in Voiceflow variables or in any of your Voiceflow app responses. The `State` is transmitted over HTTP requests to our runtime servers.
 
-## Advanced Trace Types
+## Trace Types
 
 A `GeneralTrace` is an object which represents one piece of the overall response from a Voiceflow app. Specialized traces like `SpeakTrace` are a sub-type of the more abstract `GeneralTrace` super-type, as shown below.
 
@@ -844,8 +634,5 @@ By default, the client will use the Voiceflow hosted runtime at `https://general
 const factory = new RuntimeClientFactory({
   versionID: '5fa2c62c71d4fa0007f7881b',
   endpoint: 'https://localhost:4000', // change to a local endpoint or your company's production servers
-  dataConfig: {
-    includeTypes: ['visual'],
-  },
 });
 ```
