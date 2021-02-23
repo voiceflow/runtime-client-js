@@ -33,4 +33,5 @@
 - [ ] title of PR reflects the branch name
 - [ ] all commits adhere to conventional commits
 - [ ] appropriate tests have been written
-- [ ] all the dependendencies are upgraded
+- [ ] all the dependencies are upgraded
+- [ ] updated the documentation
