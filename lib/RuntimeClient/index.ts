@@ -1,4 +1,4 @@
-import { GeneralRequest, IntentRequest, RequestType } from '@voiceflow/general-types';
+import { GeneralRequest, RequestType } from '@voiceflow/general-types';
 import { State } from '@voiceflow/runtime';
 import Bluebird from 'bluebird';
 
