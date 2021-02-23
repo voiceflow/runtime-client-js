@@ -1,12 +1,12 @@
 import { State } from '@voiceflow/runtime';
-import axios, { AxiosInstance } from 'axios';
+import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 import _cloneDeep from 'lodash/cloneDeep';
 
 import { RequestContext, ResponseContext } from '@/lib/types';
 
 import { adaptResponseContext, extractAudioStep } from './adapters';
 
-export type ClientConfig<S> = { variables?: Partial<S>; endpoint: string; versionID: string };
+export type ClientConfig<S> = { variables?: Partial<S>; endpoint: string; versionID: string; axiosConfig?: AxiosRequestConfig };
 
 export class Client<S extends Record<string, any> = Record<string, any>> {
   private axios: AxiosInstance;
@@ -17,8 +17,8 @@ export class Client<S extends Record<string, any> = Record<string, any>> {
 
   private initVariables: Partial<S> | undefined;
 
-  constructor({ variables, endpoint, versionID }: ClientConfig<S>) {
-    this.axios = axios.create({ baseURL: endpoint });
+  constructor({ variables, endpoint, versionID, axiosConfig }: ClientConfig<S>) {
+    this.axios = axios.create({ ...axiosConfig, baseURL: endpoint });
 
     this.initVariables = variables;
     this.versionID = versionID;
