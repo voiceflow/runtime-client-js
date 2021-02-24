@@ -22,19 +22,19 @@ describe('EventManager', () => {
         const context2 = { b: 2 };
         const context3 = { c: 3 };
 
-        evManager.on(TraceType.SPEAK, (object, context) => {
+        evManager.onTraceType(TraceType.SPEAK, (object, context) => {
             result.push(object);
             result.push(context);
         });
-        evManager.on(TraceType.DEBUG, async (object, context) => {
+        evManager.onTraceType(TraceType.DEBUG, async (object, context) => {
             await new Promise(res => setTimeout(res, 20));
             result.push(object);
             result.push(context);
         });
         
-        await evManager.handle(DEBUG_TRACE, context3 as any);
-        await evManager.handle(SPEAK_TRACE, context1 as any);
-        await evManager.handle(VISUAL_TRACE, context2 as any);
+        await evManager.handleTrace(DEBUG_TRACE, context3 as any);
+        await evManager.handleTrace(SPEAK_TRACE, context1 as any);
+        await evManager.handleTrace(VISUAL_TRACE, context2 as any);
 
         expect(result).to.eql([
             DEBUG_TRACE,
@@ -51,13 +51,13 @@ describe('EventManager', () => {
         const context1 = { a: 1 };
         const context2 = { b: 2 };
 
-        evManager.onAny((object, context) => {
+        evManager.onGeneral((object, context) => {
             result.push(object);
             result.push(context);
         });
         
-        await evManager.handle(SPEAK_TRACE, context1 as any);
-        await evManager.handle(VISUAL_TRACE, context2 as any);
+        await evManager.handleTrace(SPEAK_TRACE, context1 as any);
+        await evManager.handleTrace(VISUAL_TRACE, context2 as any);
 
         expect(result).to.eql([
             SPEAK_TRACE,
