@@ -88,5 +88,13 @@ describe('RuntimeClientFactory', () => {
         ],
       ]);
     });
+
+    it('API key', () => {
+      const { agent, app } = createRuntimeClientFactory({ apiKey: 'foo' });
+
+      expect(app.createClient('state' as any)).to.eql(RUNTIME_CLIENT);
+
+      expect(agent.args).to.eql([['state', CLIENT, { apiKey: 'foo', dataConfig: { ssml: false, tts: false } }]]);
+    });
   });
 });

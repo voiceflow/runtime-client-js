@@ -52,6 +52,14 @@ describe('RuntimeClient', () => {
 
       expect(agent.getContext().toJSON()).to.eql({ state: VF_APP_INITIAL_STATE, request: null, trace: [] });
     });
+
+    it('invalid API key', () => {
+      expect(() => new RuntimeClient(VF_APP_INITIAL_STATE, {} as any, { apiKey: undefined as any })).to.throw('Invalid API key');
+      expect(() => new RuntimeClient(VF_APP_INITIAL_STATE, {} as any, { apiKey: 'hello' as any })).to.throw('Invalid API key');
+      expect(() => new RuntimeClient(VF_APP_INITIAL_STATE, {} as any, { apiKey: 'VF.' as any })).to.throw('Invalid API key');
+      expect(() => new RuntimeClient(VF_APP_INITIAL_STATE, {} as any, { apiKey: 'VF.xxxxxxxx' as any })).to.throw('Invalid API key');
+      expect(() => new RuntimeClient(VF_APP_INITIAL_STATE, {} as any, { apiKey: 'VF.xxxxxxxx.xxxxxxxx' as any })).not.to.throw();
+    });
   });
 
   it('start', async () => {

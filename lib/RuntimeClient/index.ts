@@ -38,7 +38,7 @@ export class RuntimeClient<V extends Record<string, any> = Record<string, any>> 
     this.context = new Context({ request: null, state, trace: [] }, this.dataConfig);
 
     if (!this.isAPIKey(this.apiKey)) {
-      throw new VError('Invalid API Key', VError.HTTP_STATUS.UNAUTHORIZED);
+      throw new VError('Invalid API key', VError.HTTP_STATUS.UNAUTHORIZED);
     }
   }
 
