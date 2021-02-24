@@ -3,12 +3,11 @@ import { State } from '@voiceflow/runtime';
 import Bluebird from 'bluebird';
 
 import Client from '@/lib/Client';
-import { VFClientError, VFTypeError } from '@/lib/Common';
+import { isGeneralTraceEvent, isValidTraceEvent, isValidTraceType, VFClientError, VFTypeError } from '@/lib/Common';
 import Context from '@/lib/Context';
-import EventManager, { BeforeProcessingEventHandler, GeneralTraceEventHandler, TraceEventHandler, AfterProcessingEventHandler } from '@/lib/Events';
-import { DataConfig, GeneralTrace, ResponseContext, TraceType, TraceEvent } from '@/lib/types';
+import EventManager, { AfterProcessingEventHandler, BeforeProcessingEventHandler, GeneralTraceEventHandler, TraceEventHandler } from '@/lib/Events';
+import { DataConfig, GeneralTrace, ResponseContext, TraceEvent, TraceType } from '@/lib/types';
 
-import { isValidTraceType } from '../DataFilterer/utils';
 import { makeRequestBody, resetContext } from './utils';
 
 type OnMethodHandlerArgMap<V> = {
@@ -28,10 +27,13 @@ export class RuntimeClient<V extends Record<string, any> = Record<string, any>> 
 
   private events: EventManager<V>;
 
+  private activePromise: Promise<any>;
+
   constructor(state: State, { client, dataConfig = {} }: { client: Client<V>; dataConfig?: DataConfig }) {
     this.client = client;
     this.dataConfig = dataConfig;
     this.events = new EventManager();
+    this.activePromise = new Promise((resolve) => resolve(true));
 
     this.context = new Context({ request: null, state, trace: [] }, this.dataConfig);
   }
@@ -68,78 +70,79 @@ export class RuntimeClient<V extends Record<string, any> = Record<string, any>> 
 
     this.setContext(await this.client.interact(makeRequestBody(this.context!, request, this.dataConfig)));
 
-    new Bluebird(async (resolve) => {
-      await this.events.handleProcessing(TraceEvent.BEFORE_PROCESSING, this.context!);
+    this.activePromise
+      .then(() => {
+        return new Bluebird(async (resolve) => {
+          await this.events.handleProcessing(TraceEvent.BEFORE_PROCESSING, this.context!);
 
-      await Bluebird.each(this.context!.getTrace({ sanitize: this.dataConfig.ssml }), async (trace: GeneralTrace) => {
-        await this.events.handle(trace, this.context!);
-      });
+          await Bluebird.each(this.context!.getTrace({ sanitize: this.dataConfig.ssml }), async (trace: GeneralTrace) => {
+            await this.events.handleTrace(trace, this.context!);
+          });
 
-      await this.events.handleProcessing(TraceEvent.AFTER_PROCESSING, this.context!);
+          await this.events.handleProcessing(TraceEvent.AFTER_PROCESSING, this.context!);
 
-      resolve();
-    });
+          resolve();
+        });
+      })
+      .catch((err) => err);
 
     return this.context;
   }
 
   on<T extends TraceType | TraceEvent>(event: T, handler: OnMethodHandlerArgMap<V>[T]) {
-    if (event === TraceEvent.GENERAL) {
-      return this.events.onAny(handler as GeneralTraceEventHandler<V>);
-    } else if (event === TraceEvent.BEFORE_PROCESSING) {
-      return this.events.onBeforeProcessing(handler as BeforeProcessingEventHandler<V>);
-    } else if (event === TraceEvent.AFTER_PROCESSING) {
-      return this.events.onAfterProcessing(handler as AfterProcessingEventHandler<V>);
-    } else if (isValidTraceType(event)) {
-      return this.events.on(event as any, handler as any);
+    if (isValidTraceType(event)) {
+      return this.events.onTraceType<TraceType>(event, handler as TraceEventHandler<TraceType, V>);
+    }
+    if (isValidTraceEvent(event)) {
+      return isGeneralTraceEvent(event)
+        ? this.events.onGeneral(handler as GeneralTraceEventHandler<V>)
+        : this.events.onTraceEvent(event, handler as any);
     }
     throw new VFTypeError(`event "${event}" is not valid`);
   }
 
   off<T extends TraceType | TraceEvent>(event: T, handler: OnMethodHandlerArgMap<V>[T]) {
-    if (event === TraceEvent.GENERAL) {
-      return this.events.offAny(handler as GeneralTraceEventHandler<V>);
-    } else if (event === TraceEvent.BEFORE_PROCESSING) {
-      return this.events.offBeforeProcessing(handler as BeforeProcessingEventHandler<V>);
-    } else if (event === TraceEvent.AFTER_PROCESSING) {
-      return this.events.offAfterProcessing(handler as AfterProcessingEventHandler<V>);
-    }
     if (isValidTraceType(event)) {
-      return this.events.off(event as any, handler as any);
+      return this.events.offTraceType<TraceType>(event, handler as any);
+    }
+    if (isValidTraceEvent(event)) {
+      return isGeneralTraceEvent(event)
+        ? this.events.offGeneral(handler as GeneralTraceEventHandler<V>)
+        : this.events.offTraceEvent(event, handler as any);
     }
     throw new VFTypeError(`event "${event}" is not valid`);
   }
 
   onSpeak(handler: TraceEventHandler<TraceType.SPEAK, V>) {
-    this.events.on(TraceType.SPEAK, handler);
+    this.events.onTraceType(TraceType.SPEAK, handler);
   }
 
   onAudio(handler: TraceEventHandler<TraceType.AUDIO, V>) {
-    this.events.on(TraceType.AUDIO, handler);
+    this.events.onTraceType(TraceType.AUDIO, handler);
   }
 
   onBlock(handler: TraceEventHandler<TraceType.BLOCK, V>) {
-    this.events.on(TraceType.BLOCK, handler);
+    this.events.onTraceType(TraceType.BLOCK, handler);
   }
 
   onDebug(handler: TraceEventHandler<TraceType.DEBUG, V>) {
-    this.events.on(TraceType.DEBUG, handler);
+    this.events.onTraceType(TraceType.DEBUG, handler);
   }
 
   onEnd(handler: TraceEventHandler<TraceType.END, V>) {
-    this.events.on(TraceType.END, handler);
+    this.events.onTraceType(TraceType.END, handler);
   }
 
   onFlow(handler: TraceEventHandler<TraceType.FLOW, V>) {
-    this.events.on(TraceType.FLOW, handler);
+    this.events.onTraceType(TraceType.FLOW, handler);
   }
 
   onVisual(handler: TraceEventHandler<TraceType.VISUAL, V>) {
-    this.events.on(TraceType.VISUAL, handler);
+    this.events.onTraceType(TraceType.VISUAL, handler);
   }
 
   onChoice(handler: TraceEventHandler<TraceType.CHOICE, V>) {
-    this.events.on(TraceType.CHOICE, handler);
+    this.events.onTraceType(TraceType.CHOICE, handler);
   }
 
   setContext(contextJSON: ResponseContext) {

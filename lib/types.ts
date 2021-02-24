@@ -108,8 +108,8 @@ export type TraceMap = {
 
 export enum TraceEvent {
   GENERAL = 'general',
-  BEFORE_PROCESSING = 'beforeProcessing',
-  AFTER_PROCESSING = 'afterProcessing',
+  BEFORE_PROCESSING = 'before_processing',
+  AFTER_PROCESSING = 'after_processing',
 }
 
 export type Choice = ChoiceTrace['payload']['choices'][number];

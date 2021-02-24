@@ -13,10 +13,15 @@ export type BeforeProcessingEventHandler<V extends Record<string, any>> = (conte
 export type AfterProcessingEventHandler<V extends Record<string, any>> = (context: Context<V>) => void;
 
 type TraceEventHandlerMap<V> = {
-  [TraceEvent.BEFORE_PROCESSING]: BeforeProcessingEventHandler<V>[],
-  [TraceEvent.AFTER_PROCESSING]: AfterProcessingEventHandler<V>[],
-  [TraceEvent.GENERAL]: BeforeProcessingEventHandler<V>[],
+  [TraceEvent.BEFORE_PROCESSING]: BeforeProcessingEventHandler<V>;
+  [TraceEvent.AFTER_PROCESSING]: AfterProcessingEventHandler<V>;
 };
+
+type Arrify<T extends Record<string, any>> = {
+  [K in keyof T]: Array<T[K]>;
+};
+
+type InternalTraceEventHandlersMap<V> = Arrify<TraceEventHandlerMap<V>>;
 
 type _Map<T extends Record<string, any>, K extends TraceType = TraceType> = Map<K, Array<TraceEventHandler<K, T>>>;
 
@@ -25,7 +30,7 @@ export class EventManager<V extends Record<string, any>> {
 
   private genHandlers: GeneralTraceEventHandler<V>[];
 
-  private traceEventHandlers: TraceEventHandlerMap<V>;
+  private traceEventHandlers: InternalTraceEventHandlersMap<V>;
 
   constructor() {
     this.specHandlers = new Map();
@@ -36,55 +41,40 @@ export class EventManager<V extends Record<string, any>> {
     this.traceEventHandlers = {
       [TraceEvent.BEFORE_PROCESSING]: [],
       [TraceEvent.AFTER_PROCESSING]: [],
-      [TraceEvent.GENERAL]: [],
     };
   }
 
-  on<T extends TraceType>(event: T, handler: TraceEventHandler<T, V>) {
-    this.addHandler(handler, this.specHandlers.get(event)! as TraceEventHandler<T, V>[]);
+  onTraceType<T extends TraceType>(event: T, handler: TraceEventHandler<T, V>) {
+    this.addHandler(handler, this.specHandlers.get(event)!);
   }
 
-  off<T extends TraceType>(event: T, handler: TraceEventHandler<T, V>) {
-    this.removeHandler(handler, this.specHandlers.get(event)! as TraceEventHandler<T, V>[])
+  offTraceType<T extends TraceType>(event: T, handler: TraceEventHandler<T, V>) {
+    this.removeHandler(handler, this.specHandlers.get(event)!);
   }
 
-  onAny(handler: GeneralTraceEventHandler<V>) {
+  onTraceEvent<T extends Exclude<TraceEvent, TraceEvent.GENERAL>>(event: T, handler: TraceEventHandlerMap<V>[T]) {
+    this.addHandler(handler, this.traceEventHandlers[event]);
+  }
+
+  offTraceEvent<T extends Exclude<TraceEvent, TraceEvent.GENERAL>>(event: T, handler: TraceEventHandlerMap<V>[T]) {
+    this.removeHandler(handler, this.traceEventHandlers[event]);
+  }
+
+  onGeneral(handler: GeneralTraceEventHandler<V>) {
     this.addHandler(handler, this.genHandlers);
   }
 
-  offAny(handler: GeneralTraceEventHandler<V>) {
+  offGeneral(handler: GeneralTraceEventHandler<V>) {
     this.removeHandler(handler, this.genHandlers);
   }
 
-  onBeforeProcessing(handler: BeforeProcessingEventHandler<V>) {
-    this.addHandler(handler, this.traceEventHandlers[TraceEvent.BEFORE_PROCESSING]);
-  }
-
-  offBeforeProcessing(handler: BeforeProcessingEventHandler<V>) {
-    this.removeHandler(handler, this.traceEventHandlers[TraceEvent.BEFORE_PROCESSING]);
-  }
-
-  onAfterProcessing(handler: BeforeProcessingEventHandler<V>) {
-    this.addHandler(handler, this.traceEventHandlers[TraceEvent.AFTER_PROCESSING]);
-  }
-
-  offAfterProcessing(handler: BeforeProcessingEventHandler<V>) {
-    this.removeHandler(handler, this.traceEventHandlers[TraceEvent.AFTER_PROCESSING]);
-  }
-
   async handleProcessing<E extends TraceEvent.AFTER_PROCESSING | TraceEvent.BEFORE_PROCESSING>(event: E, context: Context<V>) {
-    if (event === TraceEvent.BEFORE_PROCESSING) {
-      await Bluebird.each(this.traceEventHandlers[TraceEvent.BEFORE_PROCESSING], async (handler) => {
-        await handler(context);
-      });
-    } else if (event === TraceEvent.AFTER_PROCESSING) {
-      await Bluebird.each(this.traceEventHandlers[TraceEvent.AFTER_PROCESSING], async (handler) => {
-        await handler(context);
-      });
-    }
+    await Bluebird.each(this.traceEventHandlers[event], async (handler) => {
+      await handler(context);
+    });
   }
 
-  async handle<T extends TraceType>(trace: TraceMap[T], context: Context<V>) {
+  async handleTrace<T extends TraceType>(trace: TraceMap[T], context: Context<V>) {
     await Bluebird.each(this.specHandlers.get(trace.type)!, async (handler: TraceEventHandler<T, V>) => {
       await handler(trace, context);
     });
