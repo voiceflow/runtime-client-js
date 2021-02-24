@@ -5,8 +5,8 @@ import Bluebird from 'bluebird';
 import Client from '@/lib/Client';
 import { VFClientError, VFTypeError } from '@/lib/Common';
 import Context from '@/lib/Context';
-import EventManager, { GeneralTraceEventHandler, TraceEventHandler } from '@/lib/Events';
-import { DataConfig, GeneralTrace, ResponseContext, TRACE_EVENT, TraceType } from '@/lib/types';
+import EventManager, { BeforeProcessingEventHandler, GeneralTraceEventHandler, TraceEventHandler, AfterProcessingEventHandler } from '@/lib/Events';
+import { DataConfig, GeneralTrace, ResponseContext, TraceType, TraceEvent } from '@/lib/types';
 
 import { isValidTraceType } from '../DataFilterer/utils';
 import { makeRequestBody, resetContext } from './utils';
@@ -14,7 +14,9 @@ import { makeRequestBody, resetContext } from './utils';
 type OnMethodHandlerArgMap<V> = {
   [K in TraceType]: TraceEventHandler<K, V>;
 } & {
-  trace: GeneralTraceEventHandler<V>;
+  [TraceEvent.GENERAL]: GeneralTraceEventHandler<V>;
+  [TraceEvent.BEFORE_PROCESSING]: BeforeProcessingEventHandler<V>;
+  [TraceEvent.AFTER_PROCESSING]: AfterProcessingEventHandler<V>;
 };
 
 export class RuntimeClient<V extends Record<string, any> = Record<string, any>> {
@@ -66,26 +68,41 @@ export class RuntimeClient<V extends Record<string, any> = Record<string, any>> 
 
     this.setContext(await this.client.interact(makeRequestBody(this.context!, request, this.dataConfig)));
 
-    await Bluebird.each(this.context!.getTrace({ sanitize: this.dataConfig.ssml }), async (trace: GeneralTrace) => {
-      await this.events.handle(trace, this.context!);
+    new Bluebird(async (resolve) => {
+      await this.events.handleProcessing(TraceEvent.BEFORE_PROCESSING, this.context!);
+
+      await Bluebird.each(this.context!.getTrace({ sanitize: this.dataConfig.ssml }), async (trace: GeneralTrace) => {
+        await this.events.handle(trace, this.context!);
+      });
+
+      await this.events.handleProcessing(TraceEvent.AFTER_PROCESSING, this.context!);
+
+      resolve();
     });
 
     return this.context;
   }
 
-  on<T extends TraceType | TRACE_EVENT>(event: T, handler: OnMethodHandlerArgMap<V>[T]) {
-    if (event === TRACE_EVENT) {
+  on<T extends TraceType | TraceEvent>(event: T, handler: OnMethodHandlerArgMap<V>[T]) {
+    if (event === TraceEvent.GENERAL) {
       return this.events.onAny(handler as GeneralTraceEventHandler<V>);
-    }
-    if (isValidTraceType(event)) {
+    } else if (event === TraceEvent.BEFORE_PROCESSING) {
+      return this.events.onBeforeProcessing(handler as BeforeProcessingEventHandler<V>);
+    } else if (event === TraceEvent.AFTER_PROCESSING) {
+      return this.events.onAfterProcessing(handler as AfterProcessingEventHandler<V>);
+    } else if (isValidTraceType(event)) {
       return this.events.on(event as any, handler as any);
     }
     throw new VFTypeError(`event "${event}" is not valid`);
   }
 
-  off<T extends TraceType | TRACE_EVENT>(event: T, handler: OnMethodHandlerArgMap<V>[T]) {
-    if (event === TRACE_EVENT) {
+  off<T extends TraceType | TraceEvent>(event: T, handler: OnMethodHandlerArgMap<V>[T]) {
+    if (event === TraceEvent.GENERAL) {
       return this.events.offAny(handler as GeneralTraceEventHandler<V>);
+    } else if (event === TraceEvent.BEFORE_PROCESSING) {
+      return this.events.offBeforeProcessing(handler as BeforeProcessingEventHandler<V>);
+    } else if (event === TraceEvent.AFTER_PROCESSING) {
+      return this.events.offAfterProcessing(handler as AfterProcessingEventHandler<V>);
     }
     if (isValidTraceType(event)) {
       return this.events.off(event as any, handler as any);
