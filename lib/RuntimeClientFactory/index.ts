@@ -10,6 +10,7 @@ import { DEFAULT_ENDPOINT } from './constants';
 
 export type FactoryConfig<S extends State['variables']> = {
   versionID: string;
+  apiKey: string;
   endpoint?: string;
   dataConfig?: DataConfig;
   variables?: Partial<S>;
@@ -23,7 +24,9 @@ export class RuntimeClientFactory<S extends Record<string, any> = Record<string,
 
   private defaultState: State;
 
-  constructor({ versionID, endpoint = DEFAULT_ENDPOINT, dataConfig, variables, axiosConfig }: FactoryConfig<S>) {
+  private apiKey: string;
+
+  constructor({ versionID, apiKey, endpoint = DEFAULT_ENDPOINT, dataConfig, variables, axiosConfig }: FactoryConfig<S>) {
     if (variables) {
       validateVarMerge(variables);
     }
@@ -31,6 +34,7 @@ export class RuntimeClientFactory<S extends Record<string, any> = Record<string,
     this.client = new Client({ variables, endpoint, versionID, axiosConfig });
     this.defaultState = { stack: [], storage: {}, variables: { ...variables } };
 
+    this.apiKey = apiKey;
     this.dataConfig = {
       tts: false,
       ssml: false,
@@ -39,7 +43,7 @@ export class RuntimeClientFactory<S extends Record<string, any> = Record<string,
   }
 
   createClient(state: State = this.defaultState) {
-    return new RuntimeClient<S>(state, { client: this.client, dataConfig: this.dataConfig });
+    return new RuntimeClient<S>(state, this.client, { apiKey: this.apiKey, dataConfig: this.dataConfig });
   }
 }
 
