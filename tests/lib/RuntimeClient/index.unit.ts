@@ -88,7 +88,7 @@ describe('RuntimeClient', () => {
     const data = await agent.sendText(USER_RESPONSE);
 
     expect(client.interact.callCount).to.eql(2);
-    expect(client.interact.args[1]).to.eql([SEND_TEXT_REQUEST_BODY,  API_KEY]);
+    expect(client.interact.args[1]).to.eql([SEND_TEXT_REQUEST_BODY, API_KEY]);
 
     expect(data.toJSON()).to.eql(SEND_TEXT_RESPONSE_BODY);
   });
