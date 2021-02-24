@@ -106,10 +106,7 @@ export type TraceMap = {
   [TraceType.VISUAL]: VisualTrace;
 };
 
-export enum TraceEvent {
-  GENERAL = 'general',
-  BEFORE_PROCESSING = 'beforeProcessing',
-  AFTER_PROCESSING = 'afterProcessing',
-}
+export const TRACE_EVENT = 'trace';
+export type TRACE_EVENT = typeof TRACE_EVENT;
 
 export type Choice = ChoiceTrace['payload']['choices'][number];
