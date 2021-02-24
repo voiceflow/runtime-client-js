@@ -13,7 +13,9 @@ import { makeRequestBody, resetContext } from './utils';
 type OnMethodHandlerArgMap<V> = {
   [K in TraceType]: TraceEventHandler<K, V>;
 } & {
-  trace: GeneralTraceEventHandler<V>;
+  [TraceEvent.GENERAL]: GeneralTraceEventHandler<V>;
+  [TraceEvent.BEFORE_PROCESSING]: BeforeProcessingEventHandler<V>;
+  [TraceEvent.AFTER_PROCESSING]: AfterProcessingEventHandler<V>;
 };
 
 export class RuntimeClient<V extends Record<string, any> = Record<string, any>> {
