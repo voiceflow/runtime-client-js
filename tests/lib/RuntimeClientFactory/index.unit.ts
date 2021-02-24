@@ -8,6 +8,7 @@ import RuntimeClientFactory, { FactoryConfig } from '@/lib/RuntimeClientFactory'
 import { DEFAULT_ENDPOINT } from '@/lib/RuntimeClientFactory/constants';
 
 import { VERSION_ID } from '../Context/fixtures';
+import { API_KEY } from '../fixtures';
 
 chai.use(chaiAsPromise);
 
@@ -18,7 +19,7 @@ const createRuntimeClientFactory = <S>(factoryConfig?: Partial<FactoryConfig<any
   const client = sinon.stub(Client, 'default').returns(CLIENT);
   const agent = sinon.stub(RuntimeClient, 'default').returns(RUNTIME_CLIENT);
 
-  const app = new RuntimeClientFactory<S>({ versionID: VERSION_ID, ...factoryConfig });
+  const app = new RuntimeClientFactory<S>({ versionID: VERSION_ID, apiKey: API_KEY, ...factoryConfig });
 
   return { client, agent, app };
 };
@@ -70,7 +71,7 @@ describe('RuntimeClientFactory', () => {
 
       expect(app.createClient('state' as any)).to.eql(RUNTIME_CLIENT);
 
-      expect(agent.args).to.eql([['state', { client: CLIENT, dataConfig: { ssml: false, tts: false } }]]);
+      expect(agent.args).to.eql([['state', CLIENT, { apiKey: API_KEY, dataConfig: { ssml: false, tts: false } }]]);
     });
 
     it('default state', () => {
@@ -82,7 +83,8 @@ describe('RuntimeClientFactory', () => {
       expect(agent.args).to.eql([
         [
           { stack: [], storage: {}, variables: VARIABLES },
-          { client: CLIENT, dataConfig: { ssml: false, tts: false } },
+          CLIENT,
+          { apiKey: API_KEY, dataConfig: { ssml: false, tts: false } },
         ],
       ]);
     });

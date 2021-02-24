@@ -8,7 +8,7 @@ import Client, { ClientConfig } from '@/lib/Client';
 import { DEFAULT_ENDPOINT } from '@/lib/RuntimeClientFactory/constants';
 
 import { SEND_TEXT_REQUEST_BODY, SEND_TEXT_RESPONSE_BODY, VERSION_ID, VF_APP_INITIAL_STATE } from '../Context/fixtures';
-import { INTERACT_ENDPOINT, STATE_ENDPOINT } from '../fixtures';
+import { API_KEY, INTERACT_ENDPOINT, STATE_ENDPOINT } from '../fixtures';
 import { VF_APP_CUSTOM_INITIAL_VARIABLES } from './fixtures';
 
 chai.use(chaiAsPromise);
@@ -72,9 +72,9 @@ describe('Client', () => {
 
       axiosInstance.post.resolves(asHttpResponse(SEND_TEXT_RESPONSE_BODY));
 
-      expect(await client.interact(SEND_TEXT_REQUEST_BODY)).to.eql(SEND_TEXT_RESPONSE_BODY);
+      expect(await client.interact(SEND_TEXT_REQUEST_BODY, API_KEY)).to.eql(SEND_TEXT_RESPONSE_BODY);
 
-      expect(axiosInstance.post.args).to.eql([[INTERACT_ENDPOINT(VERSION_ID), SEND_TEXT_REQUEST_BODY]]);
+      expect(axiosInstance.post.args).to.eql([[INTERACT_ENDPOINT(VERSION_ID), SEND_TEXT_REQUEST_BODY, { headers: { authorization: API_KEY } }]]);
     });
   });
 
