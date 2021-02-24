@@ -40,7 +40,7 @@ export class Client<S extends Record<string, any> = Record<string, any>> {
 
   async interact(body: RequestContext, apiKey: string): Promise<ResponseContext> {
     return this.axios
-      .post(`/interact/${this.versionID}`, body, { headers: { authorization: apiKey } },)
+      .post(`/interact/${this.versionID}`, body, { headers: { authorization: apiKey } })
       .then((response) => response.data)
       .then((context) => adaptResponseContext(context))
       .then((context) => extractAudioStep(context));

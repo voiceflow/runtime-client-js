@@ -1,7 +1,7 @@
 import { GeneralRequest, RequestType } from '@voiceflow/general-types';
 import { State } from '@voiceflow/runtime';
-import Bluebird from 'bluebird';
 import VError from '@voiceflow/verror';
+import Bluebird from 'bluebird';
 
 import Client from '@/lib/Client';
 import { VFClientError, VFTypeError } from '@/lib/Common';
@@ -29,7 +29,7 @@ export class RuntimeClient<V extends Record<string, any> = Record<string, any>> 
 
   private apiKey: string;
 
-  constructor(state: State, client:Client<V>, { apiKey, dataConfig = {} }: { apiKey: string, dataConfig?: DataConfig }) {
+  constructor(state: State, client: Client<V>, { apiKey, dataConfig = {} }: { apiKey: string; dataConfig?: DataConfig }) {
     this.client = client;
     this.apiKey = apiKey;
     this.dataConfig = dataConfig;
@@ -142,7 +142,7 @@ export class RuntimeClient<V extends Record<string, any> = Record<string, any>> 
   }
 
   isAPIKey(authorization?: string): boolean {
-    return !!authorization && authorization.startsWith('VF.') && authorization.match(/\./g)?.length === 2;
+    return !!authorization && authorization.startsWith('VF.') && authorization.match(/\./g)!.length === 2;
   }
 }
 
