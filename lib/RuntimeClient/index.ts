@@ -1,6 +1,7 @@
 import { GeneralRequest, RequestType } from '@voiceflow/general-types';
 import { State } from '@voiceflow/runtime';
 import Bluebird from 'bluebird';
+import VError from '@voiceflow/verror';
 
 import Client from '@/lib/Client';
 import { VFClientError, VFTypeError } from '@/lib/Common';
@@ -26,12 +27,19 @@ export class RuntimeClient<V extends Record<string, any> = Record<string, any>> 
 
   private events: EventManager<V>;
 
-  constructor(state: State, { client, dataConfig = {} }: { client: Client<V>; dataConfig?: DataConfig }) {
+  private apiKey: string;
+
+  constructor(state: State, client:Client<V>, { apiKey, dataConfig = {} }: { apiKey: string, dataConfig?: DataConfig }) {
     this.client = client;
+    this.apiKey = apiKey;
     this.dataConfig = dataConfig;
     this.events = new EventManager();
 
     this.context = new Context({ request: null, state, trace: [] }, this.dataConfig);
+
+    if (!this.isAPIKey(this.apiKey)) {
+      throw new VError('Invalid API Key', VError.HTTP_STATUS.UNAUTHORIZED);
+    }
   }
 
   async start(): Promise<Context<V>> {
@@ -64,7 +72,7 @@ export class RuntimeClient<V extends Record<string, any> = Record<string, any>> 
       throw new VFClientError('RuntimeClient.sendText() was called but the conversation has ended');
     }
 
-    this.setContext(await this.client.interact(makeRequestBody(this.context!, request, this.dataConfig)));
+    this.setContext(await this.client.interact(makeRequestBody(this.context!, request, this.dataConfig), this.apiKey));
 
     await Bluebird.each(this.context!.getTrace({ sanitize: this.dataConfig.ssml }), async (trace: GeneralTrace) => {
       await this.events.handle(trace, this.context!);
@@ -131,6 +139,10 @@ export class RuntimeClient<V extends Record<string, any> = Record<string, any>> 
 
   getContext() {
     return this.context;
+  }
+
+  isAPIKey(authorization?: string): boolean {
+    return !!authorization && authorization.startsWith('VF.') && authorization.match(/\./g)?.length === 2;
   }
 }
 

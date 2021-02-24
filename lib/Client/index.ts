@@ -38,9 +38,9 @@ export class Client<S extends Record<string, any> = Record<string, any>> {
     return _cloneDeep(this.cachedInitState!);
   }
 
-  async interact(body: RequestContext): Promise<ResponseContext> {
+  async interact(body: RequestContext, apiKey: string): Promise<ResponseContext> {
     return this.axios
-      .post(`/interact/${this.versionID}`, body)
+      .post(`/interact/${this.versionID}`, body, { headers: { authorization: apiKey } },)
       .then((response) => response.data)
       .then((context) => adaptResponseContext(context))
       .then((context) => extractAudioStep(context));
