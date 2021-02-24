@@ -27,13 +27,10 @@ export class RuntimeClient<V extends Record<string, any> = Record<string, any>> 
 
   private events: EventManager<V>;
 
-  private activePromise: Promise<any>;
-
   constructor(state: State, { client, dataConfig = {} }: { client: Client<V>; dataConfig?: DataConfig }) {
     this.client = client;
     this.dataConfig = dataConfig;
     this.events = new EventManager();
-    this.activePromise = new Promise((resolve) => resolve(true));
 
     this.context = new Context({ request: null, state, trace: [] }, this.dataConfig);
   }
@@ -70,21 +67,17 @@ export class RuntimeClient<V extends Record<string, any> = Record<string, any>> 
 
     this.setContext(await this.client.interact(makeRequestBody(this.context!, request, this.dataConfig)));
 
-    this.activePromise
-      .then(() => {
-        return new Bluebird(async (resolve) => {
-          await this.events.handleProcessing(TraceEvent.BEFORE_PROCESSING, this.context!);
+    await new Bluebird(async (resolve) => {
+      await this.events.handleProcessing(TraceEvent.BEFORE_PROCESSING, this.context!);
 
-          await Bluebird.each(this.context!.getTrace({ sanitize: this.dataConfig.ssml }), async (trace: GeneralTrace) => {
-            await this.events.handleTrace(trace, this.context!);
-          });
+      await Bluebird.each(this.context!.getTrace({ sanitize: this.dataConfig.ssml }), async (trace: GeneralTrace) => {
+        await this.events.handleTrace(trace, this.context!);
+      });
 
-          await this.events.handleProcessing(TraceEvent.AFTER_PROCESSING, this.context!);
+      await this.events.handleProcessing(TraceEvent.AFTER_PROCESSING, this.context!);
 
-          resolve();
-        });
-      })
-      .catch((err) => err);
+      resolve();
+    });
 
     return this.context;
   }
