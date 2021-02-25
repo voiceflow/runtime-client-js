@@ -25,18 +25,18 @@ import {
   VF_APP_INITIAL_STATE,
   START_RESPONSE_BODY_UNSANITIZED,
 } from '../Context/fixtures';
-import { API_KEY, AUDIO_TRACE, BLOCK_TRACE, DEBUG_TRACE, END_TRACE, FLOW_TRACE, SPEAK_TRACE, SPEAK_TRACE_UNSANITIZED } from '../fixtures';
+import { AUDIO_TRACE, BLOCK_TRACE, DEBUG_TRACE, END_TRACE, FLOW_TRACE, SPEAK_TRACE, SPEAK_TRACE_UNSANITIZED } from '../fixtures';
 
 chai.use(chaiAsPromise);
 
-const createRuntimeClient = (apiKey: string = API_KEY, dataConfig?: DataConfig) => {
+const createRuntimeClient = (dataConfig?: DataConfig) => {
   const state = VF_APP_INITIAL_STATE;
   const client = {
     getInitialState: sinon.stub(state),
     interact: sinon.stub(),
   };
 
-  const agent = new RuntimeClient(state, client as any, { apiKey, dataConfig });
+  const agent = new RuntimeClient(state, { client: client as any, dataConfig });
 
   return { agent, client };
 };
@@ -52,14 +52,6 @@ describe('RuntimeClient', () => {
 
       expect(agent.getContext().toJSON()).to.eql({ state: VF_APP_INITIAL_STATE, request: null, trace: [] });
     });
-
-    it('invalid API key', () => {
-      expect(() => new RuntimeClient(VF_APP_INITIAL_STATE, {} as any, { apiKey: undefined as any })).to.throw('Invalid API key');
-      expect(() => new RuntimeClient(VF_APP_INITIAL_STATE, {} as any, { apiKey: 'hello' as any })).to.throw('Invalid API key');
-      expect(() => new RuntimeClient(VF_APP_INITIAL_STATE, {} as any, { apiKey: 'VF.' as any })).to.throw('Invalid API key');
-      expect(() => new RuntimeClient(VF_APP_INITIAL_STATE, {} as any, { apiKey: 'VF.xxxxxxxx' as any })).to.throw('Invalid API key');
-      expect(() => new RuntimeClient(VF_APP_INITIAL_STATE, {} as any, { apiKey: 'VF.xxxxxxxx.xxxxxxxx' as any })).not.to.throw();
-    });
   });
 
   it('start', async () => {
@@ -70,7 +62,7 @@ describe('RuntimeClient', () => {
     const data = await agent.start();
 
     expect(client.interact.callCount).to.eql(1);
-    expect(client.interact.args).to.eql([[{ ...START_REQUEST_BODY, state: { ...START_REQUEST_BODY.state, stack: [] } }, API_KEY]]);
+    expect(client.interact.args).to.eql([[{ ...START_REQUEST_BODY, state: { ...START_REQUEST_BODY.state, stack: [] } }]]);
 
     expect(data.toJSON()).to.eql(START_RESPONSE_BODY);
     expect(agent.getContext()?.toJSON()).to.eql(START_RESPONSE_BODY);
@@ -88,7 +80,7 @@ describe('RuntimeClient', () => {
     const data = await agent.sendText(USER_RESPONSE);
 
     expect(client.interact.callCount).to.eql(2);
-    expect(client.interact.args[1]).to.eql([SEND_TEXT_REQUEST_BODY, API_KEY]);
+    expect(client.interact.args[1]).to.eql([SEND_TEXT_REQUEST_BODY]);
 
     expect(data.toJSON()).to.eql(SEND_TEXT_RESPONSE_BODY);
   });
@@ -105,7 +97,7 @@ describe('RuntimeClient', () => {
     const data = await agent.sendIntent(INTENT_RESPONSE.intent.name, INTENT_RESPONSE.entities, INTENT_RESPONSE.query, INTENT_RESPONSE.confidence);
 
     expect(client.interact.callCount).to.eql(2);
-    expect(client.interact.args[1]).to.eql([SEND_INTENT_REQUEST_BODY, API_KEY]);
+    expect(client.interact.args[1]).to.eql([SEND_INTENT_REQUEST_BODY]);
 
     expect(data.toJSON()).to.eql(SEND_TEXT_RESPONSE_BODY);
   });
@@ -130,7 +122,6 @@ describe('RuntimeClient', () => {
           payload: { intent: { name: INTENT_RESPONSE.intent.name }, entities: [], query: '', confidence: undefined },
         },
       },
-      API_KEY
     ]);
 
     expect(data.toJSON()).to.eql(SEND_TEXT_RESPONSE_BODY);
@@ -148,7 +139,7 @@ describe('RuntimeClient', () => {
     const data = await agent.sendText('');
 
     expect(client.interact.callCount).to.eql(2);
-    expect(client.interact.args[1]).to.eql([{ ...SEND_TEXT_REQUEST_BODY, request: null }, API_KEY]);
+    expect(client.interact.args[1]).to.eql([{ ...SEND_TEXT_REQUEST_BODY, request: null }]);
 
     expect(data.toJSON()).to.eql(SEND_TEXT_RESPONSE_BODY);
   });
@@ -165,7 +156,7 @@ describe('RuntimeClient', () => {
     await agent.sendText({} as any);
 
     expect(client.interact.callCount).to.eql(2);
-    expect(client.interact.args[1]).to.eql([{ ...SEND_TEXT_REQUEST_BODY, request: null }, API_KEY]);
+    expect(client.interact.args[1]).to.eql([{ ...SEND_TEXT_REQUEST_BODY, request: null }]);
   });
 
   it('sendText, falsy', async () => {
@@ -180,7 +171,7 @@ describe('RuntimeClient', () => {
     await agent.sendText(undefined as any);
 
     expect(client.interact.callCount).to.eql(2);
-    expect(client.interact.args[1]).to.eql([{ ...SEND_TEXT_REQUEST_BODY, request: null }, API_KEY]);
+    expect(client.interact.args[1]).to.eql([{ ...SEND_TEXT_REQUEST_BODY, request: null }]);
   });
 
   it('sendText, called when conversation has ended', async () => {
@@ -248,7 +239,7 @@ describe('RuntimeClient', () => {
   });
 
   it('advanced config, SSML set to true', async () => {
-    const { agent, client } = createRuntimeClient(API_KEY, {
+    const { agent, client } = createRuntimeClient({
       tts: true,
       ssml: true,
     });
@@ -263,14 +254,14 @@ describe('RuntimeClient', () => {
     const response = context.getTrace();
 
     expect(client.interact.callCount).to.eql(2);
-    expect(client.interact.args[1]).to.eql([SEND_TEXT_REQUEST_BODY_TTS_ON, API_KEY]);
+    expect(client.interact.args[1]).to.eql([SEND_TEXT_REQUEST_BODY_TTS_ON]);
 
     expect((response[0] as any).payload.message).to.eql('<voice>Books ought to have to have good endings.</voice>');
     expect((response[0] as any).payload.src).to.eql('data:audio/mpeg;base64,SUQzBAAAAAAA');
   });
 
   it('advanced config, SSML set to false', async () => {
-    const { agent, client } = createRuntimeClient(API_KEY, {
+    const { agent, client } = createRuntimeClient({
       tts: true,
       ssml: false,
     });
@@ -285,7 +276,7 @@ describe('RuntimeClient', () => {
     const response = context.getTrace();
 
     expect(client.interact.callCount).to.eql(2);
-    expect(client.interact.args[1]).to.eql([SEND_TEXT_REQUEST_BODY_TTS_ON, API_KEY]);
+    expect(client.interact.args[1]).to.eql([SEND_TEXT_REQUEST_BODY_TTS_ON]);
 
     expect((response[0] as any).payload.message).to.eql('Books ought to have to have good endings.');
     expect((response[0] as any).payload.src).to.eql('data:audio/mpeg;base64,SUQzBAAAAAAA');
@@ -436,7 +427,7 @@ describe('RuntimeClient', () => {
     });
 
     it('config, no ssml in events', async () => {
-      const { agent, client } = createRuntimeClient(API_KEY, {
+      const { agent, client } = createRuntimeClient({
         ssml: false
       });
       

@@ -33,31 +33,32 @@ describe('RuntimeClientFactory', () => {
     it('constructor', () => {
       const { client } = createRuntimeClientFactory();
 
-      expect(client.args).to.eql([[{ versionID: VERSION_ID, endpoint: DEFAULT_ENDPOINT, variables: undefined, axiosConfig: undefined }]]);
+      expect(client.args).to.eql([[{ versionID: VERSION_ID, endpoint: DEFAULT_ENDPOINT, apiKey: API_KEY, variables: undefined, axiosConfig: undefined }]]);
     });
 
     it('variables', () => {
       const { client } = createRuntimeClientFactory({ variables: 'foo' as any });
 
-      expect(client.args).to.eql([[{ versionID: VERSION_ID, endpoint: DEFAULT_ENDPOINT, variables: 'foo', axiosConfig: undefined }]]);
+      expect(client.args).to.eql([[{ versionID: VERSION_ID, endpoint: DEFAULT_ENDPOINT, apiKey: API_KEY, variables: 'foo', axiosConfig: undefined }]]);
     });
 
     it('axiosConfig', () => {
       const { client } = createRuntimeClientFactory({ axiosConfig: 'foo' as any });
 
-      expect(client.args).to.eql([[{ versionID: VERSION_ID, endpoint: DEFAULT_ENDPOINT, variables: undefined, axiosConfig: 'foo' }]]);
+      expect(client.args).to.eql([[{ versionID: VERSION_ID, endpoint: DEFAULT_ENDPOINT, apiKey: API_KEY, variables: undefined, axiosConfig: 'foo' }]]);
     });
 
     it('optional', () => {
       const { client } = createRuntimeClientFactory({
         variables: 'foo' as any,
         versionID: 'bar',
+        apiKey: 'VF.foo.bar',
         endpoint: 'x',
         dataConfig: 'y' as any,
         axiosConfig: 'bar' as any,
       });
 
-      expect(client.args).to.eql([[{ versionID: 'bar', endpoint: 'x', variables: 'foo', axiosConfig: 'bar' }]]);
+      expect(client.args).to.eql([[{ versionID: 'bar', endpoint: 'x', apiKey: 'VF.foo.bar', variables: 'foo', axiosConfig: 'bar' }]]);
     });
 
     it('does not accept invalid variables', () => {
@@ -71,7 +72,7 @@ describe('RuntimeClientFactory', () => {
 
       expect(app.createClient('state' as any)).to.eql(RUNTIME_CLIENT);
 
-      expect(agent.args).to.eql([['state', CLIENT, { apiKey: API_KEY, dataConfig: { ssml: false, tts: false } }]]);
+      expect(agent.args).to.eql([['state', { client: CLIENT, dataConfig: { ssml: false, tts: false } }]]);
     });
 
     it('default state', () => {
@@ -83,18 +84,9 @@ describe('RuntimeClientFactory', () => {
       expect(agent.args).to.eql([
         [
           { stack: [], storage: {}, variables: VARIABLES },
-          CLIENT,
-          { apiKey: API_KEY, dataConfig: { ssml: false, tts: false } },
+          { client: CLIENT, dataConfig: { ssml: false, tts: false } },
         ],
       ]);
-    });
-
-    it('API key', () => {
-      const { agent, app } = createRuntimeClientFactory({ apiKey: 'foo' });
-
-      expect(app.createClient('state' as any)).to.eql(RUNTIME_CLIENT);
-
-      expect(agent.args).to.eql([['state', CLIENT, { apiKey: 'foo', dataConfig: { ssml: false, tts: false } }]]);
     });
   });
 });
