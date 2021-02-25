@@ -8,7 +8,7 @@ import Client, { ClientConfig } from '@/lib/Client';
 import { DEFAULT_ENDPOINT } from '@/lib/RuntimeClientFactory/constants';
 
 import { SEND_TEXT_REQUEST_BODY, SEND_TEXT_RESPONSE_BODY, VERSION_ID, VF_APP_INITIAL_STATE } from '../Context/fixtures';
-import { INTERACT_ENDPOINT, STATE_ENDPOINT } from '../fixtures';
+import { API_KEY, INTERACT_ENDPOINT, STATE_ENDPOINT } from '../fixtures';
 import { VF_APP_CUSTOM_INITIAL_VARIABLES } from './fixtures';
 
 chai.use(chaiAsPromise);
@@ -27,7 +27,7 @@ const createClient = <S = any>(config?: Partial<ClientConfig<S>>) => {
 
   const axiosCreate = sinon.stub(baseAxios, 'create').returns(axiosInstance as any);
 
-  const client = new Client({ versionID: VERSION_ID, endpoint: DEFAULT_ENDPOINT, ...(config as any) });
+  const client = new Client({ versionID: VERSION_ID, endpoint: DEFAULT_ENDPOINT, apiKey: API_KEY, ...(config as any) });
 
   return { client, axiosCreate, axiosInstance };
 };
@@ -45,6 +45,7 @@ describe('Client', () => {
       expect(axiosCreate.args[0]).to.eql([
         {
           baseURL: DEFAULT_ENDPOINT,
+          headers: { authorization: API_KEY },
         },
       ]);
     });
@@ -52,15 +53,25 @@ describe('Client', () => {
     it('options', () => {
       const versionID = 'customVersionID';
       const endpoint = 'customEndpoint';
-      const { axiosCreate, client } = createClient({ versionID, endpoint });
+      const apiKey = 'VF.custom.apiKey';
+      const { axiosCreate, client } = createClient({ versionID, endpoint, apiKey });
 
       expect(axiosCreate.callCount).to.eql(1);
       expect(axiosCreate.args[0]).to.eql([
         {
           baseURL: endpoint,
+          headers: { authorization: apiKey },
         },
       ]);
       expect(client.getVersionID()).to.eql(versionID);
+    });
+
+    it('invalid API key', () => {
+      expect(() => new Client({ versionID: VERSION_ID, endpoint: DEFAULT_ENDPOINT, apiKey: undefined as any })).to.throw('Invalid API key');
+      expect(() => new Client({ versionID: VERSION_ID, endpoint: DEFAULT_ENDPOINT, apiKey: 'hello' as any })).to.throw('Invalid API key');
+      expect(() => new Client({ versionID: VERSION_ID, endpoint: DEFAULT_ENDPOINT, apiKey: 'VF.' as any })).to.throw('Invalid API key');
+      expect(() => new Client({ versionID: VERSION_ID, endpoint: DEFAULT_ENDPOINT, apiKey: 'VF.xxxxxxxx' as any })).to.throw('Invalid API key');
+      expect(() => new Client({ versionID: VERSION_ID, endpoint: DEFAULT_ENDPOINT, apiKey: 'VF.xxxxxxxx.xxxxxxxx' as any })).not.to.throw();
     });
   });
 

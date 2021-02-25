@@ -1,4 +1,5 @@
 import { State } from '@voiceflow/runtime';
+import VError from '@voiceflow/verror';
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 import _cloneDeep from 'lodash/cloneDeep';
 
@@ -6,7 +7,7 @@ import { RequestContext, ResponseContext } from '@/lib/types';
 
 import { adaptResponseContext, extractAudioStep } from './adapters';
 
-export type ClientConfig<S> = { variables?: Partial<S>; endpoint: string; versionID: string; axiosConfig?: AxiosRequestConfig };
+export type ClientConfig<S> = { variables?: Partial<S>; endpoint: string; versionID: string; apiKey: string; axiosConfig?: AxiosRequestConfig };
 
 export class Client<S extends Record<string, any> = Record<string, any>> {
   private axios: AxiosInstance;
@@ -17,8 +18,12 @@ export class Client<S extends Record<string, any> = Record<string, any>> {
 
   private initVariables: Partial<S> | undefined;
 
-  constructor({ variables, endpoint, versionID, axiosConfig }: ClientConfig<S>) {
-    this.axios = axios.create({ ...axiosConfig, baseURL: endpoint });
+  constructor({ variables, endpoint, versionID, apiKey, axiosConfig }: ClientConfig<S>) {
+    if (!Client.isAPIKey(apiKey)) {
+      throw new VError('Invalid API key', VError.HTTP_STATUS.UNAUTHORIZED);
+    }
+
+    this.axios = axios.create({ ...axiosConfig, baseURL: endpoint, headers: { authorization: apiKey } });
 
     this.initVariables = variables;
     this.versionID = versionID;
@@ -48,6 +53,10 @@ export class Client<S extends Record<string, any> = Record<string, any>> {
 
   getVersionID() {
     return this.versionID;
+  }
+
+  static isAPIKey(authorization?: string): boolean {
+    return !!authorization && authorization.startsWith('VF.') && authorization.match(/\./g)!.length === 2;
   }
 }
 
