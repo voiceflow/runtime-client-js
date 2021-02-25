@@ -24,17 +24,14 @@ export class RuntimeClientFactory<S extends Record<string, any> = Record<string,
 
   private defaultState: State;
 
-  private apiKey: string;
-
-  constructor({ versionID, apiKey, endpoint = DEFAULT_ENDPOINT, dataConfig, variables, axiosConfig }: FactoryConfig<S>) {
+  constructor({ versionID, endpoint = DEFAULT_ENDPOINT, apiKey, dataConfig, variables, axiosConfig }: FactoryConfig<S>) {
     if (variables) {
       validateVarMerge(variables);
     }
 
-    this.client = new Client({ variables, endpoint, versionID, axiosConfig });
+    this.client = new Client({ variables, endpoint, versionID, apiKey, axiosConfig });
     this.defaultState = { stack: [], storage: {}, variables: { ...variables } };
 
-    this.apiKey = apiKey;
     this.dataConfig = {
       tts: false,
       ssml: false,
@@ -43,7 +40,7 @@ export class RuntimeClientFactory<S extends Record<string, any> = Record<string,
   }
 
   createClient(state: State = this.defaultState) {
-    return new RuntimeClient<S>(state, this.client, { apiKey: this.apiKey, dataConfig: this.dataConfig });
+    return new RuntimeClient<S>(state, { client: this.client, dataConfig: this.dataConfig });
   }
 }
 
