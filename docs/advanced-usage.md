@@ -633,6 +633,7 @@ By default, the client will use the Voiceflow hosted runtime at `https://general
 ```js
 const factory = new RuntimeClientFactory({
   versionID: '5fa2c62c71d4fa0007f7881b',
+  apiKey: 'VF.3fs98h2f09.asd9020jisafj',
   endpoint: 'https://localhost:4000', // change to a local endpoint or your company's production servers
 });
 ```
