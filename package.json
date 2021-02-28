@@ -13,7 +13,7 @@
     "@voiceflow/verror": "^1.1.0",
     "axios": "^0.21.1",
     "bluebird": "^3.7.2",
-    "html-parse-stringify": "^2.0.1",
+    "html-parse-stringify": "^1.0.3",
     "lodash": "^4.17.20"
   },
   "devDependencies": {
