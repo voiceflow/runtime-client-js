@@ -112,41 +112,45 @@ Trace Events when the `RuntimeClient` receives a response from our Runtime serve
 The full list of events is listed below.
 
 - `TraceType.X` - When a specific trace of type `X` is being processed, there is a corresponding event that is fired, e.g., if `SpeakTrace` is received then the `TraceType.SPEAK` event is triggered.
-- `TRACE_EVENT` - Triggered when any trace is being processed.
+- `TraceEvent.GENERAL` - Triggered when any trace is being processed.
+- `TraceEvent.BEFORE_PROCESSING` - Triggered before any `TraceType.X` event is fired.
+- `TraceEvent.AFTER_PROCESSING` - Triggered after all traces from the response fire off `TraceType.X` events and are subsequently handled.
 
 Moreover, Trace Events are **guaranteed to occur in the order of the trace response**. For example, if the `RuntimeClient` received a list containing `BlockTrace`, `SpeakTrace`, `DebugTrace`, `SpeakTrace` in that order, then the following events will occur in this exact order:
 
+- `TraceEvent.BEFORE_PROCESSING`
 - `TraceType.BLOCK`
-- `TRACE_EVENT`
+- `TraceEvent.GENERAL`
 - `TraceType.SPEAK` - Corresponds with the first `SpeakTrace` in the list
-- `TRACE_EVENT`
+- `TraceEvent.GENERAL`
 - `TraceType.DEBUG`
-- `TRACE_EVENT`
+- `TraceEvent.GENERAL`
 - `TraceType.SPEAK` - Corresponds with the second `SpeakTrace` in the list
-- `TRACE_EVENT`
+- `TraceEvent.GENERAL`
+- `TraceEvent.AFTER_PROCESSING`
 
 ### Event Handlers
 
 To register an event handler, use the below methods:
 
-- `.on(event: TraceType | TRACE_EVENT, handler: Function)` - This method is used to register `handler` on the given `event`
+- `.on(event: TraceType | TraceEvent, handler: Function)` - This method is used to register `handler` on the given `event`
 - `.onSpeak(handler: Function)` - This method is used to register `handler` on a `TraceType.SPEAK` event. There exists equivalents for all other trace types as well.
 
 Note, since Trace Events occur in the order of the trace response, then handlers also execute sequentially in the order. That is, we call handlers for a trace in the response list, only after all previous traces in the list are handled.
 
 ```ts
-rclient.on(TraceType.SPEAK, (trace, context) => {		// register a handler for only SpeakTraces
-  console.log(trace.payload.message);								// traces will be added to your local store in order
+rclient.on(TraceType.SPEAK, (trace, context) => {		 // register a handler for only SpeakTraces
+  console.log(trace.payload.message);								 // traces will be added to your local store in order
 });
-rclient.on(TRACE_EVENT, (trace, context) => {				// register a handler for any GeneralTrace
+rclient.on(TraceEvent.GENERAL, (trace, context) => { // register a handler for any GeneralTrace
   console.log(trace);
 });
-await rclient.start();															// trigger event handler if `SpeakTrace` received
+await rclient.start();															 // trigger event handler if `SpeakTrace` received
 ```
 
 You can remove event handlers using the `.off()` function as shown below. 
 
-- `.off(event: TraceType | TRACE_EVENT, handler: Function)`
+- `.off(event: TraceType | TraceEvent, handler: Function)`
 
 Another thing to note, event handlers can be asynchronous. Since traces are processed sequentially, you can create a delay between the handling of each trace by instantiating a promise with a timeout. This is helpful for implementing fancy UI logic that creates a delay between the rendering of text responses.
 
