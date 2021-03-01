@@ -6,20 +6,21 @@
 
 To start integrating the Voiceflow app in your codebase, we do the following:
 
-1. Set up a `RuntimeClient` instance using a `RuntimeClientFactory` as shown below. Paste the `VERSION_ID` of your Voiceflow project into the `versionID` configuration option.
+1. Set up a `RuntimeClient` instance using a `RuntimeClientFactory` as shown below. Paste the `VERSION_ID` of your Voiceflow project into the `versionID` configuration option and paste the API key for your Voiceflow workspace into the `apiKey` option.
 
 ```js
 import RuntimeClientFactory from "@voiceflow/runtime-client-js"
 
 const factory = new RuntimeClientFactory({
-   versionID: 'XXXXXXXXXXXXXXXXXXXXXXXX' // the VERSION_ID goes here 
+   versionID: 'XXXXXXXXXXXXXXXXXXXXXXXX', // the VERSION_ID goes here 
+   apiKey: 'VF.XXXXXXXX.XXXXXXXX'         // the API key goes here 
 })
 const chatbot = factory.createClient();
 ```
 
-1. Call `.start()` to begin a conversation session with the Voiceflow app.
-2. Store the result of `.start()` into `context`. The `context` is a `Context` object, which is a snapshot of the conversation's current state and it contains useful information like Voiceflow variables.
-3. Output the response by iterating over `context.getResponse()` and logging `trace.payload.message`. A **trace** is a piece of the entire response.
+2. Call `.start()` to begin a conversation session with the Voiceflow app.
+3. Store the result of `.start()` into `context`. The `context` is a `Context` object, which is a snapshot of the conversation's current state and it contains useful information like Voiceflow variables.
+4. Output the response by iterating over `context.getResponse()` and logging `trace.payload.message`. A **trace** is a piece of the entire response.
 
 ```js
 (async () => {
@@ -30,8 +31,8 @@ const chatbot = factory.createClient();
 })();
 ```
 
-4. For subsequent requests after `.start()`, call `.sendText()` and pass in any user input. We call `.sendText()` and `.start()` **interaction methods**.
-5. Output the response from `.sendText()` like we did above.
+5. For subsequent requests after `.start()`, call `.sendText()` and pass in any user input. We call `.sendText()` and `.start()` **interaction methods**.
+6. Output the response from `.sendText()` like we did above.
 
 ```js
 async(() => {
@@ -46,8 +47,8 @@ async(() => {
 });
 ```
 
-6. Call `context.isEnding()` to check if the conversation has ended after each interaction method call. When a conversation ends, any calls to interaction methods - except `.start()` - will throw an exception.
-7. Call `.start()` again to restart the conversation.
+7. Call `context.isEnding()` to check if the conversation has ended after each interaction method call. When a conversation ends, any calls to interaction methods - except `.start()` - will throw an exception.
+8. Call `.start()` again to restart the conversation.
 
 ```js
 async(() => {

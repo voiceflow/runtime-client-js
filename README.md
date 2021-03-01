@@ -62,6 +62,7 @@ const { RuntimeClientFactory } = require('@voiceflow/runtime-client-js');
 // Construct an object
 const factory = new RuntimeClientFactory({
   versionID: 'your-version-id-here', // ADD YOUR VERSION ID HERE
+  apiKey: 'your-api-key-here', // ADD YOUR API KEY HERE
   endpoint: 'https://general-runtime.voiceflow.com',
 });
 const client = factory.createClient();
