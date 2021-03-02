@@ -431,7 +431,7 @@ describe('RuntimeClient', () => {
         result.push(context);
       });
       
-      client.interact.resolves(START_RESPONSE_BODY);
+      client.interact.resolves(START_RESPONSE_BODY_UNSANITIZED);
 
       const context = await agent.start();
 
@@ -446,7 +446,7 @@ describe('RuntimeClient', () => {
 
     it('config, no ssml in events', async () => {
       const { agent, client } = createRuntimeClient({
-        ssml: false
+        ssml: true
       });
       
       const result: GeneralTrace[] = [];
