@@ -12,12 +12,15 @@
   - [Statefulness of RuntimeClient](#statefulness-of-runtimeclient)
     - [Conversation Session](#conversation-session)
     - [Interaction Methods](#interaction-methods)
-      - [.start()](#.start())
-      - [.sendText()](#.sendText(userInput))
-      - [.sendIntent()](#.sendIntent(intentName, entities))
+      - [`.start()`](#.start())
+      - [`.sendText()`](#.sendText(userInput))
+      - [`.sendIntent()`](#.sendIntent(intentName, entities))
   - [Events](#events)
     - [Event Types](#event-types)
     - [Event Handlers](#event-handlers)
+      - [`.on()`](#.on(event, handler))
+      - [`.onSpeak()`](#.onSpeak(handler))
+      - [`.off()`](#.off(event, handler))
   - [Context](#context)
     - [`.isEnding()`](#isending)
     - [`.getChips()`](#getchips)
@@ -97,12 +100,11 @@ The list of interaction methods is as follows:
 
 #### `.start()`
 
+- **DESC:** Starts the conversation session and runs the application until it requests user input, at which point, the method returns the current `context`. If this is called while a conversation session is ongoing, then it starts a new conversation session from the beginning.
 - **ARG:** 
   - None
 - **RETURNS:** 
   - `Context` - A context representing the current application state
-- **SIDE-EFFECT:**
-  - Starts the conversation session and runs the application until it requests user input, at which point, the method returns the current `context`. If this is called while a conversation session is ongoing, then it starts a new conversation session from the beginning.
 - **ASSUMPTIONS**
   - This is callable at any time.
 
@@ -114,12 +116,11 @@ const context = await runtimeClient.start()
 
 #### `.sendText(userInput)`
 
+- **DESC:**  Advances the conversation session based on the user's input and then runs the application until it requests user input, at which point, the method returns the current `context`.
 - **ARG:**
   -  `userInput` - `string` - The user's response.
 - **RETURNS:**
   - `Context` - A context representing the current application state.
-- **SIDE-EFFECT:**
-  -  Advances the conversation session based on the user's input and then runs the application until it requests user input, at which point, the method returns the current `context`.
 - **ASSUMPTIONS**
   - Callable only if `RuntimeCient` has an ongoing conversation session. That is, `runtimeClient.getContext().isEnding()` is `false`. If there is no ongoing conversation session, then this call throws an exception.
 
@@ -131,13 +132,12 @@ const context = await runtimeClient.sendText("I would like a large cheeseburger 
 
 #### `.sendIntent(intentName, entities)`
 
+- **DESC:** Advances the conversation session based an intent being invoked - make sure that the `intentName` exists in the interaction model on your Voiceflow project. This bypasses NLP/NLU resolution, and is useful in explicitly triggering certain conversation paths. The method returns the current `context`.
 - **ARG:**
-  - `intentName` - `string` - 
-  - `entities` - `Entity[]` - 
+  - `intentName` - `string` 
+  - `entities` - `Entity[]` 
 - **RETURNS:**
   - `Context` - A context representing the current application state.
-- **SIDE-EFFECT:**
-  - Advances the conversation session based an intent being invoked - make sure that the `intentName` exists in the interaction model on your Voiceflow project. This bypasses NLP/NLU resolution, and is useful in explicitly triggering certain conversation paths. The method returns the current `context`.
 - **ASSUMPTIONS**
   - Callable only if `RuntimeCient` has an ongoing conversation session. That is, `runtimeClient.getContext().isEnding()` is `false`. If there is no ongoing conversation session, then this call throws an exception.
 
@@ -171,25 +171,25 @@ Moreover, Trace Events are **guaranteed to occur in the order of the trace respo
 - `TraceEvent.GENERAL`
 - `TraceEvent.AFTER_PROCESSING`
 
+Since Trace Events occur in the order of the trace response, then handlers also execute in order. 
+
 ### Event Handlers
 
-To register an event handler, use the below methods:
+### `.on(event, handler)`
 
-- `.on(event: TraceType | TraceEvent, handler: Function)` - This method is used to register `handler` on the given `event`
-- `.onSpeak(handler: Function)` - This method is used to register `handler` on a `TraceType.SPEAK` event. There exists equivalents for all other trace types as well.
+- **DESC:** Registers the `handler` to fire whenever the specified `event` occurs
+- **ARG:**
+  -  `event` - `TraceType` | `TraceEvent` - The name of the event to listen for
+  - `handler` - `Function` - The handler for the event. The specific function signature depends on `event`
+    - `(trace: T, context: Context) => void`  - Handles `TraceType.X`, `TraceEvent.GENERAL`
+      - `trace` - `T` - The trace object that triggered the current `event`. The type `T` varies depending on the `event` that was triggered. If the `event` is a specific trace type, like `TraceType.SPEAK`, then `T` is type of that trace, `SpeakTrace`. If the `event` is `TraceEvent.GENERAL`, then `T` is type `GeneralTrace`
+      - `context` - A `Context` representing the current application state
+    - `(context: Context) => void` - Handles `TraceEvent.BEFORE_PROCESSING`, `TraceEvent.AFTER_PROCESSING` 
+      - `context` - A `Context` representing the current application state
+- **RETURNS**:
+  - None
 
-The `handler` has the following signature:
-
-- `(trace: XYZTrace, context: Context) => void` - For a `TraceType.XYZ` or `TraceEvent.GENERAL` handler. The full list of trace types is [here](#trace-types)
-- `(context: Context) => void` - For any other kind of `TraceEvent` handler.
-
-You can remove event handlers using the `.off()` function as shown below. 
-
-- `.off(event: TraceType | TraceEvent, handler: Function)`
-
-Since Trace Events occur in the order of the trace response, then handlers also execute in order. That is, we call handlers for a trace in the response list, only after all previous traces in the list are handled.
-
-```ts
+```js
 rclient.on(TraceType.SPEAK, (trace, context) => {		 // register a handler for only SpeakTraces
   console.log(trace.payload.message);								 // traces will be added to your local store in order
 });
@@ -198,6 +198,45 @@ rclient.on(TraceEvent.GENERAL, (trace, context) => { // register a handler for a
 });
 await rclient.start();															 // trigger event handler if `SpeakTrace` received
 ```
+
+
+
+### `.onSpeak(handler)`
+
+- **DESC:** Register the `handler` whenever a `TraceType.SPEAK` event occurs. A similar function exists for the other `TraceType`s. 
+- **ARG:**
+  - `handler` - `(trace: T, context: Context) => void` - The handler for the event.
+    - `trace` - `T` - The `SpeakTrace` that triggered the event
+    - `context` - A `Context` representing the current application state
+- **RETURNS**
+  - None
+
+```js
+rclient.onSpeak((trace, context) => {			// register a handler for only SpeakTraces
+  console.log(trace.payload.message);			// traces will be added to your local store in order
+});
+```
+
+
+
+### `.off(event, handler)`
+
+- **DESC:** Removes the `handler` from the list of `event` listeners.
+- **ARG:**
+  -  `event` - `TraceType` | `TraceEvent` - The name of the event, whose listener we must remove.
+  - `handler` - `Function` - The handler of the event to remove.
+- **RETURNS**
+  - None
+
+```js
+const dummy = (trace) => {
+  console.log(trace.payload.message)
+};
+rclient.on(TraceType.SPEAK, dummy);
+rclient.off(TraceType.SPEAK, dummy);
+```
+
+### Asynchronous Event Handlers
 
 Another thing to note, event handlers can be asynchronous. Since traces are processed sequentially, you can create a delay between the handling of each trace by instantiating a promise with a timeout. This is helpful for implementing fancy UI logic that creates a delay between the rendering of text responses.
 
@@ -219,8 +258,6 @@ rclient.on(TraceType.SPEAK, (trace, context) => {
 });
 await rclient.start();
 ```
-
-If you are working in TypeScript, you will get auto-completion for `trace` objects. Alternatively, for documentation on each trace's payload, see [Trace Types](#trace-types).
 
 
 
