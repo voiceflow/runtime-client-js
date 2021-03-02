@@ -342,6 +342,7 @@ The Samples section has some working code demonstrating some of the configuratio
 ```js
 const app = new RuntimeClientFactory({
     versionID: 'XXXXXXXXXXXXXXXXX',
+  	apiKey: 'VF.XXXXXX.XXXXXXXXX'
     dataConfig: {
       	tts: true,
       	ssml: true,
@@ -443,6 +444,7 @@ export type VFVariablesSchema = {
 
 const factory = new RuntimeClientFactory<VFVariablesSchema>({
   versionID: 'some-version-id',
+  apiKey: 'VF.XXXXXX.XXXXXXXXX'
 });
 const app = factory.createClient();
 
@@ -463,12 +465,14 @@ import RuntimeClientFactory from '@voiceflow/runtime-client-factory';
 
 const customerSupportBotFactory = new RuntimeClientFactory({
   versionID: 'support-bot-1-id',
+  apiKey: 'VF.XXXXXX.XXXXXXXXX'
 });
 const supportBot1 = customerSupportBotFactory.createClient();
 const supportBot2 = customerSupportBotFactory.createClient(); // independent from supportBot1
 
 const orderBotFactory = new RuntimeClientFactory({
   versionID: 'order-bot-id',
+  apiKey: 'VF.XXXXXX.XXXXXXXXX'
 });
 const orderBot = orderBotFactory.createClient();
 ```
@@ -485,6 +489,7 @@ Ideally, we don't want to persist a `RuntimeClient` for every client that sends 
 // Our factory
 const factory = new RuntimeClientFactory({
   versionID: 'fdsafsdafsdfsdf',
+  apiKey: 'VF.XXXXXX.XXXXXXXXX'
 });
 
 // Our collection of RuntimeClients
