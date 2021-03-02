@@ -70,7 +70,7 @@ export class RuntimeClient<V extends Record<string, any> = Record<string, any>> 
     await new Bluebird(async (resolve) => {
       await this.events.handleProcessing(TraceEvent.BEFORE_PROCESSING, this.context!);
 
-      await Bluebird.each(this.context!.getTrace({ sanitize: this.dataConfig.ssml }), async (trace: GeneralTrace) => {
+      await Bluebird.each(this.context!.getTrace({ sanitize: !this.dataConfig.ssml }), async (trace: GeneralTrace) => {
         await this.events.handleTrace(trace, this.context!);
       });
 
