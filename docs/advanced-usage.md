@@ -12,6 +12,9 @@
   - [Statefulness of RuntimeClient](#statefulness-of-runtimeclient)
     - [Conversation Session](#conversation-session)
     - [Interaction Methods](#interaction-methods)
+      - [.start()](#.start())
+      - [.sendText()](#.sendText(userInput))
+      - [.sendIntent()](#.sendIntent(intentName, entities))
   - [Events](#events)
     - [Event Types](#event-types)
     - [Event Handlers](#event-handlers)
@@ -41,6 +44,8 @@
     - [BlockTrace](#blocktrace)
   - [Runtime](#runtime)
 
+
+
 ## Main Components
 
 The main components from `runtime-client-js` you should understand are the `RuntimeClientFactory` and the `RuntimeClient`. We will briefly introduce each component. We provide more detail in following sections.
@@ -63,7 +68,7 @@ A `RuntimeClient` instance is a **stateful** object that represents some Voicefl
 
 We frequently refer to a conversation session in the documentation. A **conversation session** is an ongoing execution of the Voiceflow app.
 
-The `RuntimeClient` is said to store the current state of the conversation session. The most recent `Context` object returned by an interaction method contains the state of the current conversation session.
+The `RuntimeClient` is said to store the current state of the conversation session. The most recent `Context` object returned by an interaction method, such as `.start()` or `.sendText()`, also contains the state of the current conversation session.
 
 Typically, a conversation session begins when you call **`.start()`** and it is said to have terminated when some `context` returned by a subsequent interaction method returns `true` for **`.isEnding()`.** For example:
 
@@ -82,24 +87,61 @@ Alternatively, the current conversation session can end if we call `.start()` to
 
 ### Interaction Methods
 
-An **interaction method** is any method of `RuntimeClient` which sends a request to our runtime servers. Interaction methods transition the conversation session and produce side-effects on the current internal state of `RuntimeClient`.
+An **interaction method** is any method of `RuntimeClient` which sends a request to our runtime servers. Interaction methods transition the conversation session and produce side-effects on `RuntimeClient`.
 
-Specifically, an interaction method produces side-effects by sending the current internal state of `RuntimeClient` to our runtime servers. The servers compute the next state of the Voiceflow application and send it back to the `RuntimeClient`, and when the response arrives, the `RuntimeClient` updates its current internal state to the new application state.
+An interaction method sends the current internal state of `RuntimeClient` to our runtime servers. The servers compute the next state of the Voiceflow application and sends it back to the `RuntimeClient`, and when the response arrives, the `RuntimeClient` updates its current internal state to the new application state.
 
 This process of sending a request to the runtime servers, computing the next state, and storing it in `RuntimeClient`'s internal storage is referred to as **starting/advancing the conversation (session)**, depending on what side-effect is produced.
 
-Different interaction method have different side-effects on the conversation session. To summarize:
+The list of interaction methods is as follows:
 
-1. `.start()` - Starts the conversation session and runs the application until it requests user input, at which point, the method returns the current `context`. If this is called while a conversation session is ongoing, then it starts a new conversation session from the beginning.
-2. `.sendText(userInput)` - Advances the conversation session based on the user's input and then runs the application until it requests user input, at which point, the method returns the current `context`.
-3. `.sendIntent(intentName, entities)` - Advances the conversation session based an intent being invoked - make sure that the `intentName` exists in the interaction model on your Voiceflow project. This bypasses NLP/NLU resolution, and is useful in explicitly triggering certain conversation paths. The method returns the current `context`.
+#### `.start()`
 
-Now, only certain interaction methods are allowed to be called at certain points in conversation session.
+- **ARG:** 
+  - None
+- **RETURNS:** 
+  - `Context` - A context representing the current application state
+- **SIDE-EFFECT:**
+  - Starts the conversation session and runs the application until it requests user input, at which point, the method returns the current `context`. If this is called while a conversation session is ongoing, then it starts a new conversation session from the beginning.
+- **ASSUMPTIONS**
+  - This is callable at any time.
 
-1. `.start()` is callable any time.
-2. `.sendText()` and `.sendIntent()` are callable only if the `RuntimeClient` contains some ongoing conversation session. That is, `runtimeClient.getContext().isEnding()` is `false`. If you call `.sendText()` when the return of the aforementioned `.isEnding()` call is `true`, then calling `.sendText()` throws an exception.
+```js
+const context = await runtimeClient.start()
+```
 
-Thus, if `.isEnding()` is `true`, the only valid method you may call is `.start()` to restart the conversation session from the beginning.
+
+
+#### `.sendText(userInput)`
+
+- **ARG:**
+  -  `userInput` - `string` - The user's response.
+- **RETURNS:**
+  - `Context` - A context representing the current application state.
+- **SIDE-EFFECT:**
+  -  Advances the conversation session based on the user's input and then runs the application until it requests user input, at which point, the method returns the current `context`.
+- **ASSUMPTIONS**
+  - Callable only if `RuntimeCient` has an ongoing conversation session. That is, `runtimeClient.getContext().isEnding()` is `false`. If there is no ongoing conversation session, then this call throws an exception.
+
+```js
+const context = await runtimeClient.sendText("I would like a large cheeseburger with sprite");
+```
+
+
+
+#### `.sendIntent(intentName, entities)`
+
+- **ARG:**
+  - `intentName` - `string` - 
+  - `entities` - `Entity[]` - 
+- **RETURNS:**
+  - `Context` - A context representing the current application state.
+- **SIDE-EFFECT:**
+  - Advances the conversation session based an intent being invoked - make sure that the `intentName` exists in the interaction model on your Voiceflow project. This bypasses NLP/NLU resolution, and is useful in explicitly triggering certain conversation paths. The method returns the current `context`.
+- **ASSUMPTIONS**
+  - Callable only if `RuntimeCient` has an ongoing conversation session. That is, `runtimeClient.getContext().isEnding()` is `false`. If there is no ongoing conversation session, then this call throws an exception.
+
+
 
 ## Events
 
@@ -107,14 +149,14 @@ The `RuntimeClient` has an event system that notifies the developer of any chang
 
 ### Event Types
 
-Trace Events when the `RuntimeClient` receives a response from our Runtime servers. For each trace that `RuntimeClient` receives from our Runtime servers we trigger a corresponding event for that trace.
+Trace Events occur when the `RuntimeClient` receives a response from our Runtime servers. For each trace that `RuntimeClient` receives from our Runtime servers we trigger a corresponding event for that trace.
 
 The full list of events is listed below.
 
 - `TraceType.X` - When a specific trace of type `X` is being processed, there is a corresponding event that is fired, e.g., if `SpeakTrace` is received then the `TraceType.SPEAK` event is triggered.
 - `TraceEvent.GENERAL` - Triggered when any trace is being processed.
 - `TraceEvent.BEFORE_PROCESSING` - Triggered before any `TraceType.X` event is fired.
-- `TraceEvent.AFTER_PROCESSING` - Triggered after all traces from the response fire off `TraceType.X` events and are subsequently handled.
+- `TraceEvent.AFTER_PROCESSING` - Triggered after all `TraceType.X` events are fired and handled. 
 
 Moreover, Trace Events are **guaranteed to occur in the order of the trace response**. For example, if the `RuntimeClient` received a list containing `BlockTrace`, `SpeakTrace`, `DebugTrace`, `SpeakTrace` in that order, then the following events will occur in this exact order:
 
@@ -136,7 +178,16 @@ To register an event handler, use the below methods:
 - `.on(event: TraceType | TraceEvent, handler: Function)` - This method is used to register `handler` on the given `event`
 - `.onSpeak(handler: Function)` - This method is used to register `handler` on a `TraceType.SPEAK` event. There exists equivalents for all other trace types as well.
 
-Note, since Trace Events occur in the order of the trace response, then handlers also execute sequentially in the order. That is, we call handlers for a trace in the response list, only after all previous traces in the list are handled.
+The `handler` has the following signature:
+
+- `(trace: XYZTrace, context: Context) => void` - For a `TraceType.XYZ` or `TraceEvent.GENERAL` handler. The full list of trace types is [here](#trace-types)
+- `(context: Context) => void` - For any other kind of `TraceEvent` handler.
+
+You can remove event handlers using the `.off()` function as shown below. 
+
+- `.off(event: TraceType | TraceEvent, handler: Function)`
+
+Since Trace Events occur in the order of the trace response, then handlers also execute in order. That is, we call handlers for a trace in the response list, only after all previous traces in the list are handled.
 
 ```ts
 rclient.on(TraceType.SPEAK, (trace, context) => {		 // register a handler for only SpeakTraces
@@ -147,10 +198,6 @@ rclient.on(TraceEvent.GENERAL, (trace, context) => { // register a handler for a
 });
 await rclient.start();															 // trigger event handler if `SpeakTrace` received
 ```
-
-You can remove event handlers using the `.off()` function as shown below. 
-
-- `.off(event: TraceType | TraceEvent, handler: Function)`
 
 Another thing to note, event handlers can be asynchronous. Since traces are processed sequentially, you can create a delay between the handling of each trace by instantiating a promise with a timeout. This is helpful for implementing fancy UI logic that creates a delay between the rendering of text responses.
 
@@ -186,13 +233,15 @@ const context1 = await chatbot.start();
 const context2 = await chatbot.sendText(userInput);
 ```
 
-As described in "Statefulness of RuntimeClient", interaction methods replace `RuntimeClient`'s copy of the conversation session state. However, these methods create a new `Context` object. We never modify previous `Context` objects inside of an interaction method. Therefore, we can access past application states through past `Context`s. This means you can build a **history** of `Context` objects and implement time-travelling capabilities in your chatbot.
+As described in "Statefulness of RuntimeClient", interaction methods replace `RuntimeClient`'s internal copy of the conversation session state. More specifically, interaction methods create a new `Context` object. and we never modify any previous `Context` objects. 
+
+Therefore, we can access past application states through past `Context`s. This means you can build a **history** of `Context` objects and implement time-travelling capabilities in your chatbot.
 
 The `Context` object has a handful of methods to expose its internal data. We will describe a subset of them below.
 
 ### `.getTrace()`
 
-Returns a list of traces representing the Voiceflow app's response. We recommend using the event-system instead if you want to handle the data in the response.
+Returns a list of traces representing the Voiceflow app's response. You can use this to manually access the response from a Voiceeflow app. However, we recommend using the event-system instead if you want to handle the response's data.
 
 ```js
 const response = context.getTrace();
@@ -242,13 +291,13 @@ chips.forEach(({ name }) => {
 });
 ```
 
-You can also check our [samples](https://github.com/voiceflow/rcjs-examples) for a working implementation of suggestion chips on the browser.
+You can also check our [samples](https://github.com/voiceflow/rcjs-examples/tree/master/suggestion-chips) for a working implementation of suggestion chips on the browser.
 
 ## Configuration
 
 The `RuntimeClientFactory` accepts configurations which it will apply to `RuntimeClient` instance it constructs. In particular, there is a `dataConfig` option for managing the data returned by `Context.getTrace()` for all `Context`s produced by a `RuntimeClient`. To summarize, there are four options currently available:
 
-1. `tts` - Set to `true` to enable text-to-speech functionality. Any returned `SpeakTrace`s corresponding to Speak Steps on Voiceflow will contain an additional`src` property containing an `.mp3` string, which is an audio-file that will speak out the trace text. This option does not affect `SpeakTrace`s corresponding to Audio Steps in any way and a `src` property is always generated.
+1. `tts` - Set to `true` to enable text-to-speech functionality. Any returned `SpeakTrace`s will contain an additional`src` property containing an `.mp3` string, which is an audio-file that will speak out the trace text. 
 2. `ssml` - Set to `true` to disable the `Context`'s SSML sanitization and return the full text string with the SSML included. This may be useful if you want to use your own TTS system
 
 The Samples section has some working code demonstrating some of the configuration options. Also, see the subsections below for how to access the data exposed by `dataConfig` options.
@@ -447,13 +496,12 @@ app.post('/:userID', async (req, res) => {
 
   // pull the current conversation session of the user from our DB
   const state = await db.read(userID);
-  const firstInteraction = !state;
 
   // if `state` is `undefined` then allocate a new client
   const client = runtimeClientFactory.createClient(state);
 
   // send the next user request
-  const context = firstInteraction ? await client.start() : await client.sendText(userInput);
+  const context = await client.sendText(userInput);
 
   // check if we need to cleanup the conversation session
   if (context.isEnding()) {
