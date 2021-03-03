@@ -7,17 +7,17 @@ To start using the SDK, we should build a General Project on [Voiceflow](https:/
 **IMPORTANT:** If you choose to build your own project, make sure you are building a **General Project** (anything that is not an Alexa Project nor a Google Project). The SDK only supports integration with Voiceflow General Projects out of the box.
 
 1. Download this `.vf` file found [here](https://github.com/voiceflow/rcjs-examples/blob/master/hamburger-order/VoiceflowBurger.vf). The `.vf` file contains a pre-built Voiceflow project that can be imported.
-2. Upload the `.vf` file to Voiceflow to import the project. For instruction on how to do this, see [here](https://docs.voiceflow.com/#/platform/project-creation/project-creation?id=project-creation) and click the "Import a .vf file" tab.
-3. While you are on the Dashboard, append `/api-keys` to the end of your URL, so that it looks like the image below. Then, hit Enter to go to the API Keys page.
+2. Upload the `.vf` file to Voiceflow to import the project. For instructions on how to do this, see [here](https://docs.voiceflow.com/#/platform/project-creation/project-creation?id=project-creation) and click the "Import a .vf file" tab.
+3. While you are on the Dashboard, append `/api-keys` to the end of your URL, so that it looks like the image below, then, hit Enter to go to the API Keys page.
 
 <img width="557" alt="Address bar at the API keys page" src="https://user-images.githubusercontent.com/32404412/109706616-2b1b7600-7b67-11eb-8d2a-6d9c0521733b.png">
 
-4. On the API Keys page, click "Create New API Key" to generate an API Key. Copy-paste the key, as you will need it later.
+4. On the API Keys page, click "Create New API Key" to generate an API Key. Copy the key, as you will need it later. **NOTE:** You should not save the key somewhere public. This key should be kept secret and supplied to your JavaScript codebase through environment variables.
 
 <img width="1093" alt="API keys page with some generated API keys" src="https://user-images.githubusercontent.com/32404412/109706891-7d5c9700-7b67-11eb-9a6b-e515053931e9.png">
 
-5. Go back to your Dashboard
-6. Open the project you imported
+5. Go back to your Dashboard.
+6. Open the project you imported earlier.
 
 <p align="center">
 	<img width="546" alt="Button to enter the Hello World project" src="https://user-images.githubusercontent.com/32404412/107441822-eff7cb00-6b03-11eb-9bd6-5551c195669b.png">

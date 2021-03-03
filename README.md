@@ -77,7 +77,7 @@ const interact = (input) => client.sendText(input);
 // e.g. interact('can I have fries with that');
 ```
 
-Pass in user input with the `client.sendText(input)` function, and any of your `client.on...` functions will trigger during the response.
+Pass in user input with the `client.sendText(input)` function, and any of your `client.on...` handlers will trigger during the response.
 
 ### Setting up a Voiceflow App
 
@@ -85,7 +85,7 @@ See [here](docs/setting-up-vf-app.md) for instructions on how to quickly setup a
 
 ### Integration Step-by-Step
 
-See [here](docs/step-by-step.md) for a step-by-step breakdown of the Minimal Working Integration. Make sure to read "Setting up a Voiceflow App" first.
+See [here](docs/step-by-step.md) for step-by-step instructions on using the Runtime Client SDK. Make sure to read "Setting up a Voiceflow App" first.
 
 ## Advanced Usage
 

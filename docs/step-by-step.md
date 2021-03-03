@@ -31,7 +31,7 @@ chatbot.on(TraceType.SPEAK, (trace) => {
 
 3. Call `.start()` to begin a conversation session with the Voiceflow app. 
 4. Store the result of `.start()` into `context`. The `context` is a `Context` object, which is a snapshot of the conversation's current state and it contains useful information like Voiceflow variables.
-5. Output the traces manually by iterating over `context.getTrace()` and logging `trace.payload.message`. This is alternate way of working with the Voiceflow's app's response.
+5. Output the traces manually by iterating over `context.getTrace()` and logging `trace.payload.message`. This is an alternate way of working with the Voiceflow's app's response.
 
 ```js
 (async () => {
@@ -46,7 +46,7 @@ chatbot.on(TraceType.SPEAK, (trace) => {
 })();
 ```
 
-6. For subsequent requests after `.start()`, call `.sendText()` and pass in any user input. We call `.sendText()` and `.start()` **interaction methods**.
+6. For subsequent requests after `.start()`, call `.sendText()` and pass in any user input. The `.sendText()` and `.start()` methods are called **interaction methods**.
 7. Output the response from `.sendText()` like we did above.
 
 ```js

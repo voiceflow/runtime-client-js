@@ -122,7 +122,7 @@ const context = await runtimeClient.start()
 - **RETURNS:**
   - `Context` - A context representing the current application state.
 - **ASSUMPTIONS**
-  - Callable only if `RuntimeCient` has an ongoing conversation session. That is, `runtimeClient.getContext().isEnding()` is `false`. If there is no ongoing conversation session, then this call throws an exception.
+  - Callable only if `RuntimeClient` has an ongoing conversation session. That is, `runtimeClient.getContext().isEnding()` is `false`. If there is no ongoing conversation session, then this call throws an exception.
 
 ```js
 const context = await runtimeClient.sendText("I would like a large cheeseburger with sprite");
@@ -139,7 +139,7 @@ const context = await runtimeClient.sendText("I would like a large cheeseburger 
 - **RETURNS:**
   - `Context` - A context representing the current application state.
 - **ASSUMPTIONS**
-  - Callable only if `RuntimeCient` has an ongoing conversation session. That is, `runtimeClient.getContext().isEnding()` is `false`. If there is no ongoing conversation session, then this call throws an exception.
+  - Callable only if `RuntimeClient` has an ongoing conversation session. That is, `runtimeClient.getContext().isEnding()` is `false`. If there is no ongoing conversation session, then this call throws an exception.
 
 
 
