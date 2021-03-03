@@ -175,7 +175,7 @@ Since Trace Events occur in the order of the trace response, then handlers also 
 
 ### Event Handlers
 
-### `.on(event, handler)`
+#### `.on(event, handler)`
 
 - **DESC:** Registers the `handler` to fire whenever the specified `event` occurs
 - **ARG:**
@@ -201,7 +201,7 @@ await rclient.start();															 // trigger event handler if `SpeakTrace` r
 
 
 
-### `.onSpeak(handler)`
+#### `.onSpeak(handler)`
 
 - **DESC:** Register the `handler` whenever a `TraceType.SPEAK` event occurs. Similar functions exists for the other `TraceType`s. 
 - **ARG:**
@@ -219,7 +219,7 @@ rclient.onSpeak((trace, context) => {			// register a handler for only SpeakTrac
 
 
 
-### `.off(event, handler)`
+#### `.off(event, handler)`
 
 - **DESC:** Removes the `handler` from the list of `event` listeners.
 - **ARG:**
