@@ -1,10 +1,10 @@
-import _isUndefined from 'lodash/isUndefined';
-import _isNumber from 'lodash/isNumber';
-import _isString from 'lodash/isString';
-import _isNull from 'lodash/isNull';
+import _isArray from 'lodash/isArray';
 import _isBoolean from 'lodash/isBoolean';
+import _isNull from 'lodash/isNull';
+import _isNumber from 'lodash/isNumber';
 import _isPlainObject from 'lodash/isPlainObject';
-import _isArray from 'lodash/isArray'
+import _isString from 'lodash/isString';
+import _isUndefined from 'lodash/isUndefined';
 
 import { VFTypeError } from '../Common';
 
