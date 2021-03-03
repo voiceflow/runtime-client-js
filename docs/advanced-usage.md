@@ -134,13 +134,18 @@ const context = await runtimeClient.sendText("I would like a large cheeseburger 
 
 - **DESC:** Advances the conversation session based an intent being invoked - make sure that the `intentName` exists in the interaction model on your Voiceflow project. This bypasses NLP/NLU resolution, and is useful in explicitly triggering certain conversation paths. The method returns the current `context`.
 - **ARG:**
-  - `intentName` - `string` 
-  - `entities` - `Entity[]` 
+  - `intentName` - `string` - The name of the intent that was matched
+  - `entities` - `Entity[]` - An `Entity` has the follow properties
+  	-  `name` - The name of the slot associated with the intent.
+  	-  `value` - The value which was assigned to the slot.
+  -  `query` - `string` - The user input that triggered the intent
 - **RETURNS:**
   - `Context` - A context representing the current application state.
 - **ASSUMPTIONS**
   - Callable only if `RuntimeClient` has an ongoing conversation session. That is, `runtimeClient.getContext().isEnding()` is `false`. If there is no ongoing conversation session, then this call throws an exception.
-
+```js
+const context = await client.sendIntent('order_pizza', [{ name: size, value: small }], 'I want a small pizza')
+```
 
 
 ## Events
