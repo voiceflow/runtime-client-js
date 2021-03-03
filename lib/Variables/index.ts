@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _isUndefined from 'lodash/isUndefined';
 
 import { VFClientError } from '../Common';
 import { ResponseContext } from '../types';
@@ -9,7 +9,7 @@ class VariableManager<S extends Record<string, any>> {
 
   get<K extends keyof S>(key: K): S[K] {
     const value = this.getVariables()[key];
-    if (_.isUndefined(value)) {
+    if (_isUndefined(value)) {
       throw new VFClientError(`variable "${key}" is undefined`);
     }
     return value;

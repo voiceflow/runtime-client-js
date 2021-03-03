@@ -1,12 +1,18 @@
-import _ from 'lodash';
+import _isUndefined from 'lodash/isUndefined';
+import _isNumber from 'lodash/isNumber';
+import _isString from 'lodash/isString';
+import _isNull from 'lodash/isNull';
+import _isBoolean from 'lodash/isBoolean';
+import _isPlainObject from 'lodash/isPlainObject';
+import _isArray from 'lodash/isArray'
 
 import { VFTypeError } from '../Common';
 
 export const isJSONSerializable = (data: unknown): boolean => {
-  if (_.isUndefined(data) || _.isNumber(data) || _.isString(data) || _.isNull(data) || _.isBoolean(data)) {
+  if (_isUndefined(data) || _isNumber(data) || _isString(data) || _isNull(data) || _isBoolean(data)) {
     return true;
   }
-  if (!_.isPlainObject(data) && !_.isArray(data)) {
+  if (!_isPlainObject(data) && !_isArray(data)) {
     return false;
   }
 
