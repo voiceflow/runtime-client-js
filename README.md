@@ -21,9 +21,10 @@ The Runtime Client can be used with jQuery, React, and any other JavaScript libr
 
 ## Demos
 
+- Runtime Client Projects - [source](https://github.com/voiceflow/runtime-client-projects) 
 - Voiceflow Burgers (Web) - [source](https://voiceflow-burger.webflow.io/)
 
-<img src="https://user-images.githubusercontent.com/5643574/106966841-17b9ee00-6714-11eb-868a-26751b7d560e.png" alt="demo" style="zoom:50%;" />
+<img src="https://user-images.githubusercontent.com/5643574/106966841-17b9ee00-6714-11eb-868a-26751b7d560e.png" alt="Voiceblow Burgers web demo" style="zoom:50%;" />
 
 ## Samples
 
@@ -32,9 +33,7 @@ See the parent [rcjs-examples](https://github.com/voiceflow/rcjs-examples) repo 
 - Hello World (Node.js) - [source](https://github.com/voiceflow/rcjs-examples/tree/master/hello-world)
 - Hamburger Order App (jQuery) - [source](https://github.com/voiceflow/rcjs-examples/tree/master/hamburger-order-jQuery)
 - Hamburger Order App (React) - [source](https://github.com/voiceflow/rcjs-examples/tree/master/hamburger-order-react)
-- Hamburger Order App (Node.js) - [source](https://github.com/voiceflow/rcjs-examples/tree/master/hamburger-order)
 - Hamburger Order Server (Express) - [source](https://github.com/voiceflow/rcjs-examples/tree/master/server)
-- Using Trace Processor (Node.js) - [source](https://github.com/voiceflow/rcjs-examples/tree/master/trace-processor)
 - Using TTS (React) - [source](https://github.com/voiceflow/rcjs-examples/tree/master/text-to-speech)
 - Using Suggestion Chips (React) - [source](https://github.com/voiceflow/rcjs-examples/tree/master/suggestion-chips)
 
@@ -55,33 +54,30 @@ yarn add @voiceflow/runtime-client-js
 The minimum code to start using the SDK is shown below:
 
 ```js
-const { RuntimeClientFactory } = require('@voiceflow/runtime-client-js');
+const { default: RuntimeClientFactory } = require('@voiceflow/runtime-client-js');
 // alternatively for ESM/ES6
 // import RuntimeClientFactory from '@voiceflow/runtime-client-js'
 
-// Construct an object
+// Construct a chatbot instance
 const factory = new RuntimeClientFactory({
-  versionID: 'your-version-id-here', // ADD YOUR VERSION ID HERE
+  versionID: 'your-version-id-here', 	// ADD YOUR VERSION ID HERE
   apiKey: 'your-api-key-here', // ADD YOUR API KEY HERE
-  endpoint: 'https://general-runtime.voiceflow.com',
 });
 const client = factory.createClient();
 
-client.onSpeak((trace) => {
-  // whenever we come across a speak block, just say the message
-  console.log(trace);
-});
+// When the chatbot responds with text, output it
+client.onSpeak((trace) => console.log(trace.payload.message));
 
-// (optional) explicitly begin a conversation session
+// (Optional) explicitly begin a conversation session
 client.start();
 
-// call this function from any input source
+// Call this function from any input source
 const interact = (input) => client.sendText(input);
 
 // e.g. interact('can I have fries with that');
 ```
 
-pass in user input with the `client.sendText(input)` function, and any of your `client.on...` functions will trigger during the response.
+Pass in user input with the `client.sendText(input)` function, and any of your `client.on...` handlers will trigger during the response.
 
 ### Setting up a Voiceflow App
 
@@ -89,7 +85,7 @@ See [here](docs/setting-up-vf-app.md) for instructions on how to quickly setup a
 
 ### Integration Step-by-Step
 
-See [here](docs/step-by-step.md) for a step-by-step breakdown of the Minimal Working Integration. Make sure to read "Setting up a Voiceflow App" first.
+See [here](docs/step-by-step.md) for step-by-step instructions on using the Runtime Client SDK. Make sure to read "Setting up a Voiceflow App" first.
 
 ## Advanced Usage
 
