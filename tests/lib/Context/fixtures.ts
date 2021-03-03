@@ -31,6 +31,7 @@ export const START_REQUEST_BODY: RequestContext = {
   request: null,
   config: {
     tts: false,
+    stripSSML: false,
   },
 };
 
@@ -92,6 +93,7 @@ export const SEND_TEXT_REQUEST_BODY: RequestContext = {
   },
   config: {
     tts: false,
+    stripSSML: false,
   },
 };
 
@@ -103,17 +105,23 @@ export const SEND_INTENT_REQUEST_BODY: RequestContext = {
   },
   config: {
     tts: false,
+    stripSSML: false
   },
 };
 
 export const SEND_TEXT_REQUEST_BODY_TTS_ON: RequestContext = {
-  state: VF_APP_NEXT_STATE_1,
-  request: {
-    type: RequestType.TEXT,
-    payload: USER_RESPONSE,
-  },
+  ...SEND_TEXT_REQUEST_BODY,
   config: {
     tts: true,
+    stripSSML: false,
+  },
+};
+
+export const SEND_TEXT_REQUEST_BODY_TTS_AND_SSML_ON: RequestContext = {
+  ...SEND_TEXT_REQUEST_BODY,
+  config: {
+    tts: true,
+    stripSSML: true,
   },
 };
 

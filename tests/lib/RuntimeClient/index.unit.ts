@@ -16,7 +16,6 @@ import {
   SEND_TEXT_REQUEST_BODY,
   SEND_TEXT_REQUEST_BODY_TTS_ON,
   SEND_TEXT_RESPONSE_BODY,
-  SEND_TEXT_RESPONSE_BODY_WITH_SSML_AND_TTS,
   START_REQUEST_BODY,
   START_RESPONSE_BODY,
   START_RESPONSE_BODY_WITH_MULTIPLE_CHOICES,
@@ -25,6 +24,8 @@ import {
   VF_APP_INITIAL_STATE,
   START_RESPONSE_BODY_UNSANITIZED,
   START_RESPONSE_BODY_ALL_TRACES,
+  SEND_TEXT_RESPONSE_BODY_WITH_SSML_AND_TTS,
+  SEND_TEXT_REQUEST_BODY_TTS_AND_SSML_ON,
 } from '../Context/fixtures';
 import { AUDIO_TRACE, BLOCK_TRACE, DEBUG_TRACE, END_TRACE, FLOW_TRACE, SPEAK_TRACE, SPEAK_TRACE_UNSANITIZED, VISUAL_TRACE } from '../fixtures';
 
@@ -255,7 +256,7 @@ describe('RuntimeClient', () => {
     const response = context.getTrace();
 
     expect(client.interact.callCount).to.eql(2);
-    expect(client.interact.args[1]).to.eql([SEND_TEXT_REQUEST_BODY_TTS_ON]);
+    expect(client.interact.args[1]).to.eql([SEND_TEXT_REQUEST_BODY_TTS_AND_SSML_ON]);
 
     expect((response[0] as any).payload.message).to.eql('<voice>Books ought to have to have good endings.</voice>');
     expect((response[0] as any).payload.src).to.eql('data:audio/mpeg;base64,SUQzBAAAAAAA');
@@ -271,16 +272,12 @@ describe('RuntimeClient', () => {
 
     await agent.start();
 
-    client.interact.resolves(SEND_TEXT_RESPONSE_BODY_WITH_SSML_AND_TTS);
+    client.interact.resolves(SEND_TEXT_RESPONSE_BODY);
 
-    const context = await agent.sendText(USER_RESPONSE);
-    const response = context.getTrace();
+    await agent.sendText(USER_RESPONSE);
 
     expect(client.interact.callCount).to.eql(2);
     expect(client.interact.args[1]).to.eql([SEND_TEXT_REQUEST_BODY_TTS_ON]);
-
-    expect((response[0] as any).payload.message).to.eql('Books ought to have to have good endings.');
-    expect((response[0] as any).payload.src).to.eql('data:audio/mpeg;base64,SUQzBAAAAAAA');
   });
 
   describe('events', () => {
@@ -431,7 +428,7 @@ describe('RuntimeClient', () => {
         result.push(context);
       });
       
-      client.interact.resolves(START_RESPONSE_BODY_UNSANITIZED);
+      client.interact.resolves(START_RESPONSE_BODY);
 
       const context = await agent.start();
 
