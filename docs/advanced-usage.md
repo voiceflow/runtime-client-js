@@ -203,7 +203,7 @@ await rclient.start();															 // trigger event handler if `SpeakTrace` r
 
 ### `.onSpeak(handler)`
 
-- **DESC:** Register the `handler` whenever a `TraceType.SPEAK` event occurs. A similar function exists for the other `TraceType`s. 
+- **DESC:** Register the `handler` whenever a `TraceType.SPEAK` event occurs. Similar functions exists for the other `TraceType`s. 
 - **ARG:**
   - `handler` - `(trace: T, context: Context) => void` - The handler for the event.
     - `trace` - `T` - The `SpeakTrace` that triggered the event
