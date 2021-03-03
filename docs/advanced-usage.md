@@ -51,17 +51,17 @@
 
 ## Main Components
 
-The main components from `runtime-client-js` you should understand are the `RuntimeClientFactory` and the `RuntimeClient`. We will briefly introduce each component. We provide more detail in following sections.
+The main components from `runtime-client-js` you should understand are the `RuntimeClientFactory` and the `RuntimeClient`. We will briefly introduce each component and we will provide more detail in following sections.
 
 ### `RuntimeClientFactory`
 
 The `RuntimeClientFactory` is a factory class that is used to create `RuntimeClient` instances, which are set to the same configuration passed into the factory itself.
 
-For example, the `RuntimeClientFactory` accepts a `versionID`, let's say it has value `fishandchips`, representing the Voiceflow app we want to start a conversation with. Any `RuntimeClient` we construct with this particular factory will then contact the same Voiceflow app with the `versionID` of `fishandchips`
+For example, the `RuntimeClientFactory` accepts a `versionID` representing the Voiceflow app we want to start a conversation with. Let's say the `versionID` has value `fishandchips`. Any `RuntimeClient` we construct with this particular factory will then contact the same Voiceflow app with the `versionID` of `fishandchips`
 
 ### `RuntimeClient`
 
-The `RuntimeClient` is an object that represents one instance of a Voiceflow app. This is the main interface you use to interact with a Voiceflow app, advance the conversation session, and get a response. You do not construct `RuntimeClient`s directy.
+The `RuntimeClient` is an object that represents one instance of a Voiceflow app. This is the main interface you use to interact with such the app, advance the conversation session, and get a response. You never construct `RuntimeClient`s directly.
 
 ## Statefulness of RuntimeClient
 
@@ -100,7 +100,7 @@ The list of interaction methods is as follows:
 
 #### `.start()`
 
-- **DESC:** Starts the conversation session and runs the application until it requests user input, at which point, the method returns the current `context`. If this is called while a conversation session is ongoing, then it starts a new conversation session from the beginning.
+- **DESC:** Starts the conversation session and runs the application until it requests user input, at which point, the method returns the current `context`. If this is called while a conversation session is ongoing, then it terminates the current session and starts a new conversation session from the beginning.
 - **ARG:** 
   - None
 - **RETURNS:** 
@@ -116,7 +116,7 @@ const context = await runtimeClient.start()
 
 #### `.sendText(userInput)`
 
-- **DESC:**  Advances the conversation session based on the user's input and then runs the application until it requests user input, at which point, the method returns the current `context`.
+- **DESC:**  Advances the current conversation session based on the user's input and then runs the application until it requests user input, at which point, the method returns the current `context`.
 - **ARG:**
   -  `userInput` - `string` - The user's response.
 - **RETURNS:**
@@ -153,7 +153,7 @@ Trace Events occur when the `RuntimeClient` receives a response from our Runtime
 
 The full list of events is listed below.
 
-- `TraceType.X` - When a specific trace of type `X` is being processed, there is a corresponding event that is fired, e.g., if `SpeakTrace` is received then the `TraceType.SPEAK` event is triggered.
+- `TraceType.X` - During an interaction method call, when a specific trace of type `X` is being processed, there is a corresponding event that is fired, e.g., if `SpeakTrace` is received then the `TraceType.SPEAK` event is triggered.
 - `TraceEvent.GENERAL` - Triggered when any trace is being processed.
 - `TraceEvent.BEFORE_PROCESSING` - Triggered before any `TraceType.X` event is fired.
 - `TraceEvent.AFTER_PROCESSING` - Triggered after all `TraceType.X` events are fired and handled. 
@@ -332,7 +332,7 @@ You can also check our [samples](https://github.com/voiceflow/rcjs-examples/tree
 
 ## Configuration
 
-The `RuntimeClientFactory` accepts configurations which it will apply to `RuntimeClient` instance it constructs. In particular, there is a `dataConfig` option for managing the data returned by `Context.getTrace()` for all `Context`s produced by a `RuntimeClient`. To summarize, there are four options currently available:
+The `RuntimeClientFactory` accepts configurations which it will apply to `RuntimeClient` instances it constructs. In particular, there is a `dataConfig` option for managing the data returned by `Context.getTrace()` for all `Context`s produced by a `RuntimeClient`. To summarize, there are two options currently available:
 
 1. `tts` - Set to `true` to enable text-to-speech functionality. Any returned `SpeakTrace`s will contain an additional`src` property containing an `.mp3` string, which is an audio-file that will speak out the trace text. 
 2. `ssml` - Set to `true` to disable the `Context`'s SSML sanitization and return the full text string with the SSML included. This may be useful if you want to use your own TTS system
@@ -430,11 +430,11 @@ Additionally, if you want to implement time-travelling and keep a record of past
 
 ### Enabling Stricter Typing
 
-The Runtime Client is implemented in TypeScript and has strict types on all of its methods. The `.variables` submodule can also be configured to support stricter types.
+The Runtime Client is implemented in TypeScript and has strict types on all of its methods. The `.variables` submodule can also be configured to support stricter typing.
 
 To do this, you must supply a variable **schema** to the `RuntimeClientFactory`. Once you do, variable methods like `.get()` will deduce the variable type based on the variable name you pass in as an argument (see below).
 
-Since Voiceflow apps are loaded in at runtime, it is impossible for the `RuntimeClient` to deduce the types of variables for you. It is up to you to define what types you expect to receive and to ensure your Voiceflow app will only send back what you expect.
+Since Voiceflow apps are loaded in at runtime, it is impossible for the `RuntimeClient` to deduce the types of variables for you, when you compile from TypeScript. It is up to you to define what types you expect to receive and to ensure your Voiceflow app will only send back what you expect.
 
 ```ts
 export type VFVariablesSchema = {
@@ -563,7 +563,13 @@ For a full-working sample demonstrating this technique, see [here](https://githu
 
 ## Best Practices
 
+**Sending data over Voiceflow interactions**
+
 Keep in mind that the `State` object in a Voiceflow application state will contains the value of any Voiceflow variables. We strongly recommend not embedding any sensitive information in Voiceflow variables or in any of your Voiceflow app responses. The `State` is transmitted over HTTP requests to our runtime servers.
+
+**API Keys**
+
+API Keys should not be directly embedded in your application, especially if your source code is public on a website like GitHub. Voiceflow API Keys should be kept in your environment variables, then loaded onto your application in your build process. 
 
 ## Trace Types
 
