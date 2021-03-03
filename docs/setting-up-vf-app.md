@@ -4,11 +4,9 @@
 
 To start using the SDK, we should build a General Project on [Voiceflow](https://creator.voiceflow.com/). We have [documentation](https://docs.voiceflow.com/#/) available, so you can get ramped up quickly. 
 
-You can also import `.vf` files into Voiceflow to load a pre-built project. For instructions on how to do this, see [here](https://docs.voiceflow.com/#/platform/project-creation/project-creation?id=project-creation) and click the "Import a .vf file" tab.
-
 **IMPORTANT:** If you choose to build your own project, make sure you are building a **General Project** (anything that is not an Alexa Project nor a Google Project). The SDK only supports integration with Voiceflow General Projects out of the box.
 
-1. Build or import a project on Voiceflow
+1. Build a project on Voiceflow
 2. While you are on the Dashboard, append `/api-keys` to the end of your URL, so that it looks like the image below, then, hit Enter to go to the API Keys page.
 
 <img width="557" alt="Address bar at the API keys page" src="https://user-images.githubusercontent.com/32404412/109706616-2b1b7600-7b67-11eb-8d2a-6d9c0521733b.png">
@@ -18,7 +16,7 @@ You can also import `.vf` files into Voiceflow to load a pre-built project. For 
 <img width="1093" alt="API keys page with some generated API keys" src="https://user-images.githubusercontent.com/32404412/109706891-7d5c9700-7b67-11eb-9a6b-e515053931e9.png">
 
 4. Go back to your Dashboard.
-5. Open the project you created/imported earlier.
+5. Open the project you created earlier.
 
 <p align="center">
 	<img width="546" alt="Button to enter the Hello World project" src="https://user-images.githubusercontent.com/32404412/107441822-eff7cb00-6b03-11eb-9bd6-5551c195669b.png">
