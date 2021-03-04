@@ -13,6 +13,6 @@ describe('RuntimeClient utils', () => {
 
   it('makeRequestBody', () => {
     const context = new Context(START_RESPONSE_BODY);
-    expect(makeRequestBody(context)).to.eql({ state: START_RESPONSE_BODY.state, request: null, config: { tts: false, stripSSML: false } });
+    expect(makeRequestBody(context)).to.eql({ state: START_RESPONSE_BODY.state, request: null, config: { tts: false, stripSSML: true } });
   });
 });

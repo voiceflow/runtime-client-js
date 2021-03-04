@@ -53,7 +53,7 @@ export type GeneralTrace = BlockTrace | ChoiceTrace | DebugTrace | EndTrace | Fl
 
 export type DataConfig = {
   tts?: boolean;
-  ssml?: boolean;
+  stripSSML?: boolean;
 };
 
 export type ResponseContext = {

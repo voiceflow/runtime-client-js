@@ -72,7 +72,7 @@ describe('RuntimeClientFactory', () => {
 
       expect(app.createClient('state' as any)).to.eql(RUNTIME_CLIENT);
 
-      expect(agent.args).to.eql([['state', { client: CLIENT, dataConfig: { ssml: false, tts: false } }]]);
+      expect(agent.args).to.eql([['state', { client: CLIENT, dataConfig: { stripSSML: true, tts: false } }]]);
     });
 
     it('default state', () => {
@@ -84,7 +84,7 @@ describe('RuntimeClientFactory', () => {
       expect(agent.args).to.eql([
         [
           { stack: [], storage: {}, variables: VARIABLES },
-          { client: CLIENT, dataConfig: { ssml: false, tts: false } },
+          { client: CLIENT, dataConfig: { stripSSML: true, tts: false } },
         ],
       ]);
     });
