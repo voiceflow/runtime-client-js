@@ -28,7 +28,7 @@ To start using the SDK, we should build a General Project on [Voiceflow](https:/
 	<img width="552"  alt="The test Button on Voiceflow" src="https://user-images.githubusercontent.com/32404412/107269101-17bd3500-6a17-11eb-86b1-b0a817022aca.png">
 </p>	
 
-7. Click Train Assistant on the sidebar in the Prototyping view. By now, you will have finished setting up the Voiceflow app.  **NOTE:** If the "Train Assistant" button is unclickable, then your project does not need to be trained, so you can skip this step.
+7. Click Train Assistant on the sidebar in the Prototyping view. By now, you will have finished setting up the Voiceflow app.  **NOTE:** If the "Train Assistant" button is not clickable, then your project does not need to be trained, so you can skip this step.
 
 <p align="center">
 	<img width="300" alt="The raining Panel on Voiceflow" src="https://user-images.githubusercontent.com/32404412/107269251-5521c280-6a17-11eb-9d82-5a0f62bff14d.png">

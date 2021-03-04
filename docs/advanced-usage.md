@@ -285,7 +285,7 @@ The `Context` object has a handful of methods to expose its internal data. We wi
 
 ### `.getTrace()`
 
-Returns a list of traces representing the Voiceflow app's response. You can use this to manually access the response from a Voiceeflow app. However, we recommend using the event-system instead if you want to handle the response's data.
+Returns a list of traces representing the Voiceflow app's response. You can use this to manually access the response from a Voiceflow app. However, we recommend using the event-system instead if you want to handle the response's data.
 
 ```js
 const response = context.getTrace();
@@ -495,7 +495,7 @@ Ideally, we don't want to persist a `RuntimeClient` for every client that sends 
 ```js
 // Our factory
 const factory = new RuntimeClientFactory({
-  versionID: 'fdsafsdafsdfsdf',
+  versionID: 'XXXX',
   apiKey: 'VF.XXXXXX.XXXXXXXXX'
 });
 
@@ -531,7 +531,7 @@ app.get('/', async (req, res) => {
 
 ### Solution
 
-The `.createClient()` can accept an additional `state` object, which solves the problem of using the `RuntimeClient` on the backend. The `.createClient()` method has different behaviour depending on the value of `state`
+The `.createClient()` can accept an additional `state` object, which solves the problem of using the `RuntimeClient` on the backend. The `.createClient()` method has different behavior depending on the value of `state`
 
 1. If `state` is `undefined`, then `createClient()` behaves as before and creates an entirely new `RuntimeClient`
 2. If `state` is a valid Voiceflow application `State`, then `createClient()` creates a `RuntimeClient` with the provided `state`, thus, regenerating the same chatbot from a previous request.
@@ -586,7 +586,7 @@ A `GeneralTrace` is an object which represents one piece of the overall response
 export type GeneralTrace = EndTrace | SpeakTrace | ChoiceTrace | FlowTrace | StreamTrace | BlockTrace | DebugTrace | VisualTrace | AudioTrace;
 ```
 
-All trace obejcts have a `type` and `payload` property, but differ in what the value of `type` and `payload` is. Shown below is a type that describes the common structure of trace objects. **NOTE**: the `Trace` type isn't actually declared in the package and is only shown for illustration.
+All trace objects have a `type` and `payload` property, but differ in what the value of `type` and `payload` is. Shown below is a type that describes the common structure of trace objects. **NOTE**: the `Trace` type isn't actually declared in the package and is only shown for illustration.
 
 ```ts
 const Trace<T extends TraceType, P> = {
@@ -740,7 +740,7 @@ By default, the client will use the Voiceflow hosted runtime at `https://general
 ```js
 const factory = new RuntimeClientFactory({
   versionID: '5fa2c62c71d4fa0007f7881b',
-  apiKey: 'VF.3fs98h2f09.asd9020jisafj',
+  apiKey: 'VF.3fs98h2f09.asd9020jis128',
   endpoint: 'https://localhost:4000', // change to a local endpoint or your company's production servers
 });
 ```
