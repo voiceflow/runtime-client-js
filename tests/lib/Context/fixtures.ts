@@ -1,4 +1,4 @@
-import { IntentRequest, RequestType } from '@voiceflow/general-types';
+import { Config, IntentRequest, RequestType } from '@voiceflow/general-types';
 import { State } from '@voiceflow/runtime';
 import _ from 'lodash';
 
@@ -26,12 +26,15 @@ export const VF_APP_INITIAL_STATE: State = {
   },
 };
 
+export const defaultConfig: Config = {
+  tts: false,
+  stripSSML: true,
+}
+
 export const START_REQUEST_BODY: RequestContext = {
   state: VF_APP_INITIAL_STATE,
   request: null,
-  config: {
-    tts: false,
-  },
+  config: defaultConfig,
 };
 
 export const VF_APP_NEXT_STATE_1: State = {
@@ -90,9 +93,7 @@ export const SEND_TEXT_REQUEST_BODY: RequestContext = {
     type: RequestType.TEXT,
     payload: USER_RESPONSE,
   },
-  config: {
-    tts: false,
-  },
+  config: defaultConfig
 };
 
 export const SEND_INTENT_REQUEST_BODY: RequestContext = {
@@ -101,19 +102,30 @@ export const SEND_INTENT_REQUEST_BODY: RequestContext = {
     type: RequestType.INTENT,
     payload: INTENT_RESPONSE,
   },
+  config: defaultConfig,
+};
+
+export const SEND_TEXT_REQUEST_BODY_TTS: RequestContext = {
+  ...SEND_TEXT_REQUEST_BODY,
   config: {
-    tts: false,
+    tts: true,
+    stripSSML: true,
   },
 };
 
-export const SEND_TEXT_REQUEST_BODY_TTS_ON: RequestContext = {
-  state: VF_APP_NEXT_STATE_1,
-  request: {
-    type: RequestType.TEXT,
-    payload: USER_RESPONSE,
-  },
+export const SEND_TEXT_REQUEST_BODY_SSML: RequestContext = {
+  ...SEND_TEXT_REQUEST_BODY,
   config: {
     tts: true,
+    stripSSML: false,
+  },
+};
+
+export const SEND_TEXT_REQUEST_BODY_TTS_AND_SSML: RequestContext = {
+  ...SEND_TEXT_REQUEST_BODY,
+  config: {
+    tts: true,
+    stripSSML: false,
   },
 };
 

@@ -13,20 +13,22 @@
     - [Conversation Session](#conversation-session)
     - [Interaction Methods](#interaction-methods)
       - [`.start()`](#start)
-      - [`.sendText()`](#sendtextuserinput)
-      - [`.sendIntent()`](#sendintentintentname-entities)
+      - [`.sendText(userInput)`](#sendtextuserinput)
+      - [`.sendIntent(intentName, entities)`](#sendintentintentname-entities)
   - [Events](#events)
     - [Event Types](#event-types)
     - [Event Handlers](#event-handlers)
-      - [`.on()`](#onevent-handler)
-      - [`.onSpeak()`](#onspeakhandler)
-      - [`.off()`](#offevent-handler)
+      - [`.on(event, handler)`](#onevent-handler)
+      - [`.onSpeak(handler)`](#onspeakhandler)
+      - [`.off(event, handler)`](#offevent-handler)
+    - [Asynchronous Event Handlers](#asynchronous-event-handlers)
   - [Context](#context)
+    - [`.getTrace()`](#gettrace)
     - [`.isEnding()`](#isending)
     - [`.getChips()`](#getchips)
   - [Configuration](#configuration)
     - [`tts`](#tts)
-    - [`ssml`](#ssml)
+    - [`stripSSML`](#stripssml)
   - [Variables](#variables)
     - [Getters](#getters)
     - [Setters](#setters)
@@ -283,7 +285,7 @@ The `Context` object has a handful of methods to expose its internal data. We wi
 
 ### `.getTrace()`
 
-Returns a list of traces representing the Voiceflow app's response. You can use this to manually access the response from a Voiceeflow app. However, we recommend using the event-system instead if you want to handle the response's data.
+Returns a list of traces representing the Voiceflow app's response. You can use this to manually access the response from a Voiceflow app. However, we recommend using the event-system instead if you want to handle the response's data.
 
 ```js
 const response = context.getTrace();
@@ -339,8 +341,8 @@ You can also check our [samples](https://github.com/voiceflow/rcjs-examples/tree
 
 The `RuntimeClientFactory` accepts configurations which it will apply to `RuntimeClient` instances it constructs. In particular, there is a `dataConfig` option for managing the data returned by `Context.getTrace()` for all `Context`s produced by a `RuntimeClient`. To summarize, there are two options currently available:
 
-1. `tts` - Set to `true` to enable text-to-speech functionality. Any returned `SpeakTrace`s will contain an additional`src` property containing an `.mp3` string, which is an audio-file that will speak out the trace text. 
-2. `ssml` - Set to `true` to disable the `Context`'s SSML sanitization and return the full text string with the SSML included. This may be useful if you want to use your own TTS system
+1. `tts` - Default value is `false`. Set to `true` to enable text-to-speech functionality. Any returned `SpeakTrace`s will contain an additional`src` property containing an `.mp3` string, which is an audio-file that will speak out the trace text. 
+2. `stripSSML` - Default value is `true`. Set to `false` to disable the `Context`'s SSML sanitization and return the full text string with the SSML included. This may be useful if you want to use your own TTS system. 
 
 The Samples section has some working code demonstrating some of the configuration options. Also, see the subsections below for how to access the data exposed by `dataConfig` options.
 
@@ -350,7 +352,7 @@ const app = new RuntimeClientFactory({
   	apiKey: 'VF.XXXXXX.XXXXXXXXX'
     dataConfig: {
       	tts: true,
-      	ssml: true,
+      	stripSSML: false,
     }
 });
 ```
@@ -365,9 +367,9 @@ const audio = new Audio(speakTrace.payload.src); // HTMLAudioElement
 audio.play();
 ```
 
-### `ssml`
+### `stripSSML`
 
-When this is set to `true`, the `message` string returned by a `SpeakTrace` will contain your SSML that you added through Voiceflow Creator.
+When this is set to `false`, the `message` string returned by a `SpeakTrace` will contain your SSML that you added through Voiceflow Creator.
 
 ```js
 console.log(context.getTrace());
@@ -493,7 +495,7 @@ Ideally, we don't want to persist a `RuntimeClient` for every client that sends 
 ```js
 // Our factory
 const factory = new RuntimeClientFactory({
-  versionID: 'fdsafsdafsdfsdf',
+  versionID: 'XXXX',
   apiKey: 'VF.XXXXXX.XXXXXXXXX'
 });
 
@@ -529,7 +531,7 @@ app.get('/', async (req, res) => {
 
 ### Solution
 
-The `.createClient()` can accept an additional `state` object, which solves the problem of using the `RuntimeClient` on the backend. The `.createClient()` method has different behaviour depending on the value of `state`
+The `.createClient()` can accept an additional `state` object, which solves the problem of using the `RuntimeClient` on the backend. The `.createClient()` method has different behavior depending on the value of `state`
 
 1. If `state` is `undefined`, then `createClient()` behaves as before and creates an entirely new `RuntimeClient`
 2. If `state` is a valid Voiceflow application `State`, then `createClient()` creates a `RuntimeClient` with the provided `state`, thus, regenerating the same chatbot from a previous request.
@@ -584,7 +586,7 @@ A `GeneralTrace` is an object which represents one piece of the overall response
 export type GeneralTrace = EndTrace | SpeakTrace | ChoiceTrace | FlowTrace | StreamTrace | BlockTrace | DebugTrace | VisualTrace | AudioTrace;
 ```
 
-All trace obejcts have a `type` and `payload` property, but differ in what the value of `type` and `payload` is. Shown below is a type that describes the common structure of trace objects. **NOTE**: the `Trace` type isn't actually declared in the package and is only shown for illustration.
+All trace objects have a `type` and `payload` property, but differ in what the value of `type` and `payload` is. Shown below is a type that describes the common structure of trace objects. **NOTE**: the `Trace` type isn't actually declared in the package and is only shown for illustration.
 
 ```ts
 const Trace<T extends TraceType, P> = {
@@ -615,7 +617,7 @@ For each of the specialized trace types, we will describe each trace's purpose a
 
 - **PURPOSE:** Contains the "real" response of the voice interface. Corresponds to a Speak Step on Voiceflow.
 - **PAYLOAD:**
-  - **`message`** - The text representation of the response from the voice interface. We strip any SSML that you may have added to the response on Voiceflow. To see the SSML, see the `ssml` option for the `RuntimeClient` constructor.
+  - **`message`** - The text representation of the response from the voice interface. We strip any SSML that you may have added to the response on Voiceflow. To see the SSML, see the `stripSSML` option for the `RuntimeClient` constructor.
   - **`src`** - This property is a URL to an audio-file that voices out the `message`. This property contains valid data only if the `tts` option in `RuntimeClient` constructor is set to `true`. 
   - **`voice`** - Only appears if `type` is `"message"` and `tts` is enabled. This property is the name of the voice assistant you chose to read out the Speak Step text.
 
@@ -738,7 +740,7 @@ By default, the client will use the Voiceflow hosted runtime at `https://general
 ```js
 const factory = new RuntimeClientFactory({
   versionID: '5fa2c62c71d4fa0007f7881b',
-  apiKey: 'VF.3fs98h2f09.asd9020jisafj',
+  apiKey: 'VF.3fs98h2f09.asd9020jis128',
   endpoint: 'https://localhost:4000', // change to a local endpoint or your company's production servers
 });
 ```

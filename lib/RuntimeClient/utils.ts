@@ -5,8 +5,9 @@ import { RequestContext } from '@/lib/types';
 
 import { DataConfig, ResponseContext } from '../types';
 
-export const configAdapter = ({ tts = false }: DataConfig = {}): Config => ({
+export const configAdapter = ({ tts = false, stripSSML = true }: DataConfig = {}): Config => ({
   tts,
+  stripSSML,
 });
 
 export const makeRequestBody = <S>(context: Context<S>, request: GeneralRequest = null, dataConfig?: DataConfig): RequestContext => {

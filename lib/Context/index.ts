@@ -1,33 +1,19 @@
-import DataFilterer from '@/lib/DataFilterer';
-import { Choice, DataConfig, ResponseContext, TraceType } from '@/lib/types';
+import { Choice, ResponseContext, TraceType } from '@/lib/types';
 
 import VariableManager from '../Variables';
 
-export type GetTraceOptions = {
-  sanitize?: boolean;
-};
-
 export class Context<S extends Record<string, any> = Record<string, any>> {
-  private dataFilterer: DataFilterer;
-
   public variables = new VariableManager<S>(this.toJSON.bind(this), this.setVariables.bind(this));
 
-  constructor(private context: ResponseContext, dataConfig?: DataConfig) {
-    this.dataFilterer = new DataFilterer(dataConfig);
-  }
+  constructor(private context: ResponseContext) {}
 
   getChips(): Choice[] {
     return this.context.trace.reduce<Choice[]>((acc, trace) => (trace.type !== TraceType.CHOICE ? acc : [...acc, ...trace.payload.choices]), []);
   }
 
   // returns the entire unfiltered list of traces of the context; can configure whether trace data should be sanitized or not
-  getTrace(options: GetTraceOptions = {}) {
-    const { sanitize = true } = options;
-
-    let result = this.context.trace;
-    if (sanitize) result = this.dataFilterer.sanitizeTraces(result);
-
-    return result;
+  getTrace() {
+    return this.context.trace;
   }
 
   // returns the raw context object

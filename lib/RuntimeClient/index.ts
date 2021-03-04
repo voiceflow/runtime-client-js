@@ -32,11 +32,11 @@ export class RuntimeClient<V extends Record<string, any> = Record<string, any>> 
     this.dataConfig = dataConfig;
     this.events = new EventManager();
 
-    this.context = new Context({ request: null, state, trace: [] }, this.dataConfig);
+    this.context = new Context({ request: null, state, trace: [] });
   }
 
   async start(): Promise<Context<V>> {
-    this.context = new Context(resetContext(this.context.toJSON()), this.dataConfig);
+    this.context = new Context(resetContext(this.context.toJSON()));
     return this.sendRequest(null);
   }
 
@@ -70,7 +70,7 @@ export class RuntimeClient<V extends Record<string, any> = Record<string, any>> 
     await new Bluebird(async (resolve) => {
       await this.events.handleProcessing(TraceEvent.BEFORE_PROCESSING, this.context!);
 
-      await Bluebird.each(this.context!.getTrace({ sanitize: !this.dataConfig.ssml }), async (trace: GeneralTrace) => {
+      await Bluebird.each(this.context!.getTrace(), async (trace: GeneralTrace) => {
         await this.events.handleTrace(trace, this.context!);
       });
 
@@ -139,7 +139,7 @@ export class RuntimeClient<V extends Record<string, any> = Record<string, any>> 
   }
 
   setContext(contextJSON: ResponseContext) {
-    this.context = new Context(contextJSON, this.dataConfig);
+    this.context = new Context(contextJSON);
   }
 
   getContext() {
