@@ -13,15 +13,17 @@
     - [Conversation Session](#conversation-session)
     - [Interaction Methods](#interaction-methods)
       - [`.start()`](#start)
-      - [`.sendText()`](#sendtextuserinput)
-      - [`.sendIntent()`](#sendintentintentname-entities)
+      - [`.sendText(userInput)`](#sendtextuserinput)
+      - [`.sendIntent(intentName, entities)`](#sendintentintentname-entities)
   - [Events](#events)
     - [Event Types](#event-types)
     - [Event Handlers](#event-handlers)
-      - [`.on()`](#onevent-handler)
-      - [`.onSpeak()`](#onspeakhandler)
-      - [`.off()`](#offevent-handler)
+      - [`.on(event, handler)`](#onevent-handler)
+      - [`.onSpeak(handler)`](#onspeakhandler)
+      - [`.off(event, handler)`](#offevent-handler)
+    - [Asynchronous Event Handlers](#asynchronous-event-handlers)
   - [Context](#context)
+    - [`.getTrace()`](#gettrace)
     - [`.isEnding()`](#isending)
     - [`.getChips()`](#getchips)
   - [Configuration](#configuration)
@@ -339,7 +341,7 @@ You can also check our [samples](https://github.com/voiceflow/rcjs-examples/tree
 
 The `RuntimeClientFactory` accepts configurations which it will apply to `RuntimeClient` instances it constructs. In particular, there is a `dataConfig` option for managing the data returned by `Context.getTrace()` for all `Context`s produced by a `RuntimeClient`. To summarize, there are two options currently available:
 
-1. `tts` - Default vlaue is `false`. Set to `true` to enable text-to-speech functionality. Any returned `SpeakTrace`s will contain an additional`src` property containing an `.mp3` string, which is an audio-file that will speak out the trace text. 
+1. `tts` - Default value is `false`. Set to `true` to enable text-to-speech functionality. Any returned `SpeakTrace`s will contain an additional`src` property containing an `.mp3` string, which is an audio-file that will speak out the trace text. 
 2. `stripSSML` - Default value is `true`. Set to `false` to disable the `Context`'s SSML sanitization and return the full text string with the SSML included. This may be useful if you want to use your own TTS system. 
 
 The Samples section has some working code demonstrating some of the configuration options. Also, see the subsections below for how to access the data exposed by `dataConfig` options.
