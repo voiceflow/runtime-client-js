@@ -26,7 +26,7 @@
     - [`.getChips()`](#getchips)
   - [Configuration](#configuration)
     - [`tts`](#tts)
-    - [`ssml`](#ssml)
+    - [`stripSSML`](#stripssml)
   - [Variables](#variables)
     - [Getters](#getters)
     - [Setters](#setters)
@@ -339,8 +339,8 @@ You can also check our [samples](https://github.com/voiceflow/rcjs-examples/tree
 
 The `RuntimeClientFactory` accepts configurations which it will apply to `RuntimeClient` instances it constructs. In particular, there is a `dataConfig` option for managing the data returned by `Context.getTrace()` for all `Context`s produced by a `RuntimeClient`. To summarize, there are two options currently available:
 
-1. `tts` - Set to `true` to enable text-to-speech functionality. Any returned `SpeakTrace`s will contain an additional`src` property containing an `.mp3` string, which is an audio-file that will speak out the trace text. 
-2. `ssml` - Set to `true` to disable the `Context`'s SSML sanitization and return the full text string with the SSML included. This may be useful if you want to use your own TTS system
+1. `tts` - Default vlaue is `false`. Set to `true` to enable text-to-speech functionality. Any returned `SpeakTrace`s will contain an additional`src` property containing an `.mp3` string, which is an audio-file that will speak out the trace text. 
+2. `stripSSML` - Default value is `true`. Set to `false` to disable the `Context`'s SSML sanitization and return the full text string with the SSML included. This may be useful if you want to use your own TTS system. 
 
 The Samples section has some working code demonstrating some of the configuration options. Also, see the subsections below for how to access the data exposed by `dataConfig` options.
 
@@ -350,7 +350,7 @@ const app = new RuntimeClientFactory({
   	apiKey: 'VF.XXXXXX.XXXXXXXXX'
     dataConfig: {
       	tts: true,
-      	ssml: true,
+      	stripSSML: false,
     }
 });
 ```
@@ -365,9 +365,9 @@ const audio = new Audio(speakTrace.payload.src); // HTMLAudioElement
 audio.play();
 ```
 
-### `ssml`
+### `stripSSML`
 
-When this is set to `true`, the `message` string returned by a `SpeakTrace` will contain your SSML that you added through Voiceflow Creator.
+When this is set to `false`, the `message` string returned by a `SpeakTrace` will contain your SSML that you added through Voiceflow Creator.
 
 ```js
 console.log(context.getTrace());
@@ -615,7 +615,7 @@ For each of the specialized trace types, we will describe each trace's purpose a
 
 - **PURPOSE:** Contains the "real" response of the voice interface. Corresponds to a Speak Step on Voiceflow.
 - **PAYLOAD:**
-  - **`message`** - The text representation of the response from the voice interface. We strip any SSML that you may have added to the response on Voiceflow. To see the SSML, see the `ssml` option for the `RuntimeClient` constructor.
+  - **`message`** - The text representation of the response from the voice interface. We strip any SSML that you may have added to the response on Voiceflow. To see the SSML, see the `stripSSML` option for the `RuntimeClient` constructor.
   - **`src`** - This property is a URL to an audio-file that voices out the `message`. This property contains valid data only if the `tts` option in `RuntimeClient` constructor is set to `true`. 
   - **`voice`** - Only appears if `type` is `"message"` and `tts` is enabled. This property is the name of the voice assistant you chose to read out the Speak Step text.
 
