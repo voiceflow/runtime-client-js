@@ -40,7 +40,7 @@ export const STATE_REQUEST_BODY_WITH_CUSTOM_VARIABLES: RequestContext = {
   request: null,
 };
 
-export const INTERACT_AXIOS_POST_RESPONSE_SPEAK_TRACE: BaseSpeakTrace = {
+export const BASE_SPEAK_TRACE: BaseSpeakTrace = {
   type: TraceType.SPEAK,
   payload: {
     ...SPEAK_TRACE.payload,
@@ -55,5 +55,5 @@ export const BASE_END_TRACE: BaseEndTrace = {
 export const INTERACT_AXIOS_POST_RESPONSE_BODY: Omit<ResponseContext, 'trace'> & { trace: BaseGeneralTrace[] } = {
   state: VF_APP_NEXT_STATE_2,
   request: null,
-  trace: [INTERACT_AXIOS_POST_RESPONSE_SPEAK_TRACE, BASE_END_TRACE],
+  trace: [BASE_SPEAK_TRACE, BASE_END_TRACE],
 };
