@@ -9,7 +9,7 @@ import { DEFAULT_ENDPOINT } from '@/lib/RuntimeClientFactory/constants';
 
 import { SEND_TEXT_REQUEST_BODY, SEND_TEXT_RESPONSE_BODY, VERSION_ID, VF_APP_INITIAL_STATE } from '../Context/fixtures';
 import { API_KEY, INTERACT_ENDPOINT, STATE_ENDPOINT } from '../fixtures';
-import { VF_APP_CUSTOM_INITIAL_VARIABLES } from './fixtures';
+import { INTERACT_AXIOS_POST_RESPONSE_BODY, VF_APP_CUSTOM_INITIAL_VARIABLES } from './fixtures';
 
 chai.use(chaiAsPromise);
 
@@ -81,7 +81,7 @@ describe('Client', () => {
         variables: VF_APP_CUSTOM_INITIAL_VARIABLES,
       });
 
-      axiosInstance.post.resolves(asHttpResponse(SEND_TEXT_RESPONSE_BODY));
+      axiosInstance.post.resolves(asHttpResponse(INTERACT_AXIOS_POST_RESPONSE_BODY));
 
       expect(await client.interact(SEND_TEXT_REQUEST_BODY)).to.eql(SEND_TEXT_RESPONSE_BODY);
 
