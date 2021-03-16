@@ -1,4 +1,5 @@
 import {
+  _V1Trace,
   BlockTrace as BaseBlockTrace,
   ChoiceTrace as BaseChoiceTrace,
   Config,
@@ -7,13 +8,15 @@ import {
   Dimensions,
   ExitTrace as BaseEndTrace,
   FlowTrace as BaseFlowTrace,
-  GeneralRequest,
   GeneralTrace as BaseGeneralTrace,
+  Request,
   SpeakTrace as BaseSpeakTrace,
   VisualTrace as BaseVisualTrace,
 } from '@voiceflow/general-types';
 import { CanvasVisibility, ImageStepData } from '@voiceflow/general-types/build/nodes/visual';
 import { State } from '@voiceflow/runtime';
+
+export type GeneralRequest = Request | null;
 
 export enum TraceType {
   BLOCK = 'block',
@@ -49,7 +52,7 @@ export type SpeakTrace = {
 };
 export type VisualTrace = AdaptTraceType<BaseVisualTrace, TraceType.VISUAL> & { payload: ImageStepData };
 
-export type GeneralTrace = BlockTrace | ChoiceTrace | DebugTrace | EndTrace | FlowTrace | AudioTrace | SpeakTrace | VisualTrace;
+export type GeneralTrace = BlockTrace | ChoiceTrace | DebugTrace | EndTrace | FlowTrace | AudioTrace | SpeakTrace | VisualTrace | _V1Trace;
 
 export type DataConfig = {
   tts?: boolean;
@@ -113,3 +116,5 @@ export enum TraceEvent {
 }
 
 export type Choice = ChoiceTrace['payload']['choices'][number];
+
+export type ResponseHandlerSideEffect = (trace: GeneralTrace) => Promise<number | void>;

@@ -1,4 +1,4 @@
-import { GeneralRequest, RequestType } from '@voiceflow/general-types';
+import { RequestType } from '@voiceflow/general-types';
 import { State } from '@voiceflow/runtime';
 import Bluebird from 'bluebird';
 
@@ -6,7 +6,7 @@ import Client from '@/lib/Client';
 import { isGeneralTraceEvent, isValidTraceEvent, isValidTraceType, VFClientError, VFTypeError } from '@/lib/Common';
 import Context from '@/lib/Context';
 import EventManager, { AfterProcessingEventHandler, BeforeProcessingEventHandler, GeneralTraceEventHandler, TraceEventHandler } from '@/lib/Events';
-import { DataConfig, GeneralTrace, ResponseContext, TraceEvent, TraceType } from '@/lib/types';
+import { DataConfig, GeneralRequest, GeneralTrace, ResponseContext, ResponseHandlerSideEffect, TraceEvent, TraceType } from '@/lib/types';
 
 import { makeRequestBody, resetContext } from './utils';
 
@@ -26,6 +26,10 @@ export class RuntimeClient<V extends Record<string, any> = Record<string, any>> 
   private context: Context<V>;
 
   private events: EventManager<V>;
+
+  private responseHandlerSideEffect: ResponseHandlerSideEffect = async () => {
+    /** empty */
+  };
 
   constructor(state: State, { client, dataConfig = {} }: { client: Client<V>; dataConfig?: DataConfig }) {
     this.client = client;
@@ -60,7 +64,7 @@ export class RuntimeClient<V extends Record<string, any> = Record<string, any>> 
     return this.sendRequest({ type: RequestType.INTENT, payload: { intent: { name }, entities, query, confidence } });
   }
 
-  async sendRequest(request: GeneralRequest) {
+  async sendRequest(request: GeneralRequest): Promise<Context<V>> {
     if (this.context.isEnding()) {
       throw new VFClientError('RuntimeClient.sendText() was called but the conversation has ended');
     }
@@ -79,7 +83,7 @@ export class RuntimeClient<V extends Record<string, any> = Record<string, any>> 
       resolve();
     });
 
-    return this.context;
+    return this.responseHandler();
   }
 
   on<T extends TraceType | TraceEvent>(event: T, handler: OnMethodHandlerArgMap<V>[T]) {
@@ -92,6 +96,20 @@ export class RuntimeClient<V extends Record<string, any> = Record<string, any>> 
         : this.events.onTraceEvent(event, handler as any);
     }
     throw new VFTypeError(`event "${event}" is not valid`);
+  }
+
+  async onResponse(responseHandlerSideEffect: ResponseHandlerSideEffect) {
+    this.responseHandlerSideEffect = responseHandlerSideEffect;
+  }
+
+  async responseHandler() {
+    const traces = this.context!.getTrace();
+    const lastTrace = traces[traces.length - 1];
+    if (!lastTrace.payload.paths) return this.context;
+
+    const path = await this.responseHandlerSideEffect(lastTrace);
+
+    return this.sendRequest({ type: RequestType.TRACE, payload: { name: lastTrace.payload.paths[path]?.event.name ?? null } as any });
   }
 
   off<T extends TraceType | TraceEvent>(event: T, handler: OnMethodHandlerArgMap<V>[T]) {
