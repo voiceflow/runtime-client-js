@@ -52,7 +52,7 @@ export type SpeakTrace = {
 };
 export type VisualTrace = AdaptTraceType<BaseVisualTrace, TraceType.VISUAL> & { payload: ImageStepData };
 
-export type GeneralTrace = BlockTrace | ChoiceTrace | DebugTrace | EndTrace | FlowTrace | AudioTrace | SpeakTrace | VisualTrace | _V1Trace;
+export type GeneralTrace = BlockTrace | ChoiceTrace | DebugTrace | EndTrace | FlowTrace | AudioTrace | SpeakTrace | VisualTrace;
 
 export type DataConfig = {
   tts?: boolean;
@@ -117,4 +117,6 @@ export enum TraceEvent {
 
 export type Choice = ChoiceTrace['payload']['choices'][number];
 
-export type ResponseHandlerSideEffect = (trace: GeneralTrace) => Promise<number | void>;
+export const is_V1Trace = (trace: BaseGeneralTrace): trace is _V1Trace => {
+  return Object.keys(trace).includes('paths');
+};

@@ -25,6 +25,33 @@ export class Context<S extends Record<string, any> = Record<string, any>> {
     return this.context.trace.some((trace) => trace.type === TraceType.END);
   }
 
+  public setStopTypes(data: string[]) {
+    this.context = {
+      ...this.context,
+      state: {
+        ...this.context.state,
+        storage: {
+          ...this.context.state.storage,
+          stopTypes: data,
+        },
+      },
+    };
+  }
+
+  public clearStopTypes() {
+    const { storage } = this.context.state;
+    this.context = {
+      ...this.context,
+      state: {
+        ...this.context.state,
+        storage: storage.reduce((acc: Record<string, any>, _key: string) => {
+          if (_key !== 'stopTypes') acc.push(storage[_key]);
+          return acc;
+        }),
+      },
+    };
+  }
+
   private setVariables(newValues: Partial<S>) {
     this.context = {
       ...this.context,

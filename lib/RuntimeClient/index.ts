@@ -1,12 +1,18 @@
-import { RequestType } from '@voiceflow/general-types';
+import { GeneralTrace as BaseGeneralTrace, RequestType } from '@voiceflow/general-types';
 import { State } from '@voiceflow/runtime';
 import Bluebird from 'bluebird';
 
 import Client from '@/lib/Client';
 import { isGeneralTraceEvent, isValidTraceEvent, isValidTraceType, VFClientError, VFTypeError } from '@/lib/Common';
 import Context from '@/lib/Context';
-import EventManager, { AfterProcessingEventHandler, BeforeProcessingEventHandler, GeneralTraceEventHandler, TraceEventHandler } from '@/lib/Events';
-import { DataConfig, GeneralRequest, GeneralTrace, ResponseContext, ResponseHandlerSideEffect, TraceEvent, TraceType } from '@/lib/types';
+import EventManager, {
+  AfterProcessingEventHandler,
+  BeforeProcessingEventHandler,
+  GeneralTraceEventHandler,
+  ResponseHandlerSideEffect,
+  TraceEventHandler,
+} from '@/lib/Events';
+import { DataConfig, GeneralRequest, GeneralTrace, is_V1Trace, ResponseContext, TraceEvent, TraceType } from '@/lib/types';
 
 import { makeRequestBody, resetContext } from './utils';
 
@@ -27,7 +33,7 @@ export class RuntimeClient<V extends Record<string, any> = Record<string, any>> 
 
   private events: EventManager<V>;
 
-  private responseHandlerSideEffect: ResponseHandlerSideEffect = async () => {
+  private responseHandlerSideEffect: ResponseHandlerSideEffect<V> = async () => {
     /** empty */
   };
 
@@ -98,18 +104,23 @@ export class RuntimeClient<V extends Record<string, any> = Record<string, any>> 
     throw new VFTypeError(`event "${event}" is not valid`);
   }
 
-  async onResponse(responseHandlerSideEffect: ResponseHandlerSideEffect) {
+  async onResponse(responseHandlerSideEffect: ResponseHandlerSideEffect<V>) {
     this.responseHandlerSideEffect = responseHandlerSideEffect;
   }
 
   async responseHandler() {
-    const traces = this.context!.getTrace();
+    const traces = this.context!.getTrace() as BaseGeneralTrace[];
     const lastTrace = traces[traces.length - 1];
-    if (!lastTrace.payload.paths) return this.context;
+    if (this.context.isEnding()) return this.context;
+    if (!is_V1Trace(lastTrace)) return this.context;
 
-    const path = await this.responseHandlerSideEffect(lastTrace);
+    const path = (await this.responseHandlerSideEffect(lastTrace, this.context)) || lastTrace.payload.defaultPath;
+    if (!path) return this.context;
 
-    return this.sendRequest({ type: RequestType.TRACE, payload: { name: lastTrace.payload.paths[path]?.event.name ?? null } as any });
+    const type = lastTrace.payload.paths[path]?.event?.type;
+    if (!type) return this.context;
+
+    return this.sendRequest({ type, payload: {} });
   }
 
   off<T extends TraceType | TraceEvent>(event: T, handler: OnMethodHandlerArgMap<V>[T]) {
@@ -162,6 +173,14 @@ export class RuntimeClient<V extends Record<string, any> = Record<string, any>> 
 
   getContext() {
     return this.context;
+  }
+
+  setStopTypes(types: string[]) {
+    return this.context.setStopTypes(types);
+  }
+
+  clearStopTypes() {
+    return this.context.clearStopTypes();
   }
 }
 
