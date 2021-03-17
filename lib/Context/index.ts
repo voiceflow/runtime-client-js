@@ -25,27 +25,27 @@ export class Context<S extends Record<string, any> = Record<string, any>> {
     return this.context.trace.some((trace) => trace.type === TraceType.END);
   }
 
-  public setStopTypes(data: string[]) {
+  public setStorage(key: string, data: string[]) {
     this.context = {
       ...this.context,
       state: {
         ...this.context.state,
         storage: {
           ...this.context.state.storage,
-          stopTypes: data,
+          [key]: data,
         },
       },
     };
   }
 
-  public clearStopTypes() {
+  public clearStorage(key: string) {
     const { storage } = this.context.state;
     this.context = {
       ...this.context,
       state: {
         ...this.context.state,
         storage: storage.reduce((acc: Record<string, any>, _key: string) => {
-          if (_key !== 'stopTypes') acc.push(storage[_key]);
+          if (_key !== key) acc.push(storage[_key]);
           return acc;
         }),
       },

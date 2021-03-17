@@ -176,11 +176,11 @@ export class RuntimeClient<V extends Record<string, any> = Record<string, any>> 
   }
 
   setStopTypes(types: string[]) {
-    return this.context.setStopTypes(types);
+    return this.context.setStorage('stopTypes', types);
   }
 
   clearStopTypes() {
-    return this.context.clearStopTypes();
+    return this.context.clearStorage('stopTypes');
   }
 }
 
