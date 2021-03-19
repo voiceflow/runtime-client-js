@@ -14,16 +14,16 @@ import {
   INTENT_RESPONSE,
   SEND_INTENT_REQUEST_BODY,
   SEND_TEXT_REQUEST_BODY,
+  SEND_TEXT_REQUEST_BODY_TTS_AND_SSML,
   SEND_TEXT_RESPONSE_BODY,
+  SEND_TEXT_RESPONSE_BODY_WITH_SSML_AND_TTS,
   START_REQUEST_BODY,
   START_RESPONSE_BODY,
+  START_RESPONSE_BODY_ALL_TRACES,
   START_RESPONSE_BODY_WITH_MULTIPLE_CHOICES,
   START_RESPONSE_BODY_WITH_NO_CHOICES,
   USER_RESPONSE,
   VF_APP_INITIAL_STATE,
-  START_RESPONSE_BODY_ALL_TRACES,
-  SEND_TEXT_RESPONSE_BODY_WITH_SSML_AND_TTS,
-  SEND_TEXT_REQUEST_BODY_TTS_AND_SSML,
 } from '../Context/fixtures';
 import { AUDIO_TRACE, BLOCK_TRACE, DEBUG_TRACE, END_TRACE, FLOW_TRACE, SPEAK_TRACE, VISUAL_TRACE } from '../fixtures';
 
@@ -291,7 +291,7 @@ describe('RuntimeClient', () => {
         CHOICE_TRACE,
         context,
         END_TRACE,
-        context
+        context,
       ]);
     });
 
@@ -309,7 +309,7 @@ describe('RuntimeClient', () => {
 
     it('off', async () => {
       const { agent, client } = createRuntimeClient();
-      
+
       const result: any[] = [];
 
       const toRemove1 = (trace: GeneralTrace, context: any) => {
@@ -317,7 +317,7 @@ describe('RuntimeClient', () => {
       };
       const toRemove2 = (context: any) => {
         result.push('AFTER', context);
-      }
+      };
 
       agent.on(TraceType.SPEAK, toRemove1);
       agent.on(TraceEvent.GENERAL, toRemove1);
@@ -341,11 +341,11 @@ describe('RuntimeClient', () => {
 
       const callback = () => {
         agent.off(BAD_TRACE_TYPE, () => {});
-      }
+      };
 
       expect(callback).to.throw();
     });
-  
+
     it('onEvent', async () => {
       const { agent, client } = createRuntimeClient();
 
@@ -385,7 +385,7 @@ describe('RuntimeClient', () => {
 
     it('before and after', async () => {
       const { agent, client } = createRuntimeClient({});
-      
+
       const result: any[] = [];
       const BEFORE = 'BEFORE';
       const AFTER = 'AFTER';
@@ -395,24 +395,96 @@ describe('RuntimeClient', () => {
         result.push(context);
       });
       agent.on(TraceType.SPEAK, (trace) => {
-        result.push(trace)
+        result.push(trace);
       });
       agent.on(TraceEvent.AFTER_PROCESSING, (context) => {
         result.push(AFTER);
         result.push(context);
       });
-      
+
       client.interact.resolves(START_RESPONSE_BODY);
 
       const context = await agent.start();
 
-      expect(result).to.eql([
-        BEFORE,
-        context,
-        SPEAK_TRACE,
-        AFTER,
-        context
-      ]);
+      expect(result).to.eql([BEFORE, context, SPEAK_TRACE, AFTER, context]);
+    });
+  });
+
+  describe('onResponse', () => {
+    it('works', () => {
+      const { agent } = createRuntimeClient();
+      const fn = sinon.stub();
+      agent.onResponse(fn as any);
+      expect(_.get(agent, 'responseHandlerSideEffect')).to.eql(fn);
+    });
+  });
+
+  describe('responseHandler', () => {
+    it('is ending', async () => {
+      const { agent } = createRuntimeClient();
+      const context = { trace: [{ type: TraceType.END }] };
+      agent.setContext(context as any);
+
+      expect(((await agent.responseHandler()) as any).context).to.eql(context);
+    });
+    it('is not v1 trace', async () => {
+      const { agent } = createRuntimeClient();
+      const context = { trace: [{}, {}] };
+      agent.setContext(context as any);
+
+      expect(((await agent.responseHandler()) as any).context).to.eql(context);
+    });
+    it('no path', async () => {
+      const { agent } = createRuntimeClient();
+      const context = { trace: [{}, { payload: { paths: [] } }] };
+      agent.setContext(context as any);
+
+      expect(((await agent.responseHandler()) as any).context).to.eql(context);
+    });
+    it('no type', async () => {
+      const { agent } = createRuntimeClient();
+      const context = { trace: [{}, { payload: { defaultPath: 1, paths: [{}, { event: {} }] } }] };
+      agent.setContext(context as any);
+
+      expect(((await agent.responseHandler()) as any).context).to.eql(context);
+    });
+    it('works', async () => {
+      const output = { foo: 'bar' };
+      const { agent } = createRuntimeClient();
+      const sideEffect = sinon.stub().resolves(1);
+      agent.onResponse(sideEffect);
+      const sendRequestStub = sinon.stub().resolves(output);
+      _.set(agent, 'sendRequest', sendRequestStub);
+      const context = { trace: [{}, { payload: { paths: [{}, { event: { type: 'trace' } }] } }] };
+      agent.setContext(context as any);
+
+      expect((await agent.responseHandler()) as any).to.eql(output);
+      expect(sendRequestStub.args).to.eql([[{ type: 'trace', payload: {} }]]);
+    });
+  });
+
+  describe('setStopTypes', () => {
+    it('works', () => {
+      const output = { foo: 'bar' };
+      const { agent } = createRuntimeClient();
+      const setStorageStub = sinon.stub().returns(output);
+      _.set(agent, 'context', { setStorage: setStorageStub });
+
+      const stopTypes = ['t1', 't2'];
+      expect(agent.setStopTypes(stopTypes)).to.eql(output);
+      expect(setStorageStub.args).to.eql([['stopTypes', stopTypes]]);
+    });
+  });
+
+  describe('clearStopTypes', () => {
+    it('works', () => {
+      const output = { foo: 'bar' };
+      const { agent } = createRuntimeClient();
+      const clearStorageStub = sinon.stub().returns(output);
+      _.set(agent, 'context', { clearStorage: clearStorageStub });
+
+      expect(agent.clearStopTypes()).to.eql(output);
+      expect(clearStorageStub.args).to.eql([['stopTypes']]);
     });
   });
 });

@@ -1,8 +1,10 @@
 import { expect } from 'chai';
-import sinon from 'sinon';
 import _ from 'lodash';
+import sinon from 'sinon';
+
 import Context from '@/lib/Context';
 
+import { SPEAK_TRACE_UNSANITIZED, VFAppVariablesSchema } from '../fixtures';
 import {
   CHOICES_1,
   CHOICES_2,
@@ -12,7 +14,6 @@ import {
   START_RESPONSE_BODY_WITH_MULTIPLE_CHOICES,
   VF_APP_NEXT_STATE_1,
 } from './fixtures';
-import { SPEAK_TRACE_UNSANITIZED, VFAppVariablesSchema } from '../fixtures';
 
 describe('Context', () => {
   afterEach(() => {
@@ -31,8 +32,8 @@ describe('Context', () => {
   it('getTrace(), sanitize option', () => {
     const context = new Context({
       ...START_RESPONSE_BODY,
-      trace: [SPEAK_TRACE_UNSANITIZED]
-    })
+      trace: [SPEAK_TRACE_UNSANITIZED],
+    });
 
     expect(context.getTrace({ sanitize: false })[0]).to.eql(SPEAK_TRACE_UNSANITIZED);
   });
@@ -77,6 +78,23 @@ describe('Context', () => {
 
       // expect the original state object that was passed into Context to be untouched
       expect(stateCopy.state.variables.name).to.eql(START_RESPONSE_BODY.state.variables.name);
-    })
+    });
+  });
+
+  describe('storage', () => {
+    it('setStorage', () => {
+      const context = new Context({ state: { storage: { foo: 'bar' } } } as any);
+      const stopTypes = ['t1', 't2'];
+      context.setStorage('stopTypes', stopTypes);
+
+      expect(_.get(context, 'context').state.storage).to.eql({ foo: 'bar', stopTypes });
+    });
+
+    it('clearStorage', () => {
+      const context = new Context({ state: { storage: { foo: 'bar', stopTypes: ['t1', 't2'] } } } as any);
+      context.clearStorage('stopTypes');
+
+      expect(_.get(context, 'context').state.storage).to.eql({ foo: 'bar' });
+    });
   });
 });

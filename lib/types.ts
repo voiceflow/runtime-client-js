@@ -118,6 +118,6 @@ export enum TraceEvent {
 
 export type Choice = ChoiceTrace['payload']['choices'][number];
 
-export const is_V1Trace = (trace: TraceFrame): trace is _V1Trace => {
-  return Object.keys(trace).includes('paths');
+export const is_V1Trace = (trace: TraceFrame<string, {}>): trace is _V1Trace => {
+  return trace.payload && Object.keys(trace.payload).includes('paths');
 };

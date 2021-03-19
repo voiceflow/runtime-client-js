@@ -44,10 +44,10 @@ export class Context<S extends Record<string, any> = Record<string, any>> {
       ...this.context,
       state: {
         ...this.context.state,
-        storage: storage.reduce((acc: Record<string, any>, _key: string) => {
-          if (_key !== key) acc.push(storage[_key]);
+        storage: Object.keys(storage).reduce<Record<string, any>>((acc, _key) => {
+          if (_key !== key) acc[_key] = storage[_key];
           return acc;
-        }),
+        }, {}),
       },
     };
   }

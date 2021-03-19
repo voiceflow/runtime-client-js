@@ -109,9 +109,10 @@ export class RuntimeClient<V extends Record<string, any> = Record<string, any>> 
   }
 
   async responseHandler() {
-    const traces = this.context!.getTrace() as TraceFrame[];
-    const lastTrace = traces[traces.length - 1];
     if (this.context.isEnding()) return this.context;
+
+    const traces = this.context!.getTrace() as TraceFrame<string, {}>[];
+    const lastTrace = traces[traces.length - 1];
     if (!is_V1Trace(lastTrace)) return this.context;
 
     const path = (await this.responseHandlerSideEffect(lastTrace, this.context)) || lastTrace.payload.defaultPath;
