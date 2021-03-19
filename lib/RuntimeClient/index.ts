@@ -116,7 +116,7 @@ export class RuntimeClient<V extends Record<string, any> = Record<string, any>> 
     if (!is_V1Trace(lastTrace)) return this.context;
 
     const path = (await this.responseHandlerSideEffect(lastTrace, this.context)) || lastTrace.payload.defaultPath;
-    if (!path) return this.context;
+    if (typeof path !== 'number') return this.context;
 
     const type = lastTrace.payload.paths[path]?.event?.type;
     if (!type) return this.context;

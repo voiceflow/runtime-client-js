@@ -78,7 +78,7 @@ export class EventManager<V extends Record<string, any>> {
   }
 
   async handleTrace<T extends TraceType>(trace: TraceMap[T], context: Context<V>) {
-    await Bluebird.each(this.specHandlers.get(trace.type)!, async (handler: TraceEventHandler<T, V>, index) => {
+    await Bluebird.each(this.specHandlers.get(trace.type) || [], async (handler: TraceEventHandler<T, V>, index) => {
       await handler(trace, context, index);
     });
 
