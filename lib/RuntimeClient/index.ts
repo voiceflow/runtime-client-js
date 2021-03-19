@@ -1,4 +1,4 @@
-import { GeneralTrace as BaseGeneralTrace, RequestType } from '@voiceflow/general-types';
+import { RequestType, TraceFrame } from '@voiceflow/general-types';
 import { State } from '@voiceflow/runtime';
 import Bluebird from 'bluebird';
 
@@ -109,7 +109,7 @@ export class RuntimeClient<V extends Record<string, any> = Record<string, any>> 
   }
 
   async responseHandler() {
-    const traces = this.context!.getTrace() as BaseGeneralTrace[];
+    const traces = this.context!.getTrace() as TraceFrame[];
     const lastTrace = traces[traces.length - 1];
     if (this.context.isEnding()) return this.context;
     if (!is_V1Trace(lastTrace)) return this.context;

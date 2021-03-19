@@ -11,6 +11,7 @@ import {
   GeneralTrace as BaseGeneralTrace,
   Request,
   SpeakTrace as BaseSpeakTrace,
+  TraceFrame,
   VisualTrace as BaseVisualTrace,
 } from '@voiceflow/general-types';
 import { CanvasVisibility, ImageStepData } from '@voiceflow/general-types/build/nodes/visual';
@@ -117,6 +118,6 @@ export enum TraceEvent {
 
 export type Choice = ChoiceTrace['payload']['choices'][number];
 
-export const is_V1Trace = (trace: BaseGeneralTrace): trace is _V1Trace => {
+export const is_V1Trace = (trace: TraceFrame): trace is _V1Trace => {
   return Object.keys(trace).includes('paths');
 };
