@@ -415,38 +415,38 @@ describe('RuntimeClient', () => {
       const { agent } = createRuntimeClient();
       const fn = sinon.stub();
       agent.onResponse(fn as any);
-      expect(_.get(agent, 'responseHandlerSideEffect')).to.eql(fn);
+      expect(_.get(agent, 'responseHandler')).to.eql(fn);
     });
   });
 
-  describe('responseHandler', () => {
+  describe('buildResponse', () => {
     it('is ending', async () => {
       const { agent } = createRuntimeClient();
       const context = { trace: [{ type: TraceType.END }] };
       agent.setContext(context as any);
 
-      expect(((await agent.responseHandler()) as any).context).to.eql(context);
+      expect(((await agent.buildResponse()) as any).context).to.eql(context);
     });
     it('is not v1 trace', async () => {
       const { agent } = createRuntimeClient();
       const context = { trace: [{}, {}] };
       agent.setContext(context as any);
 
-      expect(((await agent.responseHandler()) as any).context).to.eql(context);
+      expect(((await agent.buildResponse()) as any).context).to.eql(context);
     });
     it('no path', async () => {
       const { agent } = createRuntimeClient();
       const context = { trace: [{}, { payload: { paths: [] } }] };
       agent.setContext(context as any);
 
-      expect(((await agent.responseHandler()) as any).context).to.eql(context);
+      expect(((await agent.buildResponse()) as any).context).to.eql(context);
     });
     it('no type', async () => {
       const { agent } = createRuntimeClient();
       const context = { trace: [{}, { payload: { defaultPath: 1, paths: [{}, { event: {} }] } }] };
       agent.setContext(context as any);
 
-      expect(((await agent.responseHandler()) as any).context).to.eql(context);
+      expect(((await agent.buildResponse()) as any).context).to.eql(context);
     });
     it('works', async () => {
       const output = { foo: 'bar' };
@@ -458,7 +458,7 @@ describe('RuntimeClient', () => {
       const context = { trace: [{}, { payload: { paths: [{}, { event: { type: 'trace' } }] } }] };
       agent.setContext(context as any);
 
-      expect((await agent.responseHandler()) as any).to.eql(output);
+      expect((await agent.buildResponse()) as any).to.eql(output);
       expect(sendRequestStub.args).to.eql([[{ type: 'trace', payload: {} }]]);
     });
   });

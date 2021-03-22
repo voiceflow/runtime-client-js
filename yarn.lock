@@ -915,10 +915,10 @@
   dependencies:
     "@voiceflow/api-sdk" "1.21.0"
 
-"@voiceflow/general-types@^1.36.2":
-  version "1.36.2"
-  resolved "https://registry.yarnpkg.com/@voiceflow/general-types/-/general-types-1.36.2.tgz#1e69c42fc35962fdf0b0b3a57382eca5168d5ef6"
-  integrity sha512-/otmvxXiaYIb16zQJvyLIt7wg+TGQClCygZfbArIS+97nSr19OP1jf0vHR8oJIJbzaX7ufj/NziJtBvw3xPaSw==
+"@voiceflow/general-types@^1.37.1":
+  version "1.37.1"
+  resolved "https://registry.yarnpkg.com/@voiceflow/general-types/-/general-types-1.37.1.tgz#b20784e41cbc1218ad7fd716b09f0bf1025f380a"
+  integrity sha512-U73qHuYSPBfAn7TtvIWNna+D1/SHm6KFjmmCzu3myUEUVc5gKa+pF4+u7RDXJCgQHhqfikNUC71QMfjWXCuXVw==
   dependencies:
     "@voiceflow/api-sdk" "1.28.0"
 
