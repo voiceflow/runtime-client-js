@@ -1,7 +1,7 @@
-import { Config, GeneralRequest } from '@voiceflow/general-types';
+import { Config } from '@voiceflow/general-types';
 
 import Context from '@/lib/Context';
-import { RequestContext } from '@/lib/types';
+import { GeneralRequest, RequestContext } from '@/lib/types';
 
 import { DataConfig, ResponseContext } from '../types';
 

@@ -1,4 +1,5 @@
 import {
+  _V1Trace,
   BlockTrace as BaseBlockTrace,
   ChoiceTrace as BaseChoiceTrace,
   Config,
@@ -7,13 +8,16 @@ import {
   Dimensions,
   ExitTrace as BaseEndTrace,
   FlowTrace as BaseFlowTrace,
-  GeneralRequest,
   GeneralTrace as BaseGeneralTrace,
+  Request,
   SpeakTrace as BaseSpeakTrace,
+  TraceFrame,
   VisualTrace as BaseVisualTrace,
 } from '@voiceflow/general-types';
 import { CanvasVisibility, ImageStepData } from '@voiceflow/general-types/build/nodes/visual';
 import { State } from '@voiceflow/runtime';
+
+export type GeneralRequest = Request | null;
 
 export enum TraceType {
   BLOCK = 'block',
@@ -113,3 +117,7 @@ export enum TraceEvent {
 }
 
 export type Choice = ChoiceTrace['payload']['choices'][number];
+
+export const is_V1Trace = (trace: TraceFrame<string, {}>): trace is _V1Trace => {
+  return Array.isArray((trace as _V1Trace).payload?.paths);
+};
