@@ -25,33 +25,6 @@ export class Context<S extends Record<string, any> = Record<string, any>> {
     return this.context.trace.some((trace) => trace.type === TraceType.END);
   }
 
-  public setStorage(key: string, data: string[]) {
-    this.context = {
-      ...this.context,
-      state: {
-        ...this.context.state,
-        storage: {
-          ...this.context.state.storage,
-          [key]: data,
-        },
-      },
-    };
-  }
-
-  public clearStorage(key: string) {
-    const { storage } = this.context.state;
-    this.context = {
-      ...this.context,
-      state: {
-        ...this.context.state,
-        storage: Object.keys(storage).reduce<Record<string, any>>((acc, _key) => {
-          if (_key !== key) acc[_key] = storage[_key];
-          return acc;
-        }, {}),
-      },
-    };
-  }
-
   private setVariables(newValues: Partial<S>) {
     this.context = {
       ...this.context,

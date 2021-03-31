@@ -4,7 +4,18 @@ import _ from 'lodash';
 
 import { RequestContext, ResponseContext, TraceType } from '@/lib/types';
 
-import { AUDIO_TRACE, BLOCK_TRACE, CHOICE_TRACE, CHOICE_TRACE_WITH_NO_CHOICES, DEBUG_TRACE, END_TRACE, FLOW_TRACE, SPEAK_TRACE, SPEAK_TRACE_UNSANITIZED, VISUAL_TRACE } from '../fixtures';
+import {
+  AUDIO_TRACE,
+  BLOCK_TRACE,
+  CHOICE_TRACE,
+  CHOICE_TRACE_WITH_NO_CHOICES,
+  DEBUG_TRACE,
+  END_TRACE,
+  FLOW_TRACE,
+  SPEAK_TRACE,
+  SPEAK_TRACE_UNSANITIZED,
+  VISUAL_TRACE,
+} from '../fixtures';
 
 export { CHOICE_TRACE } from '../fixtures';
 
@@ -29,7 +40,8 @@ export const VF_APP_INITIAL_STATE: State = {
 export const defaultConfig: Config = {
   tts: false,
   stripSSML: true,
-}
+  stopTypes: undefined,
+};
 
 export const START_REQUEST_BODY: RequestContext = {
   state: VF_APP_INITIAL_STATE,
@@ -66,8 +78,8 @@ export const START_RESPONSE_BODY = {
 
 export const START_RESPONSE_BODY_ALL_TRACES = {
   ...START_RESPONSE_BODY,
-  trace: [...START_RESPONSE_BODY.trace, END_TRACE]
-}
+  trace: [...START_RESPONSE_BODY.trace, END_TRACE],
+};
 
 export const START_RESPONSE_BODY_WITH_NO_CHOICES = {
   ...START_RESPONSE_BODY,
@@ -76,8 +88,8 @@ export const START_RESPONSE_BODY_WITH_NO_CHOICES = {
 
 export const START_RESPONSE_BODY_UNSANITIZED = {
   ...START_RESPONSE_BODY,
-  trace: [SPEAK_TRACE_UNSANITIZED]
-}
+  trace: [SPEAK_TRACE_UNSANITIZED],
+};
 
 export const USER_RESPONSE = 'This is what the user says in response to the voice assistant';
 export const INTENT_RESPONSE: IntentRequest['payload'] = {
@@ -93,7 +105,7 @@ export const SEND_TEXT_REQUEST_BODY: RequestContext = {
     type: RequestType.TEXT,
     payload: USER_RESPONSE,
   },
-  config: defaultConfig
+  config: defaultConfig,
 };
 
 export const SEND_INTENT_REQUEST_BODY: RequestContext = {
@@ -126,6 +138,7 @@ export const SEND_TEXT_REQUEST_BODY_TTS_AND_SSML: RequestContext = {
   config: {
     tts: true,
     stripSSML: false,
+    stopTypes: ['trace1'],
   },
 };
 

@@ -1,5 +1,4 @@
 import {
-  _V1Trace,
   BlockTrace as BaseBlockTrace,
   ChoiceTrace as BaseChoiceTrace,
   Config,
@@ -54,11 +53,6 @@ export type SpeakTrace = {
 export type VisualTrace = AdaptTraceType<BaseVisualTrace, TraceType.VISUAL> & { payload: ImageStepData };
 
 export type GeneralTrace = BlockTrace | ChoiceTrace | DebugTrace | EndTrace | FlowTrace | AudioTrace | SpeakTrace | VisualTrace;
-
-export type DataConfig = {
-  tts?: boolean;
-  stripSSML?: boolean;
-};
 
 export type ResponseContext = {
   state: State;
@@ -118,6 +112,6 @@ export enum TraceEvent {
 
 export type Choice = ChoiceTrace['payload']['choices'][number];
 
-export const is_V1Trace = (trace: TraceFrame<string, {}>): trace is _V1Trace => {
-  return Array.isArray((trace as _V1Trace).payload?.paths);
+export const is_V1Trace = (trace: any): trace is TraceFrame => {
+  return Array.isArray((trace as TraceFrame).paths);
 };

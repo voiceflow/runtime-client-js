@@ -33,19 +33,25 @@ describe('RuntimeClientFactory', () => {
     it('constructor', () => {
       const { client } = createRuntimeClientFactory();
 
-      expect(client.args).to.eql([[{ versionID: VERSION_ID, endpoint: DEFAULT_ENDPOINT, apiKey: API_KEY, variables: undefined, axiosConfig: undefined }]]);
+      expect(client.args).to.eql([
+        [{ versionID: VERSION_ID, endpoint: DEFAULT_ENDPOINT, apiKey: API_KEY, variables: undefined, axiosConfig: undefined }],
+      ]);
     });
 
     it('variables', () => {
       const { client } = createRuntimeClientFactory({ variables: 'foo' as any });
 
-      expect(client.args).to.eql([[{ versionID: VERSION_ID, endpoint: DEFAULT_ENDPOINT, apiKey: API_KEY, variables: 'foo', axiosConfig: undefined }]]);
+      expect(client.args).to.eql([
+        [{ versionID: VERSION_ID, endpoint: DEFAULT_ENDPOINT, apiKey: API_KEY, variables: 'foo', axiosConfig: undefined }],
+      ]);
     });
 
     it('axiosConfig', () => {
       const { client } = createRuntimeClientFactory({ axiosConfig: 'foo' as any });
 
-      expect(client.args).to.eql([[{ versionID: VERSION_ID, endpoint: DEFAULT_ENDPOINT, apiKey: API_KEY, variables: undefined, axiosConfig: 'foo' }]]);
+      expect(client.args).to.eql([
+        [{ versionID: VERSION_ID, endpoint: DEFAULT_ENDPOINT, apiKey: API_KEY, variables: undefined, axiosConfig: 'foo' }],
+      ]);
     });
 
     it('optional', () => {

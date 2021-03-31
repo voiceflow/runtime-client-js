@@ -1,11 +1,11 @@
-import { _V1Trace } from '@voiceflow/general-types';
+import { TraceFrame } from '@voiceflow/general-types/build/nodes/types';
 import Bluebird from 'bluebird';
 
 import { GeneralTrace, TraceEvent, TraceMap, TraceType } from '@/lib/types';
 
 import Context from '../Context';
 
-export type ResponseHandler<V extends Record<string, any>> = (trace: _V1Trace, context: Context<V>) => Promise<number | void>;
+export type ResponseHandler<V extends Record<string, any>> = (trace: TraceFrame, context: Context<V>) => Promise<number | void>;
 
 export type TraceEventHandler<T extends TraceType, V extends Record<string, any>> = (trace: TraceMap[T], context: Context<V>, index: number) => void;
 
