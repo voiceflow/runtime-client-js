@@ -1,9 +1,9 @@
+import { Config as DataConfig } from '@voiceflow/general-types';
 import { State } from '@voiceflow/runtime';
 import { AxiosRequestConfig } from 'axios';
 
 import Client from '@/lib/Client';
 import RuntimeClient from '@/lib/RuntimeClient';
-import { DataConfig } from '@/lib/types';
 
 import { validateVarMerge } from '../Variables/utils';
 import { DEFAULT_ENDPOINT } from './constants';

@@ -80,21 +80,4 @@ describe('Context', () => {
       expect(stateCopy.state.variables.name).to.eql(START_RESPONSE_BODY.state.variables.name);
     });
   });
-
-  describe('storage', () => {
-    it('setStorage', () => {
-      const context = new Context({ state: { storage: { foo: 'bar' } } } as any);
-      const stopTypes = ['t1', 't2'];
-      context.setStorage('stopTypes', stopTypes);
-
-      expect(_.get(context, 'context').state.storage).to.eql({ foo: 'bar', stopTypes });
-    });
-
-    it('clearStorage', () => {
-      const context = new Context({ state: { storage: { foo: 'bar', stopTypes: ['t1', 't2'] } } } as any);
-      context.clearStorage('stopTypes');
-
-      expect(_.get(context, 'context').state.storage).to.eql({ foo: 'bar' });
-    });
-  });
 });

@@ -1,10 +1,11 @@
+import { Config as DataConfig } from '@voiceflow/general-types';
 import chai, { expect } from 'chai';
 import chaiAsPromise from 'chai-as-promised';
 import _ from 'lodash';
 import sinon from 'sinon';
 
 import RuntimeClient from '@/lib/RuntimeClient';
-import { DataConfig, GeneralTrace, TraceEvent, TraceType } from '@/lib/types';
+import { GeneralTrace, TraceEvent, TraceType } from '@/lib/types';
 
 import {
   CHOICE_TRACE,
@@ -242,6 +243,7 @@ describe('RuntimeClient', () => {
     const { agent, client } = createRuntimeClient({
       tts: true,
       stripSSML: false,
+      stopTypes: ['trace1'],
     });
 
     client.interact.resolves(START_RESPONSE_BODY);
@@ -455,36 +457,11 @@ describe('RuntimeClient', () => {
       agent.onResponse(sideEffect);
       const sendRequestStub = sinon.stub().resolves(output);
       _.set(agent, 'sendRequest', sendRequestStub);
-      const context = { trace: [{}, { payload: { paths: [{}, { event: { type: 'trace' } }] } }] };
+      const context = { trace: [{}, { payload: {}, paths: [{}, { event: { type: 'trace' } }] }] };
       agent.setContext(context as any);
 
       expect((await agent.buildResponse()) as any).to.eql(output);
       expect(sendRequestStub.args).to.eql([[{ type: 'trace', payload: {} }]]);
-    });
-  });
-
-  describe('setStopTypes', () => {
-    it('works', () => {
-      const output = { foo: 'bar' };
-      const { agent } = createRuntimeClient();
-      const setStorageStub = sinon.stub().returns(output);
-      _.set(agent, 'context', { setStorage: setStorageStub });
-
-      const stopTypes = ['t1', 't2'];
-      expect(agent.setStopTypes(stopTypes)).to.eql(output);
-      expect(setStorageStub.args).to.eql([['stopTypes', stopTypes]]);
-    });
-  });
-
-  describe('clearStopTypes', () => {
-    it('works', () => {
-      const output = { foo: 'bar' };
-      const { agent } = createRuntimeClient();
-      const clearStorageStub = sinon.stub().returns(output);
-      _.set(agent, 'context', { clearStorage: clearStorageStub });
-
-      expect(agent.clearStopTypes()).to.eql(output);
-      expect(clearStorageStub.args).to.eql([['stopTypes']]);
     });
   });
 });

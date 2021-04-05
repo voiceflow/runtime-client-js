@@ -1,4 +1,4 @@
-import { RequestType, TraceFrame } from '@voiceflow/general-types';
+import { Config as DataConfig, RequestType } from '@voiceflow/general-types';
 import { _V1_STOP_TYPES } from '@voiceflow/general-types/build/nodes/_v1';
 import { State } from '@voiceflow/runtime';
 import Bluebird from 'bluebird';
@@ -13,7 +13,7 @@ import EventManager, {
   ResponseHandler,
   TraceEventHandler,
 } from '@/lib/Events';
-import { DataConfig, GeneralRequest, GeneralTrace, is_V1Trace, ResponseContext, TraceEvent, TraceType } from '@/lib/types';
+import { GeneralRequest, GeneralTrace, is_V1Trace, ResponseContext, TraceEvent, TraceType } from '@/lib/types';
 
 import { makeRequestBody, resetContext } from './utils';
 
@@ -112,14 +112,14 @@ export class RuntimeClient<V extends Record<string, any> = Record<string, any>> 
   async buildResponse() {
     if (this.context.isEnding()) return this.context;
 
-    const traces = this.context!.getTrace() as TraceFrame<string, {}>[];
+    const traces = this.context!.getTrace();
     const lastTrace = traces[traces.length - 1];
     if (!is_V1Trace(lastTrace)) return this.context;
 
-    const path = (await this.responseHandler(lastTrace, this.context)) || lastTrace.payload.defaultPath;
+    const path = (await this.responseHandler(lastTrace, this.context)) || lastTrace.defaultPath;
     if (typeof path !== 'number') return this.context;
 
-    const type = lastTrace.payload.paths[path]?.event?.type;
+    const type = (lastTrace.paths || [])[path]?.event?.type;
     if (!type) return this.context;
 
     return this.sendRequest({ type, payload: {} });
@@ -175,14 +175,6 @@ export class RuntimeClient<V extends Record<string, any> = Record<string, any>> 
 
   getContext() {
     return this.context;
-  }
-
-  setStopTypes(types: string[]) {
-    return this.context.setStorage(_V1_STOP_TYPES, types);
-  }
-
-  clearStopTypes() {
-    return this.context.clearStorage(_V1_STOP_TYPES);
   }
 }
 
