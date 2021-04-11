@@ -8,8 +8,8 @@
   },
   "dependencies": {
     "@types/lodash": "^4.14.168",
-    "@voiceflow/general-types": "1.40.1",
-    "@voiceflow/runtime": "1.27.1",
+    "@voiceflow/general-types": "1.41.1",
+    "@voiceflow/runtime": "1.27.2",
     "@voiceflow/verror": "^1.1.0",
     "axios": "^0.21.1",
     "bluebird": "^3.7.2",
