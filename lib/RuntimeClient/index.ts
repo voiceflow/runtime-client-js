@@ -116,7 +116,7 @@ export class RuntimeClient<V extends Record<string, any> = Record<string, any>> 
     const lastTrace = traces[traces.length - 1];
     if (!is_V1Trace(lastTrace)) return this.context;
 
-    const path = (await this.responseHandler(lastTrace, this.context)) || lastTrace.defaultPath;
+    const path = (await this.responseHandler(lastTrace, this.context)) ?? lastTrace.defaultPath;
     if (typeof path !== 'number') return this.context;
 
     const type = (lastTrace.paths || [])[path]?.event?.type;

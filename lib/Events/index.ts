@@ -37,7 +37,7 @@ export class EventManager<V extends Record<string, any>> {
 
   constructor() {
     this.specHandlers = new Map();
-    const traceTypeVals = Object.keys(TraceType).map((type) => type.toLowerCase()) as TraceType[];
+    const traceTypeVals = Object.values(TraceType);
     traceTypeVals.forEach((traceType) => this.specHandlers.set(traceType, []));
 
     this.genHandlers = [];
