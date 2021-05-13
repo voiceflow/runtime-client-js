@@ -25,3 +25,4 @@ build
 
 # Sonar
 sonar/
+nyc_coverage*
