@@ -453,11 +453,11 @@ describe('RuntimeClient', () => {
     it('works', async () => {
       const output = { foo: 'bar' };
       const { agent } = createRuntimeClient();
-      const sideEffect = sinon.stub().resolves(1);
+      const sideEffect = sinon.stub().resolves(0);
       agent.onResponse(sideEffect);
       const sendRequestStub = sinon.stub().resolves(output);
       _.set(agent, 'sendRequest', sendRequestStub);
-      const context = { trace: [{}, { payload: {}, paths: [{}, { event: { type: 'trace' } }] }] };
+      const context = { trace: [{}, { payload: {}, paths: [{ event: { type: 'trace' } }, {}] }] };
       agent.setContext(context as any);
 
       expect((await agent.buildResponse()) as any).to.eql(output);
