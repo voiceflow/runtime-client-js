@@ -1,3 +1,8 @@
+> ⚠️ - **Deprecated** <br/>
+>
+> This SDK has been archived in favor of directly interfacing with the [Voiceflow API](https://www.voiceflow.com/api/dialog-manager) <br/>
+> We are planning to introduce a easier, lightweight SDK in the future.
+
 # Voiceflow Runtime Client
 
 The Voiceflow Runtime Client is an SDK for running Voiceflow apps in JavaScript.
